@@ -1,0 +1,60 @@
+
+html, body {
+	margin: 0;
+	padding: 0;
+}
+
+#divMap {
+	height: calc(100%);
+	left: 0;
+	position: absolute;
+	top: 0;
+	width: calc(100%);
+	z-index: 4;
+}
+
+.leaflet-top.leaflet-left {
+	left: auto;
+    right: 11px;
+	top: 124px;
+}
+
+.leaflet-top.leaflet-right {
+	top: 60px;
+}
+
+body > .container {
+	background-color: #519565;
+	width: 100%;
+}
+
+#divNavbar {
+    left: 0;
+    position: absolute;
+	width: 100%;
+}
+
+nav.navbar {
+	background-color: rgba(25, 135, 25, 0.7);
+	border: 0;
+	border-radius: 0;
+	z-index: 10;
+}
+
+.navbar-brand {
+	color: #EEE !important;
+	margin-right: 36px;
+}
+
+nav.navbar li.active {
+	border-bottom: 5px solid rgba(0, 0, 0, 0.6);	
+}
+
+nav.navbar li > a {
+	background-color: rgba(255, 255, 255, 0) !important;
+	color: #DDD !important;
+}
+
+nav.navbar li.active  > a { 
+	color: #FFF !important;
+}
