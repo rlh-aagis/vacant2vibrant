@@ -54,7 +54,7 @@ function refreshProperties () {
 	];
 	
 	var houseIcon = L.icon({
-		iconUrl: 'content/images/house.png',
+		iconUrl: 'content/images/house.svg',
 		//shadowUrl: 'leaf-shadow.png',
 
 		iconSize:     [20, 20], // size of the icon
@@ -64,13 +64,49 @@ function refreshProperties () {
 		popupAnchor:  [0, 0] // point from which the popup should open relative to the iconAnchor
 	});
 	
-	// Add properties to map as markers
-	for (var i = 0; i < propertyData.length; i++) {
+	var markerClickEvent = function (e) {
+
+		service.getPropertyDetails(e.target.propertyId).then(function (results2) {
+	
+			var propertyDetails = JSON.parse(results2);
+	
+			console.log('propertyDetails: ', propertyDetails);
+	
+			var popup = L.popup()
+				.setLatLng(e.latlng)
+				.setContent(
+					'<div style="border-bottom: 1px dotted #AAA; margin-bottom: 8px; font-size: 14px; font-weight: bold;"> Property Details </div>' +
+					'<div style="min-width: 200px;">' +
+						'<div><b>Address</b>: ' + propertyDetails.Address + '</div>' + 
+						'<div><b>City</b>: ' + propertyDetails.City + '</div>' + 
+						'<div><b>State</b>: ' + propertyDetails.State + '</div>' + 
+						'<div><b>County</b>: ' + propertyDetails.County + '</div>' + 
+						'<div><b>Sqft</b>: ' + propertyDetails.Sqft + '</div>' + 
+						'<div><b>Market Value</b>: $' + propertyDetails.Mktval + '</div>' + 
+					'</div>'
+				)
+				.openOn(map);
+			
+		});
+	};
+	
+	service.getMapProperties().then(function (results) {
 		
-		L.marker([propertyData[i].lat, propertyData[i].lng], {
-			icon: houseIcon 
-		}).addTo(map);
-		//.bindPopup('Popup content')
-		//.openPopup();
-	}
+		var propertyData = JSON.parse(results);
+		
+		// Add properties to map as markers
+		for (var i = 0; i < propertyData.length; i++) {
+			
+			if ((! isDefined(propertyData[i].Lat)) 
+				|| (! isDefined(propertyData[i].Lng))) continue;
+			
+			var marker = L.marker([propertyData[i].Lat, propertyData[i].Lng], {
+				icon: houseIcon
+			});
+			marker.propertyId = propertyData[i].PropertyId;
+			marker.on('click', markerClickEvent);
+			marker.addTo(map);
+		}
+	});
+
 }
