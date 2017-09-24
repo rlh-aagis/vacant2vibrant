@@ -16,6 +16,9 @@
 	switch ($_REQUEST['action'])
 	{
 		// Get methods
+		case 'Autocomplete': autocomplete(); break;
+		case 'GetAreaStatistics': get_area_statistics(); break;
+		case 'GetAutocompleteItemGeojson': get_autocomplete_item_geojson(); break;
 		case 'GetMapProperties': get_map_properties(); break;
 		case 'GetPropertyDetails': get_property_details(); break;
 	}
@@ -34,6 +37,106 @@
 			));
 			die();
 		}
+	}
+	
+	// autocomplete - Returns autocomplete results for land bank properties based on a search string 
+	function autocomplete ($search = null, $max_results = null) {
+		
+		$search = (isset($search)) ? $search : (isset($_REQUEST['Search']) ? pg_escape_string($_REQUEST['Search']) : null);
+		$max_results = (isset($max_results)) ? $max_results : (isset($_REQUEST['MaxResults']) ? pg_escape_string($_REQUEST['MaxResults']) : 10);
+		
+		$query = "
+			SELECT 
+				  gid AS Gid
+				, name AS Name
+			FROM v2vtypeahead WHERE name ILIKE lower('%$search%')
+			ORDER BY Name 
+			LIMIT 10
+		";
+		
+		$conn = get_postgresql_db_connection('postgres');
+		
+		$result = pg_query($conn, $query) 
+			or die ('Error: ' + pg_last_error($conn) + '\n');
+		$area_stats = array();
+		
+		while ($row = pg_fetch_row($result)) {
+			$area_stats[] = array(
+				  'Gid' => $row[0]
+				, 'Name' => $row[1]
+			);
+		}
+		
+		pg_close($conn);
+		
+		echo json_encode($area_stats);
+	}
+	
+	// get_autocomplete_item_geojson - get the geojson geometry for an autocomplete item based on the specified gid
+	function get_autocomplete_item_geojson ($gid = null) {
+		
+		$gid = (isset($gid)) ? $gid : (isset($_REQUEST['Gid']) ? pg_escape_string($_REQUEST['Gid']) : null);
+		
+		$query = "
+			SELECT 
+				ST_AsGeoJSON(geom) AS GeoJSON
+			FROM v2vtypeahead WHERE gid = $gid
+		";
+		
+		$conn = get_postgresql_db_connection('postgres');
+		
+		$result = pg_query($conn, $query) 
+			or die ('Error: ' + pg_last_error($conn) + '\n');
+		$autocomplete_item_geojson = null;
+		
+		while ($row = pg_fetch_row($result)) {
+			$autocomplete_item_geojson = array(
+				'GeoJSON' => $row[0]
+			);
+		}
+		
+		pg_close($conn);
+		
+		echo json_encode($autocomplete_item_geojson);
+	}
+	
+	// get_area_statistics - Gathers a number of statistics over a specified radius from a center point
+	function get_area_statistics ($lat = null, $lng = null, $radius_miles = null) {
+		
+		$lat = (isset($lat)) ? $lat : (isset($_REQUEST['Lat']) ? pg_escape_string($_REQUEST['Lat']) : null);
+		$lng = (isset($lng)) ? $lng : (isset($_REQUEST['Lng']) ? pg_escape_string($_REQUEST['Lng']) : null);
+		$radius_miles = (isset($radius_miles)) ? $radius_miles : (isset($_REQUEST['Radius']) ? pg_escape_string($_REQUEST['Radius']) : null);
+		
+		$query = "
+			SELECT
+				  COUNT(*) AS PropertyCount
+				, ROUND(AVG(CAST(yearacq AS INT)), 0) AS AverageYearsOld 		-- Average years old
+				, ROUND(AVG(CAST(yearsold AS INT)), 0) AS AverageYearAcquired	-- Average year acquired
+				, ROUND(AVG(CAST(mktval AS INT)), 2) AS MarketValue 			-- Market Value
+				, ROUND(AVG(CAST(sqft AS INT)), 2) AS Sqft 						-- Square Feet
+			FROM landbankprops
+			WHERE ST_Distance_Sphere(geom, ST_MakePoint($lng, $lat)) <= $radius_miles
+		";
+		
+		$conn = get_postgresql_db_connection('postgres');
+		
+		$result = pg_query($conn, $query) 
+			or die ('Error: ' + pg_last_error($conn) + '\n');
+		$area_stats = null;
+		
+		while ($row = pg_fetch_row($result)) {
+			$area_stats = array(
+				  'PropertyCount' => $row[0]
+				, 'AverageYearsOld' => 	$row[1]
+				, 'AverageYearAcquired' => 	$row[2]
+				, 'MarketValue' => 	$row[3]
+				, 'Sqft' => 	$row[4]
+			);
+		}
+		
+		pg_close($conn);
+		
+		echo json_encode($area_stats);	
 	}
 	
 	// get_properties - Gets map display property
@@ -71,7 +174,7 @@
 	// get_property_detail - Gets all relevant info for a single property
 	function get_property_details ($propertyId = null) {
 
-		$propertyId = (isset($propertyId)) ? $propertyId : (isset($_REQUEST['PropertyId']) ? $_REQUEST['PropertyId'] : null);
+		$propertyId = (isset($propertyId)) ? $propertyId : (isset($_REQUEST['PropertyId']) ? pg_escape_string($_REQUEST['PropertyId']) : null);
 	
 		$query = "
 			SELECT

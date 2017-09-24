@@ -4,6 +4,7 @@
 }
 
 #divSidebar {
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.33);
     height: calc(100% - 55px);
 	left: 0;
 	padding-left: 70px;
@@ -14,12 +15,13 @@
 }
 
 #sidebar-wrapper {
-    margin-left: -250px;
+	height: calc(100% - 50px);
+    margin-left: -350px;
     left: 70px;
-    width: 250px;
-    background: rgba(0, 0, 0, 0.86);
+    width: 350px;
+    background: rgba(255, 255, 255, 0.92);
     position: fixed;
-    height: 100%;
+	top: 54px;
     z-index: 10000;
     transition: all .4s ease 0s;
 }
@@ -27,26 +29,24 @@
 .sidebar-nav {
     display: block;
     float: left;
-    width: 250px;
+    width: 350px;
     list-style: none;
     margin: 0;
     padding: 0;
 }
 #divSidebar.active {
-    padding-left: 250px;
+    padding-left: 350px;
 }
 #divSidebar.active #sidebar-wrapper {
-    left: 250px;
+    left: 350px;
 }
 #sidebar_menu li a, .sidebar-nav li a {
     color: #999;
     display: block;
     float: left;
     text-decoration: none;
-    width: 250px;
+    width: 350px;
     background: rgba(0, 0, 0, 0);
-    border-top: 1px solid #373737;
-    border-bottom: 1px solid #1A1A1A;
     -webkit-transition: background .5s;
     -moz-transition: background .5s;
     -o-transition: background .5s;
@@ -57,6 +57,26 @@
     padding-top: 25px;
     color: #fff;
     opacity: .7;
+}
+
+#divSideBarMenuToggle > .sub_icon {
+	color: #606060;
+	cursor: pointer;
+	float: right;
+	right: 4px; 
+	top: 32px;
+}
+
+#divSideBarMenuToggle:hover > .sub_icon {
+	color: #959595 !important;
+}
+
+#divAreaStatsSubheading {
+	color: #BBB;
+    font-size: 13px;
+    left: 20px;
+    position: relative;
+    top: -40px;
 }
 
 .sidebar-nav li {
@@ -71,7 +91,7 @@
 }
 
 .sidebar-nav li a:hover {
-  color: #fff;
+  color: #454545;
   background: rgba(255,255,255,0.2);
   text-decoration: none;
 }
@@ -82,7 +102,8 @@
 }
 
 .sidebar-nav > .sidebar-brand {
-  height: 65px;
+  border-bottom: 1px solid #E3E3E3;
+  height: 84px;
   line-height: 60px;
   font-size: 18px;
 }
@@ -109,9 +130,9 @@
 }
 .sub_icon
 {
-   float:right;
-   padding-right: 32px;
-   padding-top:10px;
+   display: inline-block;
+   padding: 0;
+   width: 32px;
 }
 .content-header {
   height: 65px;
@@ -134,11 +155,25 @@
 		left: 70px;
 	}
 	#divSidebar.active {
-		padding-left: 250px;
+		padding-left: 350px;
 	}
 	#divSidebar.active #sidebar-wrapper {
-		left: 250px;
-		width: 250px;
+		left: 350px;
+		width: 350px;
 		transition: all .4s ease 0s;
 	}
 }
+
+.sidebar-item { }
+
+.sidebar-item-label {
+	display: inline-block;
+	width: 140px;
+}
+
+.sidebar-item-value {
+	display: inline-block;
+	font-weight: bold;
+	width: 75px;
+}
+

@@ -1,13 +1,54 @@
 
 <div id="sidebar-wrapper">
 	<ul id="sidebar_menu" class="sidebar-nav">
-		<li class="sidebar-brand"><a id="divSideBarMenuToggle" href="#"> Menu <span id="main_icon"></span></a></li>
+		<li class="sidebar-brand">
+			<a id="divSideBarMenuToggle" href="javascript:void(0);" onclick="refreshSidebar()"> 
+				Area Statistics <span id="main_icon"></span>
+				<div class="sub_icon glyphicon glyphicon-stats"></div>
+			</a>
+		</li>
+		<div id="divAreaStatsSubheading"> 
+			0.25 Miles of <span id="spanStartLocation"> </span> 
+		</div>
 	</ul>
-	<ul class="sidebar-nav" id="sidebar">     
-		<li><a>Link1<span class="sub_icon glyphicon glyphicon-link"></span></a></li>
-		<li><a>link2<span class="sub_icon glyphicon glyphicon-link"></span></a></li>
-		</ul>
-		<ul class="sidebar-nav sidebar-bottom">
+	<ul class="sidebar-nav" id="sidebar">
+		<li class="sidebar-item">
+			<a>
+				<div class="sub_icon glyphicon glyphicon-stats"></div>
+				<div class="sidebar-item-label"> Property Count </div> 
+				<div id="aPropertyCount" class="sidebar-item-value"> 0 </div> 
+			</a>
+		</li>
+		<li class="sidebar-item">
+			<a> 
+				<div class="sub_icon glyphicon glyphicon-stats"></div>
+				<div class="sidebar-item-label"> Avg Years Old </div> 
+				<div id="aAverageYearsOld" class="sidebar-item-value"> 0 </div> 
+			</a>
+		</li>
+		<li class="sidebar-item">
+			<a> 
+				<div class="sub_icon glyphicon glyphicon-stats"></div>
+				<div class="sidebar-item-label"> Avg Year Acquired </div> 
+				<div id="aAverageYearAcquired" class="sidebar-item-value"> 0 </div> 
+			</a>
+		</li>
+		<li class="sidebar-item">
+			<a> 
+				<div class="sub_icon glyphicon glyphicon-stats"></div>
+				<div class="sidebar-item-label"> Avg Market Value </div>
+				<div id="aMarketValue" class="sidebar-item-value"> 0 </div> 
+			</a>
+		</li>
+		<li class="sidebar-item">
+			<a> 
+				<div class="sub_icon glyphicon glyphicon-stats"></div>
+				<div class="sidebar-item-label"> Avg Sqft </div> 
+				<div id="aSqft" class="sidebar-item-value"> 0 </div>
+			</a>
+		</li>
+	</ul>
+	<ul class="sidebar-nav sidebar-bottom">
 		<li><a>Link1<span class="sub_icon glyphicon glyphicon-link"></span></a></li>
 		<li><a>Link2<span class="sub_icon glyphicon glyphicon-link"></span></a></li>
 	</ul>

@@ -52,7 +52,7 @@ nav.navbar {
 }
 
 nav.navbar li.active {
-	border-bottom: 5px solid rgba(0, 0, 0, 0.6);	
+	border-bottom: 5px solid rgba(255, 255, 255, 0.65);
 }
 
 nav.navbar li > a {
@@ -63,3 +63,18 @@ nav.navbar li > a {
 nav.navbar li.active  > a { 
 	color: #FFF !important;
 }
+
+
+/* Modal Styles - Begin */
+
+.modal-content {
+	border-radius: 0;
+}
+
+.modal-backdrop {
+	opacity: 0.2 !important;
+}
+
+/* Modal Styles - End */
+
+

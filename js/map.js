@@ -1,5 +1,11 @@
 
 var map = null;
+var userLocation = {
+	lat: 39.066379,
+	lng: -94.519982,
+	radiusMiles: (0.25 * 1609.34),
+	zoom: 16
+};
 
 function initMap (mapElementId) {
 	
@@ -12,8 +18,11 @@ function initMap (mapElementId) {
 	});
 
 	map = L.map(mapElementId).setView(
-		[39.0937, -94.5763], 
-		11
+		[
+			userLocation.lat, 
+			userLocation.lng
+		],
+		userLocation.zoom
 	);    
 	map.worldCopyJump = false;
 	
@@ -28,6 +37,23 @@ function initMap (mapElementId) {
 	baseLayers['Esri World Street Map'].addTo(map);
 
 	refreshProperties();
+	initAreaStatisticsRadius();
+}
+
+function initAreaStatisticsRadius () {
+	
+	L.circle([
+			userLocation.lat, 
+			userLocation.lng
+		], 
+		userLocation.radiusMiles/*,
+		{
+			color: 'rgba(255, 255, 255, 0.3)',
+			fillColor: 'rgba(0, 120, 205, 0.65)',
+			fillOpacity: 0.5
+		}
+		*/
+	).addTo(map);
 }
 
 function refreshProperties () {
