@@ -1,7 +1,7 @@
 
 var service = {
 	apiKey: 'D77C71BCE446924A2F7E1D21C44C7',
-	apiUrl: 'http://localhost/php/v2v-api.php',
+	apiUrl: 'http://aagis.net/v2v/php/v2v-api.php',
 	getMapProperties: null,
 	getPropertyDetail: null
 };

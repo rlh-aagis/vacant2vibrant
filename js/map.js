@@ -96,8 +96,6 @@ function refreshProperties () {
 	
 			var propertyDetails = JSON.parse(results2);
 	
-			console.log('propertyDetails: ', propertyDetails);
-	
 			var popup = L.popup()
 				.setLatLng(e.latlng)
 				.setContent(

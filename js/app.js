@@ -21,7 +21,7 @@ $(document).ready(function () {
 	
 	setTimeout(function () {
 		initSearch();
-	}, 50);
+	}, 300);
 	
 	initMap('divMap');
 });
