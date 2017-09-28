@@ -1,9 +1,17 @@
 
-<div id="sidebar-wrapper">
+<div id="divSidebarWrapper">
+
+	<div class="load-indicator">
+		<img src="content/images/ajax-loader.gif" />
+	</div>
+
 	<ul id="sidebar_menu" class="sidebar-nav">
 		<li class="sidebar-brand">
 			<a id="divSideBarMenuToggle" href="javascript:void(0);" onclick="refreshSidebar()"> 
-				Area Statistics <span id="main_icon"></span>
+				<span translate="area statistics" style="text-transform: capitalize;"> 
+					Area Statistics 
+				</span>
+				<span id="main_icon"></span>
 				<div class="sub_icon glyphicon glyphicon-stats"></div>
 			</a>
 		</li>
@@ -15,35 +23,45 @@
 		<li class="sidebar-item">
 			<a>
 				<div class="sub_icon glyphicon glyphicon-stats"></div>
-				<div class="sidebar-item-label"> Property Count </div> 
+				<div class="sidebar-item-label hide-overflow" translate="property count"> 
+					Property Count 
+				</div> 
 				<div id="aPropertyCount" class="sidebar-item-value"> 0 </div> 
 			</a>
 		</li>
 		<li class="sidebar-item">
 			<a> 
 				<div class="sub_icon glyphicon glyphicon-stats"></div>
-				<div class="sidebar-item-label"> Avg Years Old </div> 
+				<div class="sidebar-item-label hide-overflow" translate="avg years old"> 
+					Avg Years Old 
+				</div> 
 				<div id="aAverageYearsOld" class="sidebar-item-value"> 0 </div> 
 			</a>
 		</li>
 		<li class="sidebar-item">
 			<a> 
 				<div class="sub_icon glyphicon glyphicon-stats"></div>
-				<div class="sidebar-item-label"> Avg Year Acquired </div> 
+				<div class="sidebar-item-label hide-overflow"> 
+					Avg Year Acquired 
+				</div> 
 				<div id="aAverageYearAcquired" class="sidebar-item-value"> 0 </div> 
 			</a>
 		</li>
 		<li class="sidebar-item">
 			<a> 
 				<div class="sub_icon glyphicon glyphicon-stats"></div>
-				<div class="sidebar-item-label"> Avg Market Value </div>
+				<div class="sidebar-item-label hide-overflow"> 
+					Avg Market Value 
+				</div>
 				<div id="aMarketValue" class="sidebar-item-value"> 0 </div> 
 			</a>
 		</li>
 		<li class="sidebar-item">
 			<a> 
 				<div class="sub_icon glyphicon glyphicon-stats"></div>
-				<div class="sidebar-item-label"> Avg Sqft </div> 
+				<div class="sidebar-item-label hide-overflow"> 
+					Avg Sqft 
+				</div> 
 				<div id="aSqft" class="sidebar-item-value"> 0 </div>
 			</a>
 		</li>

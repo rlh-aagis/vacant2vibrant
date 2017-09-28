@@ -36,6 +36,12 @@ function initMap (mapElementId) {
 	L.control.layers(baseLayers, overlayLayers).addTo(map);
 	baseLayers['Esri World Street Map'].addTo(map);
 
+	// Set click event on map
+	map.on('click', function onMapClick (e) {
+		if ($('#divSidebar').hasClass('active'))
+			$('#divSidebar').removeClass('active');
+	});
+	
 	refreshProperties();
 	initAreaStatisticsRadius();
 }

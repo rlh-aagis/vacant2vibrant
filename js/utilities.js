@@ -1,9 +1,9 @@
 
-function isDefined(obj) {
+function isDefined (obj) {
 	return ((typeof obj !== 'undefined') && (obj !== null));
 }
 
-function centerModal() {
+function centerModal () {
     $(this).css('display', 'block');
     var $dialog = $(this).find(".modal-dialog"),
 	offset = ($(window).height() - $dialog.height()) / 2,
@@ -11,4 +11,10 @@ function centerModal() {
 
     if (offset < bottomMargin) offset = bottomMargin;
     $dialog.css("margin-top", offset);
+}
+
+function formatNumber (num) {
+    var parts = num.toString().split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return parts.join('.');
 }

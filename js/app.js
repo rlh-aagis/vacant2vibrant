@@ -1,4 +1,8 @@
 
+var app = {
+	languageData: null
+};
+
 $(document).ready(function () {
 	
 	// Load navbar
@@ -8,7 +12,7 @@ $(document).ready(function () {
 	$('#divSidebar').load('templates/sidebar.html', function( response, status, xhr ) { 
 		$('#divSideBarMenuToggle').click(function (e) {
 			e.preventDefault();
-			$("#divSidebar").toggleClass('active');
+			$('#divSidebar').toggleClass('active');
 		});
 	});
 	
@@ -87,24 +91,59 @@ function refreshSidebar () {
 	
 	$('#divAreaStatsSubheading').text('Within 0.25 Miles of (' + userLocation.lng + ', ' + userLocation.lat + ')');
 	
+	$('#divSidebarWrapper .load-indicator').show();
+	
 	service.getAreaStatistics(userLocation.lat, userLocation.lng, userLocation.radiusMiles).then(function (results) {
 		
 		results = JSON.parse(results);
 		
 		// Property Count
-		$('#aPropertyCount').text(results.PropertyCount);
+		$('#aPropertyCount').text(formatNumber(results.PropertyCount));
 		
 		// Average Years Old
-		$('#aAverageYearsOld').text(results.AverageYearsOld);
+		$('#aAverageYearsOld').text(formatNumber(results.AverageYearsOld));
 
 		// Average Year Acquired
-		$('#aAverageYearAcquired').text(results.AverageYearAcquired);
+		$('#aAverageYearAcquired').text(formatNumber(results.AverageYearAcquired));
 
 		// Market Value
-		$('#aMarketValue').text('$' + results.MarketValue);
+		$('#aMarketValue').text('$' + formatNumber(results.MarketValue));
 
 		// Sqft
-		$('#aSqft').text(results.Sqft);
+		$('#aSqft').text(formatNumber(results.Sqft));
+		
+		$('#divSidebarWrapper .load-indicator').fadeOut();
 	});
 }
 
+function setLanguage (languageCode) {
+	
+	var languageURL = 'js/translations/' + languageCode + '.json';
+
+	$('.language-menu .language-label .language-code').html(languageCode);
+	
+	$('.language-data').load(languageURL, function() {
+		
+		app.languageData = $('.language-data').html()
+			.replace(/\\n/g, "\\n")
+			.replace(/\\'/g, "\\'")
+			.replace(/\\"/g, '\\"')
+			.replace(/\\&/g, "\\&")
+			.replace(/\\r/g, "\\r")
+			.replace(/\\t/g, "\\t")
+			.replace(/\\b/g, "\\b")
+			.replace(/\\f/g, "\\f");
+		app.languageData = $.parseJSON(app.languageData);
+		
+		$('[translate]').each(function () {
+			var translation = app.languageData[$(this).attr('translate')] || $(this).attr('translate');
+			if (isDefined(translation)) $(this).html(translation);
+		});
+		
+		$('[translate-placeholder]').each(function () {
+			var translation = app.languageData[$(this).attr('translate-placeholder')] || $(this).attr('translate-placeholder');
+			if (isDefined(translation)) $(this).attr('placeholder', translation);
+		});
+	});
+	
+}

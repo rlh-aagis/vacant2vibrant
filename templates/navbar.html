@@ -7,19 +7,24 @@
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<a class="navbar-brand" href="#"> Vibrant to Vacant </a>
+			<a class="navbar-brand" href="#" style="margin-left: 8px;"> 
+				Vacant to <b>Vibrant</b> 
+			</a>
 		</div>
 		<div id="navbar" class="navbar-collapse collapse">
 			
 			<ul class="nav navbar-nav">
-				<li class="active"><a href="javascript:void(0);"> Map </a></li>
+				<li class="active"><a href="javascript:void(0);" translate="map" 
+					style="text-transform: capitalize;"> Map </a></li>
 			</ul>
 			
 			<ul class="nav navbar-nav navbar-right">
 				<li>
 					<form class="navbar-form" role="search">
+					
 						<div class="input-group">
-							<input type="text" id="txtTopSearch" class="form-control" placeholder="Search" name="q">
+							<input type="text" id="txtTopSearch" class="form-control" 
+								translate-placeholder="search" placeholder="Search" name="q">
 							<div class="input-group-btn">
 								<button class="btn btn-default" type="button" onclick="topSearch()">
 									<i class="glyphicon glyphicon-search"></i>
@@ -28,14 +33,35 @@
 						</div>
 					</form>
 				</li>
-			
-				<li><a href="javascript:void(0);"> Language: ENG <span class="sr-only">(current)</span></a></li>
+				
+				<li class="language-menu">
+					<div class="language-data" style="display: none;"></div>
+					<a href="javascript:void(0);" class="language-label"> 
+						<span translate="language:"> Language: </span> 
+						<span class="language-code"> ENG </span>
+					</a>
+					<div class="language-selector">
+						<div class="language-item" onclick="setLanguage('eng')"> 
+							<img src="content/images/languages/eng.png" />
+							<span> English </span> 
+						</div>
+						<div class="language-item" onclick="setLanguage('fra')"> 
+							<img src="content/images/languages/fra.png" />
+							<span> French </span>
+						</div>
+						<div class="language-item" onclick="setLanguage('spa')"> 
+							<img src="content/images/languages/spa.png" />
+							<span> Spanish </span>
+						</div>
+					</div>
+				</li>
 				
 				<li class="dropdown">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown" 
 						role="button" aria-haspopup="true" aria-expanded="false">
 						<i class="glyphicon glyphicon-user"></i>
-						User <span class="caret"></span>
+						<span translate="user" style="text-transform: capitalize;"> User </span>
+						<span class="caret"></span>
 					</a>
 					
 					<ul class="dropdown-menu">
