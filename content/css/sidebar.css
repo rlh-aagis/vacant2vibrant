@@ -5,12 +5,14 @@
 
 #divSidebar {
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.33);
+	display: none;
     height: calc(100% - 55px);
 	left: 0;
 	padding-left: 70px;
 	position: absolute;
 	top: 55px;
 	transition: all .4s ease 0s;
+	width: auto;
 	z-index: 9;
 }
 

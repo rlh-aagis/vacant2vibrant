@@ -9,8 +9,10 @@ body {
 }
 
 html, body {
+	height: 100%;
 	margin: 0;
 	padding: 0;
+	width: 100%;
 }
 
 .hide-overflow {
@@ -18,6 +20,17 @@ html, body {
     text-overflow: ellipsis;
     vertical-align: top;
 	white-space: nowrap;
+}
+
+body > .container {
+	background-color: #FFF;
+	height: 100%;
+	width: 100%;
+}
+
+body > .container > div {
+	width: 100%;
+	z-index: 4;
 }
 
 .load-indicator {
@@ -28,7 +41,43 @@ html, body {
     transform: translate(-50%, -50%);
 }
 
+/* Credit to bootsnipp.com for the css for the color graph */
+.colorgraph {
+  height: 5px;
+  border-top: 0;
+  background: #c4e17f;
+  border-radius: 5px;
+  background-image: -webkit-linear-gradient(left, #c4e17f, #c4e17f 12.5%, #f7fdca 12.5%, #f7fdca 25%, #fecf71 25%, #fecf71 37.5%, #f0776c 37.5%, #f0776c 50%, #db9dbe 50%, #db9dbe 62.5%, #c49cde 62.5%, #c49cde 75%, #669ae1 75%, #669ae1 87.5%, #62c2e4 87.5%, #62c2e4);
+  background-image: -moz-linear-gradient(left, #c4e17f, #c4e17f 12.5%, #f7fdca 12.5%, #f7fdca 25%, #fecf71 25%, #fecf71 37.5%, #f0776c 37.5%, #f0776c 50%, #db9dbe 50%, #db9dbe 62.5%, #c49cde 62.5%, #c49cde 75%, #669ae1 75%, #669ae1 87.5%, #62c2e4 87.5%, #62c2e4);
+  background-image: -o-linear-gradient(left, #c4e17f, #c4e17f 12.5%, #f7fdca 12.5%, #f7fdca 25%, #fecf71 25%, #fecf71 37.5%, #f0776c 37.5%, #f0776c 50%, #db9dbe 50%, #db9dbe 62.5%, #c49cde 62.5%, #c49cde 75%, #669ae1 75%, #669ae1 87.5%, #62c2e4 87.5%, #62c2e4);
+  background-image: linear-gradient(to right, #c4e17f, #c4e17f 12.5%, #f7fdca 12.5%, #f7fdca 25%, #fecf71 25%, #fecf71 37.5%, #f0776c 37.5%, #f0776c 50%, #db9dbe 50%, #db9dbe 62.5%, #c49cde 62.5%, #c49cde 75%, #669ae1 75%, #669ae1 87.5%, #62c2e4 87.5%, #62c2e4);
+}
+
+.disclaimer-box {
+	background-color: #FAFAFA;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+	margin: 25px 0 0 0;
+	padding: 10px 20px;
+}
+
+.disclaimer-title {
+	color: #353535;
+	font-size: 16px;
+	font-weight: bold;
+}
+
+.disclaimer-text {
+	color: #656565;
+	font-size: 14px;
+	font-weight: normal;
+}
+
+#divLandingPage {
+	
+}
+
 #divMap {
+	display: none;
 	height: calc(100%);
 	left: 0;
 	position: absolute;
@@ -51,15 +100,12 @@ html, body {
 	border-radius: 3px !important;
 }
 
-body > .container {
-	background-color: #519565;
-	width: 100%;
-}
-
 #divNavbar {
+	display: none;
     left: 0;
     position: absolute;
 	width: 100%;
+	z-index: 10;
 }
 
 nav.navbar {

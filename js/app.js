@@ -1,33 +1,24 @@
 
 var app = {
-	languageData: null
+	languageData: null,
+	page: 'landing'
 };
 
 $(document).ready(function () {
-	
-	// Load navbar
-	$('#divNavbar').load('templates/navbar.html');
-	
-	// Load sidebar
-	$('#divSidebar').load('templates/sidebar.html', function( response, status, xhr ) { 
-		$('#divSideBarMenuToggle').click(function (e) {
-			e.preventDefault();
-			$('#divSidebar').toggleClass('active');
-		});
-	});
-	
+
 	// Show disclaimer on site login
-	$('#divModal1').load('templates/disclaimer.html', function( response, status, xhr ) { 
-		$('#divDisclaimer').modal('show');
-	});
+	// $('#divModal1').load('templates/disclaimer.html', function( response, status, xhr ) { 
+		// $('#divDisclaimer').modal('show');
+	// });
 	
 	bindEvents();
 	
-	setTimeout(function () {
-		initSearch();
-	}, 300);
-	
-	initMap('divMap');
+	$('#divLandingPage').load('templates/landing.html', function( response, status, xhr ) { 
+		
+		setTimeout(function () {
+			initSearch('txtLandingSearch');
+		}, 300);
+	});
 });
 
 function bindEvents () {
@@ -39,13 +30,13 @@ function bindEvents () {
     });
 }
 
-function initSearch () {
+function initSearch (searchElementId) {
 
 	// Initialize jQuery autocomplete on top search box
-	$('#txtTopSearch').autocomplete({
+	$('#' + searchElementId).autocomplete({
 		source: function (request, response) {
-		
-			var search = $('#txtTopSearch').val();
+			
+			var search = $('#' + searchElementId).val();
 			
 			service.autocomplete(search, 10).then(function (results) {
 				
@@ -62,24 +53,69 @@ function initSearch () {
 		select: function (event, ui) {
 			
 			setTimeout(function () {
-				$('#txtTopSearch').val(ui.item.label);
+				$('#' + searchElementId).val(ui.item.label);
 			}, 50);
 			
-			service.getAutocompleteItemGeojson(ui.item.value).then(function (results) {
-			
-				results = JSON.parse(results);
-			
-				var geojson = JSON.parse(results.GeoJSON);
-				var geojsonBounds = L.geoJson(geojson).getBounds();
-				map.fitBounds(geojsonBounds);
+			if (app.page == 'landing') {
 				
-				setTimeout(function () {
-					var mapZoom = map.getZoom();
-					map.setZoom(mapZoom - 1);
-				}, 100);
-			});
+				service.getAutocompleteItemLatLng(ui.item.value).then(function (results) {
+				
+					results = JSON.parse(results);
+					
+					// Set map starting location
+					if (isDefined(results) && isDefined(results.Lat) 
+						&& isDefined(results.Lng)) {
+						userLocation.lat = results.Lat;
+						userLocation.lng = results.Lng;
+					}
+					
+					landingSearch();
+				});
+				
+			} else if (app.page == 'map') {
+				
+				service.getAutocompleteItemGeojson(ui.item.value).then(function (results) {
+				
+					results = JSON.parse(results);
+				
+					var geojson = JSON.parse(results.GeoJSON);
+					var geojsonBounds = L.geoJson(geojson).getBounds();
+					map.fitBounds(geojsonBounds);
+					
+					setTimeout(function () {
+						var mapZoom = map.getZoom();
+						map.setZoom(mapZoom - 1);
+					}, 100);
+				});
+			}
         }
 	});
+}
+
+function landingSearch () {
+	
+	app.page = 'map';
+	
+	$('#divLandingPage').fadeOut();
+	
+	// Load navbar
+	$('#divNavbar').load('templates/navbar.html').fadeIn();
+	
+	// Load sidebar
+	$('#divSidebar').load('templates/sidebar.html', function( response, status, xhr ) { 
+		$('#divSideBarMenuToggle').click(function (e) {
+			e.preventDefault();
+			$('#divSidebar').toggleClass('active');
+		});
+	}).fadeIn();
+	
+	setTimeout(function () {
+		initSearch('txtTopSearch');
+	}, 300);
+	
+	$('#divMap').fadeIn();
+	
+	initMap('divMap');
 }
 
 function topSearch () {

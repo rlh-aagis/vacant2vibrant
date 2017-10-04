@@ -25,6 +25,7 @@ function initMap (mapElementId) {
 		userLocation.zoom
 	);    
 	map.worldCopyJump = false;
+	$('#' + mapElementId).fadeIn(200);
 	
 	var baseLayers = {
 		'Esri World Imagery': Esri_WorldImagery,
@@ -85,16 +86,43 @@ function refreshProperties () {
 		}
 	];
 	
-	var houseIcon = L.icon({
-		iconUrl: 'content/images/house.svg',
-		//shadowUrl: 'leaf-shadow.png',
-
-		iconSize:     [20, 20], // size of the icon
-		shadowSize:   [0, 0], // size of the shadow
-		iconAnchor:   [0, 0], // point of the icon which will correspond to marker's location
-		shadowAnchor: [0, 0],  // the same for the shadow
-		popupAnchor:  [0, 0] // point from which the popup should open relative to the iconAnchor
+	var blueHouseIcon = L.icon({
+		iconUrl: 'content/images/house-blue.svg',
+		iconSize:     [20, 20],
+		shadowSize:   [0, 0],
+		iconAnchor:   [0, 0],
+		shadowAnchor: [0, 0],
+		popupAnchor:  [0, 0]
 	});
+	
+	var greenHouseIcon = L.icon({
+		iconUrl: 'content/images/house-green.svg',
+		iconSize:     [20, 20],
+		shadowSize:   [0, 0],
+		iconAnchor:   [0, 0],
+		shadowAnchor: [0, 0],
+		popupAnchor:  [0, 0]
+	});
+	
+	var orangeHouseIcon = L.icon({
+		iconUrl: 'content/images/house-orange.svg',
+		iconSize:     [20, 20],
+		shadowSize:   [0, 0],
+		iconAnchor:   [0, 0],
+		shadowAnchor: [0, 0],
+		popupAnchor:  [0, 0]
+	});
+	
+	var redHouseIcon = L.icon({
+		iconUrl: 'content/images/house-red.svg',
+		iconSize:     [20, 20],
+		shadowSize:   [0, 0],
+		iconAnchor:   [0, 0],
+		shadowAnchor: [0, 0],
+		popupAnchor:  [0, 0]
+	});
+	
+	//leaflet-marker-icon
 	
 	var markerClickEvent = function (e) {
 
@@ -107,12 +135,13 @@ function refreshProperties () {
 				.setContent(
 					'<div style="border-bottom: 1px dotted #AAA; margin-bottom: 8px; font-size: 14px; font-weight: bold;"> Property Details </div>' +
 					'<div style="min-width: 200px;">' +
+						'<div><b>Property Type</b>: ' + propertyDetails.PropClass + '</div>' + 
 						'<div><b>Address</b>: ' + propertyDetails.Address + '</div>' + 
 						'<div><b>City</b>: ' + propertyDetails.City + '</div>' + 
 						'<div><b>State</b>: ' + propertyDetails.State + '</div>' + 
 						'<div><b>County</b>: ' + propertyDetails.County + '</div>' + 
-						'<div><b>Sqft</b>: ' + propertyDetails.Sqft + '</div>' + 
-						'<div><b>Market Value</b>: $' + propertyDetails.Mktval + '</div>' + 
+						'<div><b>Sqft</b>: ' + propertyDetails.SqftDisplay + '</div>' + 
+						'<div><b>Market Value</b>: $' + propertyDetails.MktvalDisplay + '</div>' + 
 					'</div>'
 				)
 				.openOn(map);
@@ -130,12 +159,27 @@ function refreshProperties () {
 			if ((! isDefined(propertyData[i].Lat)) 
 				|| (! isDefined(propertyData[i].Lng))) continue;
 			
+			var markerIcon = null;
+			switch (propertyData[i].PropClass.toString().trim().toLowerCase()) {
+				case 'commercial vacant': markerIcon = greenHouseIcon; break;
+				case 'commercial improved': markerIcon = blueHouseIcon; break;
+				case 'residential vacant': markerIcon = orangeHouseIcon; break;
+				case 'residential improved': markerIcon = redHouseIcon; break;
+			}
+			if (! markerIcon) continue;
+			
 			var marker = L.marker([propertyData[i].Lat, propertyData[i].Lng], {
-				icon: houseIcon
+				icon: markerIcon
 			});
 			marker.propertyId = propertyData[i].PropertyId;
 			marker.on('click', markerClickEvent);
 			marker.addTo(map);
+			
+			if (propertyData[i].PropClass) {
+				var propClass = propertyData[i].PropClass.toString()
+					.trim().toLowerCase().replace(/\s/g, '-');
+				$($(marker)[0]._icon).addClass(propClass);
+			}
 		}
 	});
 

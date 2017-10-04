@@ -19,6 +19,7 @@
 		case 'Autocomplete': autocomplete(); break;
 		case 'GetAreaStatistics': get_area_statistics(); break;
 		case 'GetAutocompleteItemGeojson': get_autocomplete_item_geojson(); break;
+		case 'GetAutocompleteItemLatLng': get_autocomplete_item_lat_lng(); break;
 		case 'GetMapProperties': get_map_properties(); break;
 		case 'GetPropertyDetails': get_property_details(); break;
 	}
@@ -66,6 +67,37 @@
 				, 'Name' => $row[1]
 			);
 		}
+		
+		pg_close($conn);
+		
+		echo json_encode($area_stats);
+	}
+	
+	// get_autocomplete_item_lat_lng - Gets the lat and long of a specified gid autocomplete address
+	function get_autocomplete_item_lat_lng () {
+		
+		$gid = (isset($gid)) ? $gid : (isset($_REQUEST['Gid']) ? pg_escape_string($_REQUEST['Gid']) : null);
+
+		$query = "
+			SELECT 
+				ST_Y(ST_Centroid(geom)) AS Lat,
+				ST_X(ST_Centroid(geom)) AS Lon
+			FROM v2vtypeahead WHERE gid = $gid
+			ORDER BY Name 
+			LIMIT 1
+		";
+		
+		$conn = get_postgresql_db_connection('postgres');
+		
+		$result = pg_query($conn, $query) 
+			or die ('Error: ' + pg_last_error($conn) + '\n');
+		
+		$row = pg_fetch_row($result);
+		$area_stats = array(
+			  'Gid' => $gid
+			, 'Lat' => $row[0]
+			, 'Lng' => $row[1]
+		);
 		
 		pg_close($conn);
 		
@@ -147,9 +179,13 @@
 				  gid
 				, lat
 				, lon
+				, propclass
 			FROM public.landbankprops
+			WHERE (1 = 1)
+			AND ((propclass ILIKE '%commercial improved%') OR (propclass ILIKE '%commercial vacant%')
+			 OR (propclass ILIKE '%residential improved%') OR (propclass ILIKE '%residential vacant%'))
 			ORDER BY zoned
-			LIMIT 1000
+			LIMIT 1500
 		";
 		
 		$conn = get_postgresql_db_connection('postgres');
@@ -163,6 +199,7 @@
 				  'PropertyId' => $row[0]
 				, 'Lat' => 	$row[1]
 				, 'Lng' => 	$row[2]
+				, 'PropClass' => $row[3]
 			);
 		}
 		
@@ -243,7 +280,7 @@
 			, 'Pstatcd' => $row[13]
 			, 'Lbgrpcond' => $row[14]
 			, 'Lbmatchcdg' => $row[15]
-			, 'Propclass' => $row[16]
+			, 'PropClass' => $row[16]
 			, 'Propstat' => $row[17]
 			, 'Invtype' => $row[18]
 			, 'Zoned' => $row[19]
@@ -259,7 +296,9 @@
 			, 'Potentuse' => $row[29]
 			, 'Mktvalyr' => $row[30]
 			, 'Mktval' => $row[31]
+			, 'MktvalDisplay' => number_format($row[31], 2, '.', ',')
 			, 'Sqft' => $row[32]
+			, 'SqftDisplay' => number_format($row[32], 2, '.', ',')
 			, 'Yrforcls' => $row[33]
 			, 'Propcond' => $row[34]
 			, 'Geoid' => $row[35]

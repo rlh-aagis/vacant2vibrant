@@ -1,9 +1,12 @@
 
 var service = {
 	apiKey: 'D77C71BCE446924A2F7E1D21C44C7',
-	apiUrl: 'http://aagis.net/v2v/php/v2v-api.php',
+	//apiUrl: 'http://localhost/php/v2v-api.php', // DEV
+	apiUrl: 'http://aagis.net/v2v/php/v2v-api.php', // PROD
 	getMapProperties: null,
-	getPropertyDetail: null
+	getPropertyDetail: null,
+	getAutocompleteItemGeojson: null,
+	getAutocompleteItemLatLng: null
 };
 
 service.getMapProperties = function (propertyId) {
@@ -83,6 +86,24 @@ service.autocomplete = function (search, maxResults) {
 service.getAutocompleteItemGeojson = function (gid) {
 
 	var url = service.apiUrl + '?action=GetAutocompleteItemGeojson';
+	if (isDefined(gid)) url += '&Gid=' + gid;
+	url += '&key=' + service.apiKey;
+
+	var deferred = $.ajax({
+		url: url,
+		type: 'GET',
+		beforeSend: function (xhr) { },
+		success: function (data, textStatus, xhr) { },
+		complete: function (xhr, textStatus) { },
+		error: function (xhr, textStatus, errorThrown) { }
+	});
+	
+	return deferred;
+};
+
+service.getAutocompleteItemLatLng = function (gid) {
+	
+	var url = service.apiUrl + '?action=GetAutocompleteItemLatLng';
 	if (isDefined(gid)) url += '&Gid=' + gid;
 	url += '&key=' + service.apiKey;
 
