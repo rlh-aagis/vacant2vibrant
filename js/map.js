@@ -1,9 +1,14 @@
 
+var mapLayers = {
+	searchRadiusLayer: null
+};
 var map = null;
 var userLocation = {
+	category: 'address',
+	label: '',
 	lat: 39.066379,
 	lng: -94.519982,
-	radiusMiles: (0.25 * 1609.34),
+	searchRadiusMiles: (0.25 * 1609.34),
 	zoom: 16
 };
 
@@ -43,48 +48,110 @@ function initMap (mapElementId) {
 			$('#divSidebar').removeClass('active');
 	});
 	
+	// Set popup open event on map
+	map.on('popupopen', function (e) {
+		userLocation.category = 'address';
+		searchMap(
+			null, 
+			null,
+			userLocation.category, 
+			e.popup._latlng.lat, 
+			e.popup._latlng.lng
+		);
+	});
+	
 	refreshProperties();
-	initAreaStatisticsRadius();
 }
 
-function initAreaStatisticsRadius () {
+function searchMap(locationGid, locationName, locationCategory, locationLat, locationLng) {
 	
-	L.circle([
-			userLocation.lat, 
-			userLocation.lng
-		], 
-		userLocation.radiusMiles/*,
-		{
-			color: 'rgba(255, 255, 255, 0.3)',
-			fillColor: 'rgba(0, 120, 205, 0.65)',
-			fillOpacity: 0.5
+	if (! isDefined(locationCategory)) locationCategory = 'address';
+	
+	var layerStyleFcn = function (feature) {
+		return {
+			fillColor: '#0064FF',
+			weight: 3,
+			opacity: 1.0,
+			color: '#FFA100',
+			fillOpacity: 0.3
+		};
+	};
+	
+	// For address items, draw a search radius
+	if (locationCategory.toString().toLowerCase() == 'address') {
+
+		var setAddressSearchRadius = function (data) {
+			
+			if (!isDefined(data)) return;
+			
+			// Set map starting location
+			if (isDefined(data.Lat) && isDefined(data.Lng)) {
+				userLocation.lat = data.Lat;
+				userLocation.lng = data.Lng;
+			}
+			
+			if (isDefined(mapLayers.searchRadiusLayer))
+				map.removeLayer(mapLayers.searchRadiusLayer);
+			mapLayers.searchRadiusLayer = L.circle([
+				userLocation.lat, 
+				userLocation.lng
+			], userLocation.searchRadiusMiles, layerStyleFcn());
+			
+			mapLayers.searchRadiusLayer.addTo(map);
+			
+			app.refreshSidebar();
+		};
+		
+		if (isDefined(locationLat) && isDefined(locationLng)) {
+			
+			setAddressSearchRadius({ Lat: locationLat, Lng: locationLng });
+			
+		} else if (isDefined(locationGid)) {
+	
+			service.getAutocompleteItemLatLng(locationGid).then(function (results) {
+				setAddressSearchRadius(JSON.parse(results));
+			});
 		}
-		*/
-	).addTo(map);
+	
+	// For all other categories
+	} else {
+		
+		service.getAutocompleteItemGeojson(locationGid).then(function (results) {
+			
+			results = JSON.parse(results);
+			var geojson = JSON.parse(results.GeoJSON);
+			
+			// Set map starting location
+			if (isDefined(results) && isDefined(results.Lat) 
+				&& isDefined(results.Lng)) {
+				userLocation.lat = results.Lat;
+				userLocation.lng = results.Lng;
+			}
+			
+			userLocation.lat = results.CenterLat;
+			userLocation.lng = results.CenterLng;
+			
+			if (mapLayers.searchRadiusLayer)
+				map.removeLayer(mapLayers.searchRadiusLayer);						
+			mapLayers.searchRadiusLayer = new L.geoJson(geojson, { style: layerStyleFcn });
+			mapLayers.searchRadiusLayer.addTo(map);
+			
+			setTimeout(function () {
+				app.refreshSidebar();
+			}, 100);
+			
+			var geojsonBounds = L.geoJson(geojson).getBounds();
+			map.fitBounds(geojsonBounds);
+			
+			setTimeout(function () {
+				var mapZoom = map.getZoom();
+				map.setZoom(mapZoom - 1);
+			}, 100);
+		});
+	}
 }
 
 function refreshProperties () {
-	
-	// Get test property data
-	var propertyData = [
-		{ 
-			address: '123 Main St',
-			lat: 39.024923, 
-			lng: -94.564466
-		}, { 
-			address: '124 Main St',
-			lat: 39.028311, 
-			lng: -94.556446
-		}, { 
-			address: '126 Main St',
-			lat: 39.019643, 
-			lng: -94.576273
-		}, { 
-			address: '130 Main St',
-			lat: 39.017409, 
-			lng: -94.548893
-		}
-	];
 	
 	var blueHouseIcon = L.icon({
 		iconUrl: 'content/images/house-blue.svg',
@@ -122,8 +189,6 @@ function refreshProperties () {
 		popupAnchor:  [0, 0]
 	});
 	
-	//leaflet-marker-icon
-	
 	var markerClickEvent = function (e) {
 
 		service.getPropertyDetails(e.target.propertyId).then(function (results2) {
@@ -135,13 +200,13 @@ function refreshProperties () {
 				.setContent(
 					'<div style="border-bottom: 1px dotted #AAA; margin-bottom: 8px; font-size: 14px; font-weight: bold;"> Property Details </div>' +
 					'<div style="min-width: 200px;">' +
-						'<div><b>Property Type</b>: ' + propertyDetails.PropClass + '</div>' + 
-						'<div><b>Address</b>: ' + propertyDetails.Address + '</div>' + 
-						'<div><b>City</b>: ' + propertyDetails.City + '</div>' + 
-						'<div><b>State</b>: ' + propertyDetails.State + '</div>' + 
-						'<div><b>County</b>: ' + propertyDetails.County + '</div>' + 
-						'<div><b>Sqft</b>: ' + propertyDetails.SqftDisplay + '</div>' + 
-						'<div><b>Market Value</b>: $' + propertyDetails.MktvalDisplay + '</div>' + 
+						'<div style="text-transform: capitalize;"><b>Sold / Available </b>: ' + propertyDetails.SoldAvail + '</div>' + 
+						'<div style="text-transform: capitalize;"><b>Condition</b>: ' + propertyDetails.Condition + '</div>' + 
+						'<div style="text-transform: capitalize;"><b>Address</b>: ' + propertyDetails.Address + '</div>' + 
+						'<div style="text-transform: capitalize;"><b>Neighborhood</b>: ' + propertyDetails.Neighborhood + '</div>' + 
+						'<div style="text-transform: capitalize;"><b>Zip Code</b>: ' + propertyDetails.Zip + '</div>' + 
+						'<div style="text-transform: capitalize;"><b>Sqft</b>: ' + propertyDetails.SqftDisplay + '</div>' + 
+						'<div style="text-transform: capitalize;"><b>Market Value</b>: $' + propertyDetails.MktvalDisplay + '</div>' + 
 					'</div>'
 				)
 				.openOn(map);
@@ -160,11 +225,11 @@ function refreshProperties () {
 				|| (! isDefined(propertyData[i].Lng))) continue;
 			
 			var markerIcon = null;
-			switch (propertyData[i].PropClass.toString().trim().toLowerCase()) {
-				case 'commercial vacant': markerIcon = greenHouseIcon; break;
-				case 'commercial improved': markerIcon = blueHouseIcon; break;
-				case 'residential vacant': markerIcon = orangeHouseIcon; break;
-				case 'residential improved': markerIcon = redHouseIcon; break;
+			switch (propertyData[i].Condition.toString().trim().toLowerCase()) {
+				case 'good': markerIcon = greenHouseIcon; break;
+				case 'distressed': markerIcon = orangeHouseIcon; break;
+				case 'fair': markerIcon = redHouseIcon; break;
+				default: markerIcon = blueHouseIcon; break;
 			}
 			if (! markerIcon) continue;
 			

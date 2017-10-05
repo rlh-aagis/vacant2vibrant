@@ -44,12 +44,48 @@ service.getPropertyDetails = function (propertyId) {
 	return deferred;
 };
 
-service.getAreaStatistics = function (lat, lng, radius) {
+service.getAreaStatisticsByLocation = function (lat, lng, radius) {
 
-	var url = service.apiUrl + '?action=GetAreaStatistics';
+	var url = service.apiUrl + '?action=GetAreaStatisticsByLocation';
 	if (isDefined(lat)) url += '&Lat=' + lat;
 	if (isDefined(lng)) url += '&Lng=' + lng;
 	if (isDefined(radius)) url += '&Radius=' + radius;
+	url += '&key=' + service.apiKey;
+
+	var deferred = $.ajax({
+		url: url,
+		type: 'GET',
+		beforeSend: function (xhr) { },
+		success: function (data, textStatus, xhr) { },
+		complete: function (xhr, textStatus) { },
+		error: function (xhr, textStatus, errorThrown) { }
+	});
+	
+	return deferred;
+};
+
+service.getAreaStatisticsByNeighborhood = function (neighborhoodName) {
+
+	var url = service.apiUrl + '?action=GetAreaStatisticsByNeighborhood';
+	if (isDefined(neighborhoodName)) url += '&Neighborhood=' + neighborhoodName;
+	url += '&key=' + service.apiKey;
+
+	var deferred = $.ajax({
+		url: url,
+		type: 'GET',
+		beforeSend: function (xhr) { },
+		success: function (data, textStatus, xhr) { },
+		complete: function (xhr, textStatus) { },
+		error: function (xhr, textStatus, errorThrown) { }
+	});
+	
+	return deferred;
+};
+
+service.getAreaStatisticsByZipCode = function (zipCode) {
+
+	var url = service.apiUrl + '?action=GetAreaStatisticsByZipCode';
+	if (isDefined(zipCode)) url += '&Zip=' + zipCode;
 	url += '&key=' + service.apiKey;
 
 	var deferred = $.ajax({

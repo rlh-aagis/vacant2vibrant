@@ -17,7 +17,9 @@
 	{
 		// Get methods
 		case 'Autocomplete': autocomplete(); break;
-		case 'GetAreaStatistics': get_area_statistics(); break;
+		case 'GetAreaStatisticsByLocation': get_area_statistics_by_location(); break;
+		case 'GetAreaStatisticsByNeighborhood': get_area_statistics_by_neighborhood(); break;
+		case 'GetAreaStatisticsByZipCode': get_area_statistics_by_zip_code(); break;
 		case 'GetAutocompleteItemGeojson': get_autocomplete_item_geojson(); break;
 		case 'GetAutocompleteItemLatLng': get_autocomplete_item_lat_lng(); break;
 		case 'GetMapProperties': get_map_properties(); break;
@@ -43,14 +45,18 @@
 	// autocomplete - Returns autocomplete results for land bank properties based on a search string 
 	function autocomplete ($search = null, $max_results = null) {
 		
-		$search = (isset($search)) ? $search : (isset($_REQUEST['Search']) ? pg_escape_string($_REQUEST['Search']) : null);
 		$max_results = (isset($max_results)) ? $max_results : (isset($_REQUEST['MaxResults']) ? pg_escape_string($_REQUEST['MaxResults']) : 10);
+		$search = (isset($search)) ? $search : (isset($_REQUEST['Search']) ? pg_escape_string($_REQUEST['Search']) : null);
+		$search = strtoupper($search);
 		
 		$query = "
 			SELECT 
-				  gid AS Gid
-				, name AS Name
-			FROM v2vtypeahead WHERE name ILIKE lower('%$search%')
+				  TA.gid AS Gid
+				, TA.name AS Name
+				, TA.category AS Category
+			FROM v2vtypeahead TA 
+			LEFT OUTER JOIN landbankprops LBP ON TA.gid = LBP.gid
+			WHERE name ILIKE '%$search%'
 			ORDER BY Name 
 			LIMIT 10
 		";
@@ -65,6 +71,7 @@
 			$area_stats[] = array(
 				  'Gid' => $row[0]
 				, 'Name' => $row[1]
+				, 'Category' => $row[2]
 			);
 		}
 		
@@ -111,7 +118,10 @@
 		
 		$query = "
 			SELECT 
-				ST_AsGeoJSON(geom) AS GeoJSON
+				  category
+				, ST_Y(ST_Centroid(geom)) AS CenterLat
+				, ST_X(ST_Centroid(geom)) AS CenterLng	  
+				, ST_AsGeoJSON(geom) AS GeoJSON
 			FROM v2vtypeahead WHERE gid = $gid
 		";
 		
@@ -123,7 +133,10 @@
 		
 		while ($row = pg_fetch_row($result)) {
 			$autocomplete_item_geojson = array(
-				'GeoJSON' => $row[0]
+				'Category' => $row[0],
+				'CenterLat' => $row[1],
+				'CenterLng' => $row[2],
+				'GeoJSON' => $row[3]
 			);
 		}
 		
@@ -132,8 +145,8 @@
 		echo json_encode($autocomplete_item_geojson);
 	}
 	
-	// get_area_statistics - Gathers a number of statistics over a specified radius from a center point
-	function get_area_statistics ($lat = null, $lng = null, $radius_miles = null) {
+	// get_area_statistics_by_location - Gathers a number of statistics over a specified radius from a center point
+	function get_area_statistics_by_location ($lat = null, $lng = null, $radius_miles = null) {
 		
 		$lat = (isset($lat)) ? $lat : (isset($_REQUEST['Lat']) ? pg_escape_string($_REQUEST['Lat']) : null);
 		$lng = (isset($lng)) ? $lng : (isset($_REQUEST['Lng']) ? pg_escape_string($_REQUEST['Lng']) : null);
@@ -171,6 +184,85 @@
 		echo json_encode($area_stats);	
 	}
 	
+	// get_area_statistics_by_neighborhood - Gathers a number of statistics from a neighborhood area
+	function get_area_statistics_by_neighborhood ($neighborhood = null) {
+		
+		$neighborhood = (isset($neighborhood)) ? $neighborhood : (isset($_REQUEST['Neighborhood']) ? pg_escape_string($_REQUEST['Neighborhood']) : null);
+
+		$query = "
+			SELECT 
+				  ROUND(AVG(CAST(ABSSHNUM AS INT)), 0) AS AbsenteeOwnerShares
+				, ROUND(AVG(CAST(Visible AS INT)), 0) AS StreetVisible311Calls
+				, ROUND(AVG(CAST(PVVIS AS INT)), 0) AS StreetVisiblePropertyViolations
+				, ROUND(AVG(CAST(CRPERSON AS INT)), 0) AS CrimesAgainstPersons
+				, ROUND(AVG(CAST(CRPROP AS INT)), 0) AS CrimesAgainstProperty
+				, ROUND(AVG(CAST(ADD1f AS INT)), 0) AS SingleFamilyBPAdditions 
+			FROM public.v2vneighborhood 
+			WHERE (neighshape ILIKE '$neighborhood') 
+			LIMIT 1 
+		";
+		
+		$conn = get_postgresql_db_connection('postgres');
+		
+		$result = pg_query($conn, $query) 
+			or die ('Error: ' + pg_last_error($conn) + '\n');
+		$area_stats = null;
+		
+		$row = pg_fetch_row($result);
+		$area_stats = array(
+			  'AbsenteeOwnerShares' => $row[0]
+			, 'StreetVisible311Calls' => $row[1]
+			, 'StreetVisiblePropertyViolations' => $row[2]
+			, 'CrimesAgainstPersons' => $row[3]
+			, 'CrimesAgainstProperty' => $row[4]
+			, 'SingleFamilyBPAdditions' => $row[5]
+		);
+		
+		pg_close($conn);
+		
+		echo json_encode($area_stats);	
+	}
+	
+	// get_area_statistics_by_zip_code - Gathers a number of statistics from a zip code area
+	function get_area_statistics_by_zip_code ($zip_code = null) {
+		
+		$zip_code = (isset($zip_code)) ? $zip_code : (isset($_REQUEST['Zip']) ? pg_escape_string($_REQUEST['Zip']) : null);
+		$zip_code = preg_replace("/[^0-9\.\-]/", "", $zip_code);
+		
+		$query = "
+			SELECT 
+				  ROUND(AVG(CAST(ABSSHNUM AS INT)), 0) AS AbsenteeOwnerShares
+				, ROUND(AVG(CAST(Visible AS INT)), 0) AS StreetVisible311Calls
+				, ROUND(AVG(CAST(PVVIS AS INT)), 0) AS StreetVisiblePropertyViolations
+				, ROUND(AVG(CAST(CRPERSON AS INT)), 0) AS CrimesAgainstPersons
+				, ROUND(AVG(CAST(CRPROP AS INT)), 0) AS CrimesAgainstProperty
+				, ROUND(AVG(CAST(ADD1f AS INT)), 0) AS SingleFamilyBPAdditions 
+			FROM public.v2vzipcode 
+			WHERE (zipcode ILIKE '$zip_code')
+			LIMIT 1 
+		";
+		
+		$conn = get_postgresql_db_connection('postgres');
+		
+		$result = pg_query($conn, $query) 
+			or die ('Error: ' + pg_last_error($conn) + '\n');
+		$area_stats = null;
+		
+		$row = pg_fetch_row($result);
+		$area_stats = array(
+			  'AbsenteeOwnerShares' => $row[0]
+			, 'StreetVisible311Calls' => $row[1]
+			, 'StreetVisiblePropertyViolations' => $row[2]
+			, 'CrimesAgainstPersons' => $row[3]
+			, 'CrimesAgainstProperty' => $row[4]
+			, 'SingleFamilyBPAdditions' => $row[5]
+		);
+	
+		pg_close($conn);
+		
+		echo json_encode($area_stats);	
+	}
+	
 	// get_properties - Gets map display property
 	function get_map_properties () {
 		
@@ -179,13 +271,9 @@
 				  gid
 				, lat
 				, lon
-				, propclass
+				, sold_avail
+				, condition
 			FROM public.landbankprops
-			WHERE (1 = 1)
-			AND ((propclass ILIKE '%commercial improved%') OR (propclass ILIKE '%commercial vacant%')
-			 OR (propclass ILIKE '%residential improved%') OR (propclass ILIKE '%residential vacant%'))
-			ORDER BY zoned
-			LIMIT 1500
 		";
 		
 		$conn = get_postgresql_db_connection('postgres');
@@ -199,7 +287,8 @@
 				  'PropertyId' => $row[0]
 				, 'Lat' => 	$row[1]
 				, 'Lng' => 	$row[2]
-				, 'PropClass' => $row[3]
+				, 'SolAvail' => $row[3]
+				, 'Condition' => $row[4]
 			);
 		}
 		
@@ -208,8 +297,65 @@
 		echo json_encode($properties);	
 	}
 	
-	// get_property_detail - Gets all relevant info for a single property
+	// get_property_details - Gets all relevant info for a single property
 	function get_property_details ($propertyId = null) {
+
+		$propertyId = (isset($propertyId)) ? $propertyId : (isset($_REQUEST['PropertyId']) ? pg_escape_string($_REQUEST['PropertyId']) : null);
+	
+		$query = "
+			SELECT
+				  gid
+				, recordid
+				, address
+				, apn
+				, neigh
+				, zip
+				, yearacq
+				, yearsold
+				, propclass
+				, sold_avail
+				, condition
+				, mktval
+				, sqft
+				, lat
+				, lon
+			FROM public.landbankprops
+			WHERE gid = $propertyId;
+		";
+			
+		$conn = get_postgresql_db_connection('postgres');
+		
+		$result = pg_query($conn, $query) 
+			or die ('Error: ' + pg_last_error($conn) + '\n');
+
+		$row = pg_fetch_row($result);
+		$propertyDetails = array(
+			  'Gid' => $row[0]
+			, 'Recordid' => $row[1]
+			, 'Address' => $row[2]
+			, 'APN' => $row[3]
+			, 'Neighborhood' => $row[4]
+			, 'Zip' => $row[5]
+			, 'YearAcq' => $row[6]
+			, 'YearsOld' => $row[7]
+			, 'Propclass' => $row[8]
+			, 'SoldAvail' => ucwords(strtolower($row[9]))
+			, 'Condition' => ucwords(strtolower($row[10]))
+			, 'Mktval' => $row[11]
+			, 'MktvalDisplay' => number_format($row[11], 2, '.', ',')
+			, 'Sqft' => $row[12]
+			, 'SqftDisplay' => number_format($row[12], 2, '.', ',')
+			, 'Lat' => $row[13]
+			, 'Lon' => $row[14]
+		);	
+		
+		pg_close($conn);
+		
+		echo json_encode($propertyDetails);	
+	}
+	
+	// get_full_property_detail - Gets all relevant info for a single property
+	function get_full_property_details ($propertyId = null) {
 
 		$propertyId = (isset($propertyId)) ? $propertyId : (isset($_REQUEST['PropertyId']) ? pg_escape_string($_REQUEST['PropertyId']) : null);
 	

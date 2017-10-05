@@ -7,7 +7,7 @@
 
 	<ul id="sidebar_menu" class="sidebar-nav">
 		<li class="sidebar-brand">
-			<a id="divSideBarMenuToggle" href="javascript:void(0);" onclick="refreshSidebar()"> 
+			<a id="divSideBarMenuToggle" href="javascript:void(0);" onclick="app.refreshSidebar()"> 
 				<span translate="area statistics" style="text-transform: capitalize;"> 
 					Area Statistics 
 				</span>
@@ -26,7 +26,7 @@
 				<div class="sidebar-item-label hide-overflow" translate="property count"> 
 					Property Count 
 				</div> 
-				<div id="aPropertyCount" class="sidebar-item-value"> 0 </div> 
+				<div id="txtPropertyCount" class="sidebar-item-value"> 0 </div> 
 			</a>
 		</li>
 		<li class="sidebar-item">
@@ -35,7 +35,7 @@
 				<div class="sidebar-item-label hide-overflow" translate="avg years old"> 
 					Avg Years Old 
 				</div> 
-				<div id="aAverageYearsOld" class="sidebar-item-value"> 0 </div> 
+				<div id="txtAverageYearsOld" class="sidebar-item-value"> 0 </div> 
 			</a>
 		</li>
 		<li class="sidebar-item">
@@ -44,7 +44,7 @@
 				<div class="sidebar-item-label hide-overflow"> 
 					Avg Year Acquired 
 				</div> 
-				<div id="aAverageYearAcquired" class="sidebar-item-value"> 0 </div> 
+				<div id="txtAverageYearAcquired" class="sidebar-item-value"> 0 </div> 
 			</a>
 		</li>
 		<li class="sidebar-item">
@@ -53,7 +53,7 @@
 				<div class="sidebar-item-label hide-overflow"> 
 					Avg Market Value 
 				</div>
-				<div id="aMarketValue" class="sidebar-item-value"> 0 </div> 
+				<div id="txtMarketValue" class="sidebar-item-value"> 0 </div> 
 			</a>
 		</li>
 		<li class="sidebar-item">
@@ -62,9 +62,65 @@
 				<div class="sidebar-item-label hide-overflow"> 
 					Avg Sqft 
 				</div> 
-				<div id="aSqft" class="sidebar-item-value"> 0 </div>
+				<div id="txtSqft" class="sidebar-item-value"> 0 </div>
 			</a>
 		</li>
+		
+		<li class="sidebar-item">
+			<a> 
+				<div class="sub_icon glyphicon glyphicon-stats"></div>
+				<div class="sidebar-item-label hide-overflow"> 
+					Absentee Owner Shares
+				</div> 
+				<div id="txtAbsenteeOwnerShares" class="sidebar-item-value"> 0 </div>
+			</a>
+		</li>
+		<li class="sidebar-item">
+			<a> 
+				<div class="sub_icon glyphicon glyphicon-stats"></div>
+				<div class="sidebar-item-label hide-overflow"> 
+					Visible 311 Calls
+				</div> 
+				<div id="txtStreetVisible311Calls" class="sidebar-item-value"> 0 </div>
+			</a>
+		</li>
+		<li class="sidebar-item">
+			<a> 
+				<div class="sub_icon glyphicon glyphicon-stats"></div>
+				<div class="sidebar-item-label hide-overflow"> 
+					Visible Property Violations
+				</div> 
+				<div id="txtStreetVisiblePropertyViolations" class="sidebar-item-value"> 0 </div>
+			</a>
+		</li>
+		<li class="sidebar-item">
+			<a> 
+				<div class="sub_icon glyphicon glyphicon-stats"></div>
+				<div class="sidebar-item-label hide-overflow"> 
+					Crimes Against Persons
+				</div> 
+				<div id="txtCrimesAgainstPersons" class="sidebar-item-value"> 0 </div>
+			</a>
+		</li>
+		<li class="sidebar-item">
+			<a>
+				<div class="sub_icon glyphicon glyphicon-stats"></div>
+				<div class="sidebar-item-label hide-overflow"> 
+					Crimes Against Property
+				</div>
+				<div id="txtCrimesAgainstProperty" class="sidebar-item-value"> 0 </div>
+			</a>
+		</li>
+		<li class="sidebar-item">
+			<a>
+				<div class="sub_icon glyphicon glyphicon-stats"></div>
+				<div class="sidebar-item-label hide-overflow"> 
+					Single Family BP Additions 
+				</div>
+				<div id="txtSingleFamilyBPAdditions" class="sidebar-item-value"> 0 </div>
+			</a>
+		</li>
+		
 	</ul>
 	<ul class="sidebar-nav sidebar-bottom">
 		<!-- <li><a>Link1<span class="sub_icon glyphicon glyphicon-link"></span></a></li> -->

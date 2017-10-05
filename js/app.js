@@ -1,7 +1,8 @@
 
 var app = {
 	languageData: null,
-	page: 'landing'
+	page: 'landing',
+	refreshSidebar: null
 };
 
 $(document).ready(function () {
@@ -45,49 +46,30 @@ function initSearch (searchElementId) {
 				response($.map(results, function (item) {
 					return {
 						value: item.Gid,
-						label: item.Name
+						label: item.Name,
+						category: item.Category
 					}
 				}));
 			});
 		},
 		select: function (event, ui) {
 			
+			if (app.page == 'landing') landingSearch();
+			
 			setTimeout(function () {
 				$('#' + searchElementId).val(ui.item.label);
 			}, 50);
+
+			userLocation.category = ui.item.category;
+			userLocation.label = ui.item.label;
 			
-			if (app.page == 'landing') {
-				
-				service.getAutocompleteItemLatLng(ui.item.value).then(function (results) {
-				
-					results = JSON.parse(results);
-					
-					// Set map starting location
-					if (isDefined(results) && isDefined(results.Lat) 
-						&& isDefined(results.Lng)) {
-						userLocation.lat = results.Lat;
-						userLocation.lng = results.Lng;
-					}
-					
-					landingSearch();
-				});
-				
-			} else if (app.page == 'map') {
-				
-				service.getAutocompleteItemGeojson(ui.item.value).then(function (results) {
-				
-					results = JSON.parse(results);
-				
-					var geojson = JSON.parse(results.GeoJSON);
-					var geojsonBounds = L.geoJson(geojson).getBounds();
-					map.fitBounds(geojsonBounds);
-					
-					setTimeout(function () {
-						var mapZoom = map.getZoom();
-						map.setZoom(mapZoom - 1);
-					}, 100);
-				});
-			}
+			searchMap(
+				ui.item.value,
+				userLocation.label,
+				userLocation.category,
+				null,
+				null
+			);
         }
 	});
 }
@@ -123,34 +105,98 @@ function topSearch () {
 	$('#txtTopSearch').autocomplete('search');
 }
 
-function refreshSidebar () {
+app.refreshSidebar = function (locationLabel, locationCategory) {
 	
-	$('#divAreaStatsSubheading').text('Within 0.25 Miles of (' + userLocation.lng + ', ' + userLocation.lat + ')');
+	if (! isDefined(locationLabel)) 
+		locationLabel = userLocation.label || 'address';
+	if (! isDefined(locationCategory)) 
+		locationCategory = userLocation.category || 'address';
+	
+	var areaStatsHeaderHTML = '';
+	switch (locationCategory) {
+		case 'address':
+			areaStatsHeaderHTML = 'Within 0.25 Miles of ' +
+				'(' + userLocation.lng + ', ' + userLocation.lat + ')';
+			break;
+		case 'nbrhd':
+			areaStatsHeaderHTML = locationLabel + ' Neighborhood';
+			break;
+		case 'zip':
+			areaStatsHeaderHTML = 'Zip ' + locationLabel;
+			break;
+	}
+	$('#divAreaStatsSubheading').html(areaStatsHeaderHTML);
+	
+	$('#divSidebarWrapper .sidebar-item').hide();
 	
 	$('#divSidebarWrapper .load-indicator').show();
 	
-	service.getAreaStatistics(userLocation.lat, userLocation.lng, userLocation.radiusMiles).then(function (results) {
-		
-		results = JSON.parse(results);
-		
-		// Property Count
-		$('#aPropertyCount').text(formatNumber(results.PropertyCount));
-		
-		// Average Years Old
-		$('#aAverageYearsOld').text(formatNumber(results.AverageYearsOld));
+	// Call area stats service method based on location category
+	switch (locationCategory) {
+		case 'address':
+			service.getAreaStatisticsByLocation(
+				userLocation.lat, 
+				userLocation.lng, 
+				userLocation.searchRadiusMiles).then(function (results) {
+					
+				results = JSON.parse(results);
+				
+				// Property Count
+				$('#txtPropertyCount').text(formatNumber(results.PropertyCount)).closest('.sidebar-item').fadeIn();
+				// Average Years Old
+				$('#txtAverageYearsOld').text(formatNumber(results.AverageYearsOld)).closest('.sidebar-item').fadeIn();
+				// Average Year Acquired
+				$('#txtAverageYearAcquired').text(formatNumber(results.AverageYearAcquired)).closest('.sidebar-item').fadeIn();
+				// Market Value
+				$('#txtMarketValue').text('$' + formatNumber(results.MarketValue)).closest('.sidebar-item').fadeIn();
+				// Sqft
+				$('#txtSqft').text(formatNumber(results.Sqft)).closest('.sidebar-item').fadeIn();
+				
+				$('#divSidebarWrapper .load-indicator').fadeOut();
+			});
+			break;
+		case 'nbrhd':
+			service.getAreaStatisticsByNeighborhood(locationLabel).then(function (results) {
+				results = JSON.parse(results);
+				
+				// Share of parcels owned by absentee owner number
+				$('#txtAbsenteeOwnerShares').text(formatNumber(results.AbsenteeOwnerShares)).closest('.sidebar-item').fadeIn();
+				// Number of 311 Calls Visible from Street
+				$('#txtStreetVisible311Calls').text(formatNumber(results.StreetVisible311Calls)).closest('.sidebar-item').fadeIn();
+				// Property Violations Visible from Street
+				$('#txtStreetVisiblePropertyViolations').text(formatNumber(results.StreetVisiblePropertyViolations)).closest('.sidebar-item').fadeIn();
+				// Crimes against persons Number
+				$('#txtCrimesAgainstPersons').text(formatNumber(results.CrimesAgainstPersons)).closest('.sidebar-item').fadeIn();
+				// Crimes against persons Number
+				$('#txtCrimesAgainstProperty').text(formatNumber(results.CrimesAgainstProperty)).closest('.sidebar-item').fadeIn();
+				// Single Family BP additions
+				$('#txtSingleFamilyBPAdditions').text(formatNumber(results.SingleFamilyBPAdditions)).closest('.sidebar-item').fadeIn();
 
-		// Average Year Acquired
-		$('#aAverageYearAcquired').text(formatNumber(results.AverageYearAcquired));
+				$('#divSidebarWrapper .load-indicator').fadeOut();
+			});
+			break;
+		case 'zip':
+			service.getAreaStatisticsByZipCode(locationLabel).then(function (results) {
+				results = JSON.parse(results);
+				
+				// Share of parcels owned by absentee owner number
+				$('#txtAbsenteeOwnerShares').text(formatNumber(results.AbsenteeOwnerShares)).closest('.sidebar-item').fadeIn();
+				// Number of 311 Calls Visible from Street
+				$('#txtStreetVisible311Calls').text(formatNumber(results.StreetVisible311Calls)).closest('.sidebar-item').fadeIn();
+				// Property Violations Visible from Street
+				$('#txtStreetVisiblePropertyViolations').text(formatNumber(results.StreetVisiblePropertyViolations)).closest('.sidebar-item').fadeIn();
+				// Crimes against persons Number
+				$('#txtCrimesAgainstPersons').text(formatNumber(results.CrimesAgainstPersons)).closest('.sidebar-item').fadeIn();
+				// Crimes against persons Number
+				$('#txtCrimesAgainstProperty').text(formatNumber(results.CrimesAgainstProperty)).closest('.sidebar-item').fadeIn();
+				// Single Family BP additions
+				$('#txtSingleFamilyBPAdditions').text(formatNumber(results.SingleFamilyBPAdditions)).closest('.sidebar-item').fadeIn();
 
-		// Market Value
-		$('#aMarketValue').text('$' + formatNumber(results.MarketValue));
-
-		// Sqft
-		$('#aSqft').text(formatNumber(results.Sqft));
-		
-		$('#divSidebarWrapper .load-indicator').fadeOut();
-	});
-}
+				$('#divSidebarWrapper .load-indicator').fadeOut();
+			});
+			break;
+	}
+};
 
 function setLanguage (languageCode) {
 	
@@ -181,5 +227,5 @@ function setLanguage (languageCode) {
 			if (isDefined(translation)) $(this).attr('placeholder', translation);
 		});
 	});
-	
 }
+
