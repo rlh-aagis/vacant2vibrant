@@ -198,15 +198,44 @@ function refreshProperties () {
 			var popup = L.popup()
 				.setLatLng(e.latlng)
 				.setContent(
-					'<div style="border-bottom: 1px dotted #AAA; margin-bottom: 8px; font-size: 14px; font-weight: bold;"> Property Details </div>' +
-					'<div style="min-width: 200px;">' +
-						'<div style="text-transform: capitalize;"><b>Sold / Available </b>: ' + propertyDetails.SoldAvail + '</div>' + 
-						'<div style="text-transform: capitalize;"><b>Condition</b>: ' + propertyDetails.Condition + '</div>' + 
-						'<div style="text-transform: capitalize;"><b>Address</b>: ' + propertyDetails.Address + '</div>' + 
-						'<div style="text-transform: capitalize;"><b>Neighborhood</b>: ' + propertyDetails.Neighborhood + '</div>' + 
-						'<div style="text-transform: capitalize;"><b>Zip Code</b>: ' + propertyDetails.Zip + '</div>' + 
-						'<div style="text-transform: capitalize;"><b>Sqft</b>: ' + propertyDetails.SqftDisplay + '</div>' + 
-						'<div style="text-transform: capitalize;"><b>Market Value</b>: $' + propertyDetails.MktvalDisplay + '</div>' + 
+					'<div class="map-popup-title"> Property Details </div>' +
+					'<div class="map-popup-content">' +
+						'<div class="map-popup-item">' + 
+						'<div class="map-popup-item-label"> Record Id </div><div class="map-popup-item-value">' + (propertyDetails.RecordId || '-') + '</div>' + 
+						'</div>' +
+						'<div class="map-popup-item">' + 
+						'<div class="map-popup-item-label"> Address </div><div class="map-popup-item-value">' + (propertyDetails.Address || '-') + '</div>' + 
+						'</div>' +
+						'<div class="map-popup-item">' + 
+						'<div class="map-popup-item-label"> APN </div><div class="map-popup-item-value">' + (propertyDetails.APN || '-') + '</div>' + 
+						'</div>' +
+						'<div class="map-popup-item">' + 
+						'<div class="map-popup-item-label"> Neighborhood </div><div class="map-popup-item-value">' + (propertyDetails.Neighborhood || '-') + '</div>' + 
+						'</div>' +
+						'<div class="map-popup-item">' + 
+						'<div class="map-popup-item-label"> Zip Code </div><div class="map-popup-item-value">' + (propertyDetails.Zip || '-') + '</div>' + 
+						'</div>' +
+						'<div class="map-popup-item">' + 
+						'<div class="map-popup-item-label"> Year Acquired </div><div class="map-popup-item-value">' + (propertyDetails.YearAcq || '-') + '</div>' + 
+						'</div>' +
+						'<div class="map-popup-item">' + 
+						'<div class="map-popup-item-label"> Years Old </div><div class="map-popup-item-value">' + (propertyDetails.YearsOld || '-') + '</div>' + 
+						'</div>' +
+						'<div class="map-popup-item">' + 
+						'<div class="map-popup-item-label"> Property Type </div><div class="map-popup-item-value">' + (propertyDetails.PropClass || '-') + '</div>' + 
+						'</div>' +
+						'<div class="map-popup-item">' + 
+						'<div class="map-popup-item-label"> Sold / Available </div><div class="map-popup-item-value">' + (propertyDetails.SoldAvail || '-') + '</div>' + 
+						'</div>' +
+						'<div class="map-popup-item">' + 
+						'<div class="map-popup-item-label"> Condition </div><div class="map-popup-item-value">' + (propertyDetails.Condition || '-') + '</div>' + 
+						'</div>' +
+						'<div class="map-popup-item">' + 
+						'<div class="map-popup-item-label"> Market Value </div><div class="map-popup-item-value"> $' + (propertyDetails.MktvalDisplay || '-') + '</div>' + 
+						'</div>' +
+						'<div class="map-popup-item">' + 
+						'<div class="map-popup-item-label"> Sqft </div><div class="map-popup-item-value">' + (propertyDetails.SqftDisplay || '-') + '</div>' + 
+						'</div>' +
 					'</div>'
 				)
 				.openOn(map);

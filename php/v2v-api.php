@@ -331,14 +331,14 @@
 		$row = pg_fetch_row($result);
 		$propertyDetails = array(
 			  'Gid' => $row[0]
-			, 'Recordid' => $row[1]
+			, 'RecordId' => $row[1]
 			, 'Address' => $row[2]
 			, 'APN' => $row[3]
 			, 'Neighborhood' => $row[4]
 			, 'Zip' => $row[5]
 			, 'YearAcq' => $row[6]
 			, 'YearsOld' => $row[7]
-			, 'Propclass' => $row[8]
+			, 'PropClass' => $row[8]
 			, 'SoldAvail' => ucwords(strtolower($row[9]))
 			, 'Condition' => ucwords(strtolower($row[10]))
 			, 'Mktval' => $row[11]
