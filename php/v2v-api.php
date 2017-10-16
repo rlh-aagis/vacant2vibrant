@@ -305,7 +305,6 @@
 		$query = "
 			SELECT
 				  gid
-				, recordid
 				, address
 				, apn
 				, neigh
@@ -331,22 +330,21 @@
 		$row = pg_fetch_row($result);
 		$propertyDetails = array(
 			  'Gid' => $row[0]
-			, 'RecordId' => $row[1]
-			, 'Address' => $row[2]
-			, 'APN' => $row[3]
-			, 'Neighborhood' => $row[4]
-			, 'Zip' => $row[5]
-			, 'YearAcq' => $row[6]
-			, 'YearsOld' => $row[7]
-			, 'PropClass' => $row[8]
-			, 'SoldAvail' => ucwords(strtolower($row[9]))
-			, 'Condition' => ucwords(strtolower($row[10]))
-			, 'Mktval' => $row[11]
-			, 'MktvalDisplay' => number_format($row[11], 2, '.', ',')
-			, 'Sqft' => $row[12]
-			, 'SqftDisplay' => number_format($row[12], 2, '.', ',')
-			, 'Lat' => $row[13]
-			, 'Lon' => $row[14]
+			, 'Address' => $row[1]
+			, 'APN' => $row[2]
+			, 'Neighborhood' => $row[3]
+			, 'Zip' => $row[4]
+			, 'YearAcq' => $row[5]
+			, 'YearsOld' => $row[6]
+			, 'PropClass' => $row[7]
+			, 'SoldAvail' => ucwords(strtolower($row[8]))
+			, 'Condition' => ucwords(strtolower($row[9]))
+			, 'Mktval' => $row[10]
+			, 'MktvalDisplay' => number_format($row[10], 0, '.', ',')
+			, 'Sqft' => $row[11]
+			, 'SqftDisplay' => number_format($row[11], 0, '.', ',')
+			, 'Lat' => $row[12]
+			, 'Lon' => $row[13]
 		);	
 		
 		pg_close($conn);
@@ -442,9 +440,9 @@
 			, 'Potentuse' => $row[29]
 			, 'Mktvalyr' => $row[30]
 			, 'Mktval' => $row[31]
-			, 'MktvalDisplay' => number_format($row[31], 2, '.', ',')
+			, 'MktvalDisplay' => number_format($row[31], 0, '.', ',')
 			, 'Sqft' => $row[32]
-			, 'SqftDisplay' => number_format($row[32], 2, '.', ',')
+			, 'SqftDisplay' => number_format($row[32], 0, '.', ',')
 			, 'Yrforcls' => $row[33]
 			, 'Propcond' => $row[34]
 			, 'Geoid' => $row[35]

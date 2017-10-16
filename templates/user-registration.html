@@ -1,0 +1,83 @@
+
+<div id="divUserRegistrationModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title"> User Registration </h4>
+            </div>
+            <div class="modal-body">
+				<div class="row" style="margin: 0 0 24px 0;">
+					<div class="col-md-12">
+						After registering a new user, you will be able to access more
+						data points on each area searched and save your searches so
+						you are able to easily navigate back.
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						
+						<div class="control-group row">
+							<label class="control-label col-md-2" for="txtCreateUsername"> Username </label>
+							<div class="controls col-md-8">
+								<input type="text" id="txtCreateUsername"
+									placeholder="" class="form-control input-xlarge">
+								<p class="help-block"> Username can contain any letters or numbers, without spaces </p>
+							</div>
+						</div>
+
+						<div class="control-group row">
+							<label class="control-label col-md-2" for="txtCreateEmailAddress">E-mail</label>
+							<div class="controls col-md-8">
+								<input type="text" id="txtCreateEmailAddress"
+									placeholder="" class="form-control input-xlarge">
+								<p class="help-block"> Please provide your E-mail address </p>
+							</div>
+						</div>
+						
+						<div class="control-group row">
+							<label class="control-label col-md-2" for="txtCreatePassword"> Password </label>
+							<div class="controls col-md-8">
+								<input type="password" id="txtCreatePassword" 
+									placeholder="" class="form-control input-xlarge">
+								<p class="help-block"> Password should be at least 5 characters </p>
+							</div>
+						</div>
+
+						<div class="control-group row">
+							<label class="control-label col-md-2" for="txtCreateConfirmPassword"> Password (Confirm) </label>
+							<div class="controls col-md-8">
+								<input type="password" id="txtCreateConfirmPassword"
+										placeholder="" class="form-control input-xlarge">
+								<p class="help-block"> Please confirm password </p>
+							</div>
+						</div>
+
+						<div class="control-group row">
+							<label class="control-label col-md-2" for="txtCreateGender"> Gender </label>
+							<div class="controls col-md-8">
+								<input type="text" id="txtCreateGender"
+									placeholder="" class="form-control input-xlarge">
+								<p class="help-block"> Please provide your gender </p>
+							</div>
+						</div>
+						
+						<div class="control-group row">
+							<label class="control-label col-md-2" for="txtCreateZip"> Zip </label>
+							<div class="controls col-md-8">
+								<input type="text" id="txtCreateZip"
+									placeholder="" class="form-control input-xlarge">
+								<p class="help-block"> Please provide your zip code </p>
+							</div>
+						</div>
+
+					</div>
+				</div>
+            </div>
+            <div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal" style="float: left;"> Cancel </button>
+				<button class="btn btn-success" onclick="registerUser()"> Register </button>
+            </div>
+        </div>
+    </div>
+</div>

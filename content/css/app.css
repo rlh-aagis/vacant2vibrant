@@ -52,6 +52,16 @@ body > .container > div {
     transform: translate(-50%, -50%);
 }
 
+.link {
+	color: #33D;
+	cursor: pointer;
+}
+
+.link:hover {
+	color: #22B;
+}
+
+
 /* Credit to bootsnipp.com for the css for the color graph */
 .colorgraph {
   height: 5px;
@@ -105,11 +115,27 @@ body > .container > div {
 .leaflet-top.leaflet-left {
 	left: auto;
     right: 11px;
-	top: 124px;
+	top: 186px;
 }
 
 .leaflet-top.leaflet-right {
 	top: 60px;
+}
+
+.leaflet-control-layers {
+	background-color: rgba(255, 255, 255, 0.92) !important;
+	color: #333 !important;
+	display: block !important;
+	padding: 6px 10px 6px 6px !important;
+	position: relative !important;
+}
+
+.leaflet-control-layers .leaflet-control-layers-toggle {
+	display: none !important;
+}
+
+.leaflet-control-layers .leaflet-control-layers-list {
+	display: block !important;
 }
 
 .leaflet-popup-content-wrapper {
@@ -133,7 +159,7 @@ body > .container > div {
 
 .map-popup-item {
 	display: inline-block;
-	margin: 0 0 3px 0;
+	margin: 0 0 4px 0;
 	width: 190px;
 }
 
@@ -151,6 +177,75 @@ body > .container > div {
 	width: 180px;
 }
 
+.map-legend {
+	background-color: rgba(255, 255, 255, 0.65);
+	border: 2px solid rgba(0,0,0,0.2);
+	border-radius: 4px;
+	float: right;
+	margin: 0 10px 10px 0;
+	padding: 10px;
+	width: 180px;
+}
+
+.map-legend .map-legend-title {
+	font-weight: bold;
+	margin: 0 0 4px 0;
+}
+
+.map-legend .map-legend-row {
+	margin: 0 0 2px 0;
+}
+
+.map-legend .map-legend-row img {
+	display: inline-block;
+	height: 18px;
+	margin: 0 4px 0 0;
+	position: relative;
+	top: -2px;
+	width: 18px;
+}
+
+.map-legend .map-legend-row span { }
+
+.map-button {
+	background-color: rgba(255, 255, 255, 0.92);
+	border: 2px solid rgba(0,0,0,0.2);
+	border-radius: 3px;
+	clear: both;
+	color: #606060;
+	cursor: pointer;
+	font-size: 18px;
+	font-weight: normal;
+	height: 36px;
+	padding: 4px;
+	position: relative;
+	width: 36px;
+}
+
+.map-button:hover {
+	background-color: rgba(240, 240, 240, 0.92);
+}
+
+.map-button.map-back-zoom-button > i.glyphicon {
+	position: absolute;
+	top: 7px;
+}
+
+.map-button.map-back-zoom-button:before {
+	content: '\25C2';
+	margin: 0 0 0 -3px;
+}
+
+.leaflet-marker-icon.selected {
+	border: 2px dotted rgba(255, 255, 255, 0.8);
+	border-radius: 20px;
+    height: 34px !important;
+	padding: 4px;
+    width: 34px !important;
+}
+
+/* Navbar Styles */
+
 #divNavbar {
 	display: none;
     left: 0;
@@ -165,6 +260,14 @@ nav.navbar {
 	border-radius: 0;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
 	z-index: 10;
+}
+
+.navbar-nav.navbar-right {
+	width: 60%;
+}
+
+.navbar-nav.navbar-right > li {
+	float: right;
 }
 
 .navbar-brand {
@@ -194,6 +297,13 @@ nav.navbar li.active  > a {
 	color: #FFF !important;
 }
 
+.top-search-button {
+	background-color: #428BC7;
+	border-color: #CCC;
+	color: #FFF;
+	width: 55px;
+}
+
 /* Modal Styles - Begin */
 
 .modal-content {
@@ -204,7 +314,39 @@ nav.navbar li.active  > a {
 	opacity: 0.2 !important;
 }
 
+.disclaimer-modal .modal-header {
+	background-color: #428BC7;
+}
+
+.disclaimer-modal .modal-title {
+	color: #FFF;	
+}
+
+.error-modal .modal-header {
+	background-color: rgba(240, 20, 0, 0.8);
+}
+
+.error-modal .modal-title {
+	color: #FFF;	
+}
+
 /* Modal Styles - End */
+
+
+/* User Auth Modals - Begin */
+
+.control-label {
+	display: inline-block;
+	margin: 6px 10px 0 0;
+	vertical-align: top;
+}
+
+.control-label + .controls {
+	display: inline-block;
+	vertical-align: top;
+}
+
+/* User Auth Modals - End */
 
 
 /* Language Selector Styles - Start */
@@ -263,4 +405,6 @@ nav.navbar li.active  > a {
 }
 
 /* Language Selector Styles - End */
+
+
 

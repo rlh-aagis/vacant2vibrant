@@ -1,4 +1,4 @@
-.row{
+.row {
     margin-left:0px;
     margin-right:0px;
 }
@@ -82,7 +82,7 @@
 }
 
 .sidebar-nav li {
-  line-height: 40px;
+  line-height: 32px;
   text-indent: 20px;
 }
 

@@ -1,5 +1,6 @@
 
 var app = {
+	autocompleteItems: [],
 	languageData: null,
 	page: 'landing',
 	refreshSidebar: null
@@ -7,12 +8,9 @@ var app = {
 
 $(document).ready(function () {
 
-	// Show disclaimer on site login
-	// $('#divModal1').load('templates/disclaimer.html', function( response, status, xhr ) { 
-		// $('#divDisclaimer').modal('show');
-	// });
-	
 	bindEvents();
+	
+	bindLandingModals();
 	
 	$('#divLandingPage').load('templates/landing.html', function( response, status, xhr ) { 
 		
@@ -31,8 +29,44 @@ function bindEvents () {
     });
 }
 
+function bindLandingModals () {
+	
+	if (app.page != 'landing') return;
+	
+	$('<div id="divMessageModalContainer"></div>').load('templates/message-modal.html', function (response, status, xhr) { 
+	
+	}).appendTo('body > .container');
+	$('<div id="divDisclaimerContainer"></div>').load('templates/disclaimer.html', function (response, status, xhr) { 
+	
+	}).appendTo('body > .container');
+}
+
+function bindMapModals () {
+	
+	if (app.page == 'landing') return;
+	
+	$('<div id="divUserLoginModalContainer"></div>').load('templates/user-login.html', function (response, status, xhr) { 
+	
+	}).appendTo('body > .container');
+	$('<div id="divUserProfileModalContainer"></div>').load('templates/user-profile.html', function (response, status, xhr) { 
+	
+	}).appendTo('body > .container');
+	$('<div id="divUserRegModalContainer"></div>').load('templates/user-registration.html', function (response, status, xhr) { 
+	
+	}).appendTo('body > .container');
+}
+
 function initSearch (searchElementId) {
 
+	var _search = function (autocompleteItem) {
+		
+		if (app.page == 'landing') {
+			landingSearch(autocompleteItem);
+		} else {
+			search(autocompleteItem);
+		}
+	};
+	
 	// Initialize jQuery autocomplete on top search box
 	$('#' + searchElementId).autocomplete({
 		source: function (request, response) {
@@ -41,7 +75,7 @@ function initSearch (searchElementId) {
 			
 			service.autocomplete(search, 10).then(function (results) {
 				
-				results = JSON.parse(results);
+				results = app.autocompleteItems = JSON.parse(results);
 				
 				response($.map(results, function (item) {
 					return {
@@ -50,31 +84,42 @@ function initSearch (searchElementId) {
 						category: item.Category
 					}
 				}));
+				
+				$('#btnLandingSearch').toggleClass('disabled', (results.length == 0));
 			});
 		},
 		select: function (event, ui) {
 			
-			if (app.page == 'landing') landingSearch();
-			
+			// To prevent displaying value id
 			setTimeout(function () {
 				$('#' + searchElementId).val(ui.item.label);
-			}, 50);
-
-			userLocation.category = ui.item.category;
-			userLocation.label = ui.item.label;
+			}, 25);
 			
-			searchMap(
-				ui.item.value,
-				userLocation.label,
-				userLocation.category,
-				null,
-				null
-			);
+			_search(ui.item);
         }
+	});
+	
+	$('#' + searchElementId).keyup(function (e) {
+		// On enter key, search
+		if (e.keyCode == 13) _search();
 	});
 }
 
-function landingSearch () {
+function landingSearch (autocompleteItem) {
+	
+	if ((! isDefined(app.autocompleteItems)) || (app.autocompleteItems.length == 0)) {
+		
+		$('#divMessageModal').addClass('error-modal');
+		$('#divMessageModal .modal-title').html('Search Not Found');
+		$('#divMessageModal .modal-body').html('Search query not found; please check spelling or go to map view.');
+		$('#divMessageModal').modal('show');
+	} else {
+		$('#divDisclaimerModal').data('AutocompleteItem', autocompleteItem)
+		$('#divDisclaimerModal').modal('show');
+	}
+}
+
+function performLandingSearch(autocompleteItem) {
 	
 	app.page = 'map';
 	
@@ -95,14 +140,48 @@ function landingSearch () {
 		initSearch('txtTopSearch');
 	}, 300);
 	
+	setTimeout(function () {
+		bindMapModals();
+	}, 250);
+	
 	$('#divMap').fadeIn();
 	
 	initMap('divMap');
+	
+	search(autocompleteItem);
 }
 
-function topSearch () {
+function search (autocompleteItem) {
 	
-	$('#txtTopSearch').autocomplete('search');
+	if ((! isDefined(autocompleteItem)) && (app.autocompleteItems.length > 0)) {
+		autocompleteItem = {
+			value: app.autocompleteItems[0].Gid,
+			label: app.autocompleteItems[0].Name,
+			category: app.autocompleteItems[0].Category
+		};
+	}
+	
+	if (! isDefined(autocompleteItem)) return;
+	
+	userLocation.category = autocompleteItem.category;
+	userLocation.label = autocompleteItem.label;
+	
+	searchMap(
+		autocompleteItem.value,
+		userLocation.label,
+		userLocation.category,
+		null,
+		null
+	);
+	
+	setTimeout(function () {
+		$('#txtTopSearch').val(autocompleteItem.label);
+	}, 50);
+}
+
+function clearSearch () {
+	$('#txtTopSearch').val('');
+	clearMap();
 }
 
 app.refreshSidebar = function (locationLabel, locationCategory) {
@@ -229,3 +308,20 @@ function setLanguage (languageCode) {
 	});
 }
 
+function registerUser () {
+
+	var createUserViewModel = {
+		CreateUsername: $('#txtCreateUsername').val(),
+		CreatePassword: $('#txtCreatePassword').val(),
+		CreateRepeatPassword: $('#txtCreateConfirmPassword').val(),
+		CreateEmailAddress: $('#txtCreateEmailAddress').val(),
+		CreateGender: $('#txtCreateGender').val(),
+		CreateZip: $('#txtCreateZip').val()
+	};
+
+	authService.createUser(createUserViewModel).then(function (results) {
+		// Success
+	});
+	
+	$('#divUserRegistrationModal').modal('hide');
+}

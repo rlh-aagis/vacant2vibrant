@@ -19,25 +19,26 @@
 			</ul>
 			
 			<ul class="nav navbar-nav navbar-right">
-				<li>
-					<form class="navbar-form" role="search">
+
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown" 
+						role="button" aria-haspopup="true" aria-expanded="false">
+						<i class="glyphicon glyphicon-user"></i>
+						<span translate="user" style="text-transform: capitalize;"> Guest </span>
+						<span class="caret"></span>
+					</a>
 					
-						<div class="input-group">
-							<input type="text" id="txtTopSearch" class="form-control" 
-								translate-placeholder="search" placeholder="Search" name="q">
-							<div class="input-group-btn">
-								<button class="btn btn-default" type="button" onclick="topSearch()">
-									<i class="glyphicon glyphicon-search"></i>
-								</button>
-							</div>
-						</div>
-					</form>
+					<ul class="dropdown-menu">
+						<li><a href="#">My Account</a></li>
+						<li role="separator" class="divider"></li>
+						<li><a href="javacript:void(0);"> Log Out </a></li>
+					</ul>
 				</li>
 				
 				<li class="language-menu">
 					<div class="language-data" style="display: none;"></div>
 					<a href="javascript:void(0);" class="language-label"> 
-						<span translate="language:"> Language: </span> 
+						<!-- <span translate="language:"> Language: </span>  -->
 						<span class="language-code"> ENG </span>
 					</a>
 					<div class="language-selector">
@@ -56,20 +57,25 @@
 					</div>
 				</li>
 				
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown" 
-						role="button" aria-haspopup="true" aria-expanded="false">
-						<i class="glyphicon glyphicon-user"></i>
-						<span translate="user" style="text-transform: capitalize;"> Guest </span>
-						<span class="caret"></span>
-					</a>
-					
-					<ul class="dropdown-menu">
-						<li><a href="#">My Account</a></li>
-						<li role="separator" class="divider"></li>
-						<li><a href="javacript:void(0);"> Log Out </a></li>
-					</ul>
+				<li style="width: 50%;">
+					<form class="navbar-form" role="search">
+						<div class="input-group" style="width: 100%;">
+							<input type="text" id="txtTopSearch" class="form-control" 
+								translate-placeholder="search" placeholder="Search" name="q">
+							<div class="input-group-btn">
+								<button class="btn btn-default" type="button" 
+									style="padding: 6px 10px;" onclick="clearSearch()">
+									<i class="glyphicon glyphicon-erase"></i>
+								</button>
+								<button class="btn btn-default top-search-button" type="button" 
+									onclick="search()">
+									<i class="glyphicon glyphicon-search"></i>
+								</button>
+							</div>
+						</div>
+					</form>
 				</li>
+				
 			</ul>
 		</div>
 	</div>
