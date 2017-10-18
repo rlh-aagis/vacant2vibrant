@@ -4,18 +4,47 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title"> Login to Vacant to Vibrant </h4>
+                <h4 class="modal-title"> Login </h4>
             </div>
             <div class="modal-body">
-				<p><input type="text" class="form-control span3" name="eid" id="email" placeholder="Email"></p>
-				<p><input type="password" class="form-control span3" name="passwd" placeholder="Password"></p>
-				<p><button type="submit" class="btn btn-primary"> Sign in </button>
-					<a href="#">Forgot Password?</a>
-				</p>
+				<div class="row" style="margin: 0 0 24px 0;">
+					<div class="col-md-12"></div>
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						
+						<div class="control-group row">
+							<label class="control-label col-md-2" for="txtLoginEmailAddress" style="width: 124px;"> Email Address </label>
+							<div class="controls col-md-8">
+								<input type="text" id="txtLoginEmailAddress"
+									placeholder="" class="form-control input-xlarge">
+								<p class="help-block"> Please enter your login email address </p>
+							</div>
+						</div>
+
+						<div class="control-group row">
+							<label class="control-label col-md-2" for="txtLoginPassword" style="width: 124px;"> Password </label>
+							<div class="controls col-md-8">
+								<input type="password" id="txtLoginPassword"
+										placeholder="" class="form-control input-xlarge">
+								<p class="help-block"> Please enter your password </p>
+							</div>
+						</div>
+						
+						<div class="control-group row error-row">
+							<label class="control-label col-md-2" for="txtLoginPassword"></label>
+							<div class="controls col-md-8">
+								<div class="error-message"></div>
+							</div>
+						</div>
+						
+					</div>
+				</div>
             </div>
             <div class="modal-footer">
-				New To Vacant to Vibrant ?
-				<a href="#" class="btn btn-primary"> Register </a>
+				<button type="button" class="btn btn-default" data-dismiss="modal" style="float: left;"> Cancel </button>
+				<div data-toggle="modal" data-target="#divUserRegistrationModal" class="link" style="display: inline-block; line-height: 14px; margin: 0 20px 0 0;"> Register New User </div>
+				<button class="btn btn-success" onclick="loginUser()"> Login </button>
             </div>
         </div>
     </div>

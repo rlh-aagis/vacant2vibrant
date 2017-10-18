@@ -10,6 +10,9 @@
 			<a class="navbar-brand" href="#" style="margin-left: 8px;"> 
 				Vacant to <b>Vibrant</b> 
 			</a>
+			<div class="mobile-nav-button" onclick="toggleMapLegend()">
+				<i class="glyphicon glyphicon-list-alt"></i>
+			</div>
 		</div>
 		<div id="navbar" class="navbar-collapse collapse">
 			
@@ -20,18 +23,26 @@
 			
 			<ul class="nav navbar-nav navbar-right">
 
-				<li class="dropdown">
+				<li class="menu-register-user">
+					<a href="#" data-toggle="modal" data-target="#divUserRegistrationModal"> Register </a>
+				</li>
+				
+				<li class="menu-login-user">
+					<a href="#" data-toggle="modal" data-target="#divUserLoginModal"> Login </a>
+				</li>
+				
+				<li class="dropdown menu-user">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown" 
 						role="button" aria-haspopup="true" aria-expanded="false">
 						<i class="glyphicon glyphicon-user"></i>
-						<span translate="user" style="text-transform: capitalize;"> Guest </span>
+						<span class="menu-username" translate="user"> Guest </span>
 						<span class="caret"></span>
 					</a>
 					
 					<ul class="dropdown-menu">
-						<li><a href="#">My Account</a></li>
+						<li><a href="#" onclick="openUserDetails()">My Account</a></li>
 						<li role="separator" class="divider"></li>
-						<li><a href="javacript:void(0);"> Log Out </a></li>
+						<li><a href="#" onclick="logoutUser()"> Log Out </a></li>
 					</ul>
 				</li>
 				
@@ -77,6 +88,7 @@
 				</li>
 				
 			</ul>
+			
 		</div>
 	</div>
 </nav>

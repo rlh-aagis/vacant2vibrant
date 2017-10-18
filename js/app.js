@@ -2,6 +2,7 @@
 var app = {
 	autocompleteItems: [],
 	languageData: null,
+	loggedIn: false,
 	page: 'landing',
 	refreshSidebar: null
 };
@@ -52,6 +53,12 @@ function bindMapModals () {
 	
 	}).appendTo('body > .container');
 	$('<div id="divUserRegModalContainer"></div>').load('templates/user-registration.html', function (response, status, xhr) { 
+	
+	}).appendTo('body > .container');
+	$('<div id="divUserActivationModalContainer"></div>').load('templates/user-activation.html', function (response, status, xhr) { 
+	
+	}).appendTo('body > .container');
+	$('<div id="divUserDetailsModalContainer"></div>').load('templates/user-details.html', function (response, status, xhr) { 
 	
 	}).appendTo('body > .container');
 }
@@ -227,9 +234,11 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 				// Average Year Acquired
 				$('#txtAverageYearAcquired').text(formatNumber(results.AverageYearAcquired)).closest('.sidebar-item').fadeIn();
 				// Market Value
-				$('#txtMarketValue').text('$' + formatNumber(results.MarketValue)).closest('.sidebar-item').fadeIn();
+				if (isDefined(results.MarketValue))
+					$('#txtMarketValue').text('$' + formatNumber(results.MarketValue)).closest('.sidebar-item').fadeIn();
 				// Sqft
-				$('#txtSqft').text(formatNumber(results.Sqft)).closest('.sidebar-item').fadeIn();
+				if (isDefined(results.MarketValue))
+					$('#txtSqft').text(formatNumber(results.Sqft)).closest('.sidebar-item').fadeIn();
 				
 				$('#divSidebarWrapper .load-indicator').fadeOut();
 			});
@@ -318,10 +327,106 @@ function registerUser () {
 		CreateGender: $('#txtCreateGender').val(),
 		CreateZip: $('#txtCreateZip').val()
 	};
+	
+	// Clear fields
+	$('#txtCreateUsername').val('');
+	$('#txtCreatePassword').val('');
+	$('#txtCreateConfirmPassword').val('');
+	$('#txtCreateEmailAddress').val('');
+	$('#txtCreateGender').val('');
+	$('#txtCreateZip').val('');
 
 	authService.createUser(createUserViewModel).then(function (results) {
 		// Success
 	});
 	
 	$('#divUserRegistrationModal').modal('hide');
+	
+	setTimeout(function () {
+		$('#divUserActivationModal').modal('show');
+	}, 300);
 }
+
+function activateUser () {
+	
+	var activateUserViewModel = {
+		ActivationKey: $('#txtActivationKey').val()
+	};
+	
+	// Clear fields
+	$('#txtActivationKey').val('');
+
+	authService.activateUser(activateUserViewModel).then(function (results) {
+		// Success
+	});
+	
+	$('#divUserActivationModal').modal('hide');
+	$('#divUserRegistrationModal').modal('hide');
+}
+
+function loginUser () {
+	
+	var loginUserViewModel = {
+		LoginEmailAddress: $('#txtLoginEmailAddress').val(),
+		LoginPassword: $('#txtLoginPassword').val()
+	};
+	
+	// Clear fields
+	$('#txtLoginEmailAddress').val('');
+	$('#txtLoginPassword').val('');
+
+	authService.loginUser(loginUserViewModel).then(function (results) {
+		// Success
+		$('#divUserLoginModal').modal('hide');
+		$('.menu-register-user, .menu-login-user').hide();
+		$('.menu-user .menu-username').html(loginUserViewModel.LoginEmailAddress);
+		$('.menu-user').addClass('visible');
+		
+		$('.sidebar-register-or-login').hide();
+		
+		app.loggedIn = true;
+	
+		app.refreshSidebar();
+		
+	}, function (error) {
+		
+		$('#divUserLoginModal .error-message').html(error.responseText || 'Error authenticating user and password');
+		$('#divUserLoginModal .error-row').fadeIn();
+	});
+}
+
+function logoutUser () {
+	
+	authService.logoutUser().then(function (results) { 
+		app.loggedIn = false;
+		
+		$('.menu-register-user, .menu-login-user').show();
+		$('.menu-user').removeClass('visible');
+		
+		app.refreshSidebar();
+		
+		$('.sidebar-register-or-login').show();
+	});
+}
+
+function openUserDetails () {
+	
+	authService.getUserDetails().then(function (results) {
+
+		if (! isDefined(results)) return;
+		
+		$('#divUserDetailsModal #txtUserEmailAddress').val(results.Id);
+		$('#divUserDetailsModal #txtUserActiveStatus').val(results.Email);
+		$('#divUserDetailsModal #txtUserActiveStatus').val(results.IsActive);
+		$('#divUserDetailsModal #txtUserGender').val(results.Gender);
+		$('#divUserDetailsModal #txtUserZip').val(results.Zip);
+	
+		$('#divUserDetailsModal').modal('show');
+	});
+}
+
+function toggleMapLegend () {
+	
+	$('.map-legend').toggleClass('visible');
+}
+

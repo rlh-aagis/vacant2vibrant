@@ -355,10 +355,13 @@ function refreshProperties () {
 			$('#txtTopSearch').val(propertyDetails.Address || '');
 			
 			// Set county parcel link
+			var countyParcelLabel = 'View Parcel Information';
 			var countyParcelLink = 'https://ascendweb.jacksongov.org';
 			if (propertyDetails.APN.length == 19) {
 				countyParcelLink = 'http://maps.jacksongov.org/PropertyReport/PropertyReport.cfm?pid=';
-				countyParcelLink += propertyDetails.APN.replace(/(\D{2})(\d{2})(\d{3})(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})(\d{3})$/, "$2-$3-$4-$5-$6-$7-$8-$9");
+				var pid = propertyDetails.APN.replace(/(\D{2})(\d{2})(\d{3})(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})(\d{3})$/, "$2-$3-$4-$5-$6-$7-$8-$9");
+				countyParcelLink += pid;
+				countyParcelLabel = pid;
 			}
 	
 			var popup = L.popup()
@@ -390,7 +393,7 @@ function refreshProperties () {
 						
 						'<div class="map-popup-item">' + 
 						'<div class="map-popup-item-label"> County Parcel Number </div><div class="map-popup-item-value">' +
-							'<a href="' + countyParcelLink + '" target="_blank"> View Parcel Information </a>' +
+							'<a href="' + countyParcelLink + '" target="_blank"> ' + countyParcelLabel + ' </a>' +
 						'</div>' + 
 						'</div>' +
 						'<div class="map-popup-item">' + 

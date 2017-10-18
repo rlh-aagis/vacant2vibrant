@@ -1,0 +1,37 @@
+
+<div id="divUserActivationModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title"> User Activation </h4>
+            </div>
+            <div class="modal-body">
+				<div class="row" style="margin: 0 0 24px 0;">
+					<div class="col-md-12">
+						Please enter the activation code you received in your email after registering a new user.
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						
+						<div class="control-group row">
+							<label class="control-label col-md-3" for="txtActivationKey" 
+								style="width: 136px;"> Activation Key </label>
+							<div class="controls col-md-7">
+								<input type="text" id="txtActivationKey"
+									placeholder="Activation Key" class="form-control input-xlarge" />
+								<p class="help-block"> Enter your activation key </p>
+							</div>
+						</div>
+					</div>
+				</div>
+            </div>
+            <div class="modal-footer">
+				<button type="button" class="btn btn-default" 
+						data-dismiss="modal" style="float: left;"> Cancel </button>
+				<button class="btn btn-success" onclick="activateUser()"> Activate </button>
+            </div>
+        </div>
+    </div>
+</div>

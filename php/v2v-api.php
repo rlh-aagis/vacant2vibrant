@@ -1,4 +1,6 @@
 <?php
+
+	if (!isset($_SESSION)) session_start();
 	
 	error_reporting(E_ALL | E_STRICT);
 	ini_set('display_errors', 'On');
@@ -152,13 +154,18 @@
 		$lng = (isset($lng)) ? $lng : (isset($_REQUEST['Lng']) ? pg_escape_string($_REQUEST['Lng']) : null);
 		$radius_miles = (isset($radius_miles)) ? $radius_miles : (isset($_REQUEST['Radius']) ? pg_escape_string($_REQUEST['Radius']) : null);
 		
+		// Include additional details if the user is logged in
+		$additional_details = (isset($_SESSION['Username'])) ? '
+				, ROUND(AVG(CAST(mktval AS INT)), 2) AS MarketValue 			-- Market Value
+				, ROUND(AVG(CAST(sqft AS INT)), 2) AS Sqft 						-- Square Feet
+		' : '';
+		
 		$query = "
 			SELECT
 				  COUNT(*) AS PropertyCount
 				, ROUND(AVG(CAST(yearacq AS INT)), 0) AS AverageYearsOld 		-- Average years old
 				, ROUND(AVG(CAST(yearsold AS INT)), 0) AS AverageYearAcquired	-- Average year acquired
-				, ROUND(AVG(CAST(mktval AS INT)), 2) AS MarketValue 			-- Market Value
-				, ROUND(AVG(CAST(sqft AS INT)), 2) AS Sqft 						-- Square Feet
+				$additional_details
 			FROM landbankprops
 			WHERE ST_Distance_Sphere(geom, ST_MakePoint($lng, $lat)) <= $radius_miles
 		";
@@ -170,13 +177,22 @@
 		$area_stats = null;
 		
 		while ($row = pg_fetch_row($result)) {
-			$area_stats = array(
-				  'PropertyCount' => $row[0]
-				, 'AverageYearsOld' => 	$row[1]
-				, 'AverageYearAcquired' => 	$row[2]
-				, 'MarketValue' => 	$row[3]
-				, 'Sqft' => 	$row[4]
-			);
+			if (isset($_SESSION['Username'])) {
+				$area_stats = array(
+					  'PropertyCount' => $row[0]
+					, 'AverageYearsOld' => 	$row[1]
+					, 'AverageYearAcquired' => 	$row[2]
+					, 'MarketValue' => 	$row[3]
+					, 'Sqft' => 	$row[4]
+				);
+			} else {
+					$area_stats = array(
+					  'PropertyCount' => $row[0]
+					, 'AverageYearsOld' => 	$row[1]
+					, 'AverageYearAcquired' => 	$row[2]
+				);
+
+			}
 		}
 		
 		pg_close($conn);

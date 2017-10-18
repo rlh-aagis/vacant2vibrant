@@ -27,6 +27,13 @@ body {
     line-height: 34px;
 }
 
+@media screen and (max-width: 400px) {
+	.main-title {
+		margin-left: 5%;
+		width: 95%;
+	}
+}
+
 .hide-overflow {
 	overflow-x: hidden;
     text-overflow: ellipsis;
@@ -146,6 +153,12 @@ body > .container > div {
 	width: 360px !important;
 }
 
+@media screen and (max-width: 400px)  { 
+	.leaflet-popup-content {
+		width: 200px !important;
+	}
+}
+
 .map-popup-title {
 	border-bottom: 1px dotted #AAA; 
 	margin-bottom: 8px; 
@@ -177,6 +190,30 @@ body > .container > div {
 	width: 180px;
 }
 
+@media screen and (max-width: 400px)  { 
+	.map-popup-content {
+		min-width: 200px;
+	}
+
+	.map-popup-item {
+		display: block;
+		margin: 0 0 2px 0;
+		width: 210px;
+	}
+
+	.map-popup-item-label {
+		display: inline-block;
+		font-size: 11px;
+		width: 90px;
+	}
+
+	.map-popup-item-value {
+		display: inline-block;
+		font-size: 11px;
+		width: 100px;
+	}
+}
+
 .map-legend {
 	background-color: rgba(255, 255, 255, 0.65);
 	border: 2px solid rgba(0,0,0,0.2);
@@ -185,6 +222,16 @@ body > .container > div {
 	margin: 0 10px 10px 0;
 	padding: 10px;
 	width: 180px;
+}
+
+@media screen and (max-width: 400px)  {  
+	.map-legend {
+		display: none;
+	}
+	
+	.map-legend.visible {
+		display: block;
+	}
 }
 
 .map-legend .map-legend-title {
@@ -220,6 +267,12 @@ body > .container > div {
 	padding: 4px;
 	position: relative;
 	width: 36px;
+	
+	-webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    -ms-transition: all 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .map-button:hover {
@@ -275,6 +328,14 @@ nav.navbar {
 	margin-right: 36px;
 }
 
+nav.navbar li {
+	-webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    -ms-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+}
+
 nav.navbar li.active {
 	border-bottom: 5px solid rgba(255, 255, 255, 0.65);
 	margin-top: -5px;
@@ -293,6 +354,10 @@ nav.navbar li > a {
 	color: #DDD !important;
 }
 
+nav.navbar .dropdown-menu li > a {
+	color: #656565 !important;
+}
+
 nav.navbar li.active  > a { 
 	color: #FFF !important;
 }
@@ -304,7 +369,40 @@ nav.navbar li.active  > a {
 	width: 55px;
 }
 
+.mobile-nav-button {
+    color: rgba(255, 255, 255, 0.9);
+	cursor: pointer;
+	display: none;
+    font-size: 24px;
+	font-weight: normal;
+    height: 50px;
+	padding: 8px 0 0 0;
+	text-align: center;
+	width: 40px;
+	
+	-webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    -ms-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+}
+
+.mobile-nav-button:hover {
+	background-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+@media screen and (max-width: 400px)  { 
+	.mobile-nav-button {
+		display: inline-block;
+	}
+}
+
 /* Modal Styles - Begin */
+
+.modal-header {
+	background-color: #EEE;
+    border-bottom: 3px solid #4B4;
+}
 
 .modal-content {
 	border-radius: 0;
@@ -315,7 +413,8 @@ nav.navbar li.active  > a {
 }
 
 .disclaimer-modal .modal-header {
-	background-color: #428BC7;
+	background-color: #428BC7 !important;
+	border-bottom: 3px solid #CCC;
 }
 
 .disclaimer-modal .modal-title {
@@ -323,7 +422,7 @@ nav.navbar li.active  > a {
 }
 
 .error-modal .modal-header {
-	background-color: rgba(240, 20, 0, 0.8);
+	background-color: rgba(240, 20, 0, 0.8) !important;
 }
 
 .error-modal .modal-title {
@@ -339,11 +438,13 @@ nav.navbar li.active  > a {
 	display: inline-block;
 	margin: 6px 10px 0 0;
 	vertical-align: top;
+	width: 100px;
 }
 
 .control-label + .controls {
 	display: inline-block;
 	vertical-align: top;
+	width: 350px;
 }
 
 /* User Auth Modals - End */
@@ -357,6 +458,12 @@ nav.navbar li.active  > a {
 	display: none;
 	margin: 0 0 0 0;
 	position: absolute;
+	
+	-webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    -ms-transition: all 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .language-menu {
@@ -375,6 +482,12 @@ nav.navbar li.active  > a {
 	height: 48px;
 	min-width: 152px;
 	padding: 8px 16px;
+	
+	-webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    -ms-transition: all 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .language-selector .language-item:hover {
@@ -407,4 +520,27 @@ nav.navbar li.active  > a {
 /* Language Selector Styles - End */
 
 
+/* Auth screens related styles - Begin */
+
+.menu-user {
+	display: none !important;
+}
+
+.menu-user.visible {
+	display: list-item !important;
+}
+
+.menu-username {
+	text-transform: capitalize;
+}
+
+.error-row {
+	display: none;
+}
+
+.error-row .error-message {
+	color: #B44;
+}
+
+/* Auth screens related styles - End */
 
