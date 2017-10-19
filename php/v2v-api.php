@@ -1,6 +1,6 @@
 <?php
 
-	if (!isset($_SESSION)) session_start();
+	if (! session_id()) session_start();
 	
 	error_reporting(E_ALL | E_STRICT);
 	ini_set('display_errors', 'On');

@@ -374,7 +374,7 @@ function loginUser () {
 	// Clear fields
 	$('#txtLoginEmailAddress').val('');
 	$('#txtLoginPassword').val('');
-
+	
 	authService.loginUser(loginUserViewModel).then(function (results) {
 		// Success
 		$('#divUserLoginModal').modal('hide');
@@ -385,7 +385,8 @@ function loginUser () {
 		$('.sidebar-register-or-login').hide();
 		
 		app.loggedIn = true;
-	
+		
+		refreshUserFavorites();
 		app.refreshSidebar();
 		
 	}, function (error) {
@@ -398,11 +399,13 @@ function loginUser () {
 function logoutUser () {
 	
 	authService.logoutUser().then(function (results) { 
-		app.loggedIn = false;
-		
+
 		$('.menu-register-user, .menu-login-user').show();
 		$('.menu-user').removeClass('visible');
 		
+		app.loggedIn = false;
+		
+		refreshUserFavorites();
 		app.refreshSidebar();
 		
 		$('.sidebar-register-or-login').show();
@@ -415,9 +418,12 @@ function openUserDetails () {
 
 		if (! isDefined(results)) return;
 		
-		$('#divUserDetailsModal #txtUserEmailAddress').val(results.Id);
-		$('#divUserDetailsModal #txtUserActiveStatus').val(results.Email);
-		$('#divUserDetailsModal #txtUserActiveStatus').val(results.IsActive);
+		results = JSON.parse(results);
+	
+		var userActiveStatus = (results.IsActive == '1') ? 'Active' : 'Inactive';
+	
+		$('#divUserDetailsModal #txtUserEmailAddress').val(results.Email);
+		$('#divUserDetailsModal #txtUserActiveStatus').val(userActiveStatus);
 		$('#divUserDetailsModal #txtUserGender').val(results.Gender);
 		$('#divUserDetailsModal #txtUserZip').val(results.Zip);
 	
@@ -430,3 +436,41 @@ function toggleMapLegend () {
 	$('.map-legend').toggleClass('visible');
 }
 
+function refreshUserFavorites () {
+	
+	$('.favorite-toggle').toggleClass('visible', app.LoggedIn);
+	$('.favorites-list').toggleClass('visible', app.LoggedIn);
+	$('.favorites-list .nav-menu-selector').empty();
+	
+	if (app.LoggedIn) {
+		
+		authService.getUserFavorites().then(function (results) {
+			
+			if (!isDefined(results)) return;
+			
+			results = JSON.parse(results);
+			
+			for (var i = 0; i < results.length; i++) {
+			
+				var favoriteItem = 
+					'<div class="nav-menu-item">' +
+						'<span> ' + results[i].SearchText + ' </span>' +
+					'</div>';
+			
+				$('.favorites-list .nav-menu-selector').append(favoriteItem);
+				
+				if (i == 5) break;
+			}
+		});
+	}
+}
+
+function setUserFavorite () {
+	
+	var searchText = $('#txtTopSearch').val().trim();
+	if (searchText.length == 0) return;
+	
+	authService.setUserFavorite(searchText).then(function (results) {
+		refreshUserFavorites();
+	});
+}

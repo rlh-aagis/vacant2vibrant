@@ -1,7 +1,7 @@
 <?php
 
-	if (!isset($_SESSION)) session_start();
-	
+	if (! session_id()) session_start();
+
 	error_reporting(E_ALL | E_STRICT);
 	ini_set('display_errors', 'On');
 	
@@ -22,6 +22,8 @@
 		case 'ActivateUser': activate_user(); break;
 		case 'CreateUser': create_user(); break;
 		case 'GetUserDetails': get_user_details(); break;
+		case 'GetUserFavorites': get_user_favorites(); break;
+		case 'SetUserFavorite': set_user_favorite(); break;
 		case 'LoginUser': login_user(); break;
 		case 'LogoutUser': logout_user(); break;
 	}
@@ -132,7 +134,7 @@
 		} else {
 			// Login was successful
 			$message = 'Login Successful';
-			$_SESSION['Username'] = $auth_data->username;
+			$_SESSION['Username'] = $auth_data->emailaddress;
 			//header('Location: main.php'); 
 		}
 		
@@ -158,7 +160,7 @@
 				, zip
 			FROM public.users
 			WHERE (1 = 1)
-			AND (email ILIKE " . $_SESSION['Username'] . ")
+			AND (email ILIKE '" . $_SESSION['Username'] . "')
 		";
 			
 		$conn = get_postgresql_db_connection('v2v_auth');
@@ -178,7 +180,66 @@
 		
 		pg_close($conn);
 		
-		echo json_encode($userDetails);	
+		echo json_encode($userDetails);
+	}
+	
+	// get_user_favorites - Retrieves the current user's favorite searches
+	function get_user_favorites () {
+		
+		$query = "
+			SELECT 
+				  UF.id
+				, UF.search_text
+			FROM public.user_favorites UF
+			LEFT OUTER JOIN public.users U ON UF.user_id = U.id
+			WHERE (1 = 1)
+			AND (U.email ILIKE '" . $_SESSION['Username'] . "')
+		";
+			
+		$conn = get_postgresql_db_connection('v2v_auth');
+		
+		$result = pg_query($conn, $query) 
+			or die ('Error: ' + pg_last_error($conn) + '\n');
+
+		$row = pg_fetch_row($result);
+		$userFavorites = array(
+			  'Id' => $row[0]
+			, 'SearchText' => $row[1]
+		);
+		
+		pg_close($conn);
+		
+		echo json_encode($userFavorites);
+	}
+	
+	// set_user_favorite - Sets a new user favorite
+	function set_user_favorite () {
+		
+		$search_text = (isset($search_text)) ? $search_text : (isset($_REQUEST['SearchText']) ? 
+			pg_escape_string($_REQUEST['SearchText']) : null);
+		
+		$query = "
+			DELETE FROM (			
+				SELECT 
+					  UF.id
+					, UF.search_text
+				FROM public.user_favorites UF
+				LEFT OUTER JOIN public.users U ON UF.id = U.user_id
+				WHERE (1 = 1)
+				AND (U.email ILIKE '" . $_SESSION['Username'] . "')
+				ORDER BY created_date ASC
+				LIMIT 1
+			) _UF;
+		";
+			
+		$conn = get_postgresql_db_connection('v2v_auth');
+		
+		$result = pg_query($conn, $query) 
+			or die ('Error: ' + pg_last_error($conn) + '\n');
+		
+		pg_close($conn);
+		
+		echo json_encode(true);
 	}
 	
 	function get_postgresql_db_connection ($db_name='v2v_auth') {

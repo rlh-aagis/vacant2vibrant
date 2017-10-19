@@ -100,3 +100,40 @@ authService.getUserDetails = function () {
 	
 	return deferred;
 };
+
+authService.getUserFavorites = function () {
+	
+	var deferred = $.ajax({
+		url: authService.authUrl + '?Action=GetUserFavorites',
+		type: 'GET',
+		success: function (results) { },
+		error: function (e) {
+			console.log(e.message);
+		}
+	});
+	
+	return deferred;
+};
+
+authService.setUserFavorite = function (searchText) {
+	
+	if (! searchText) return;
+	
+	// Format post data
+	favoriteData = {
+		Action: 'SetUserFavorite',
+		SearchText: searchText
+	};
+
+	var deferred = $.ajax({
+		url: authService.authUrl,
+		type: 'POST',
+		data: favoriteData,
+		success: function (results) { },
+		error: function (e) {
+			console.log(e.message);
+		}
+	});
+	
+	return deferred;
+};

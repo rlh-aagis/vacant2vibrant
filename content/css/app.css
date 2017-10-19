@@ -316,7 +316,7 @@ nav.navbar {
 }
 
 .navbar-nav.navbar-right {
-	width: 60%;
+	width: 65%;
 }
 
 .navbar-nav.navbar-right > li {
@@ -397,6 +397,29 @@ nav.navbar li.active  > a {
 	}
 }
 
+.favorite-nav-button {
+	color: rgba(255, 255, 0, 0.8);
+	cursor: pointer;
+	font-size: 18px;
+	padding: 12px 10px;
+}
+
+.favorites-list {
+	display: none !important;
+}
+
+.favorites-list.visible {
+	display: list-item !important;
+}
+
+.favorite-toggle {
+	display: none !important;
+}
+
+.favorite-toggle.visible {
+	display: list-item !important;
+}
+
 /* Modal Styles - Begin */
 
 .modal-header {
@@ -439,6 +462,10 @@ nav.navbar li.active  > a {
 	margin: 6px 10px 0 0;
 	vertical-align: top;
 	width: 100px;
+}
+
+.control-label.long-width {
+	width: 130px !important;
 }
 
 .control-label + .controls {
