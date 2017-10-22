@@ -25,6 +25,7 @@
 		case 'GetAutocompleteItemGeojson': get_autocomplete_item_geojson(); break;
 		case 'GetAutocompleteItemLatLng': get_autocomplete_item_lat_lng(); break;
 		case 'GetMapProperties': get_map_properties(); break;
+		case 'GetNeighborhoodGeojson': get_neighborhood_geojson(); break;
 		case 'GetPropertyDetails': get_property_details(); break;
 	}
 	
@@ -147,6 +148,34 @@
 		echo json_encode($autocomplete_item_geojson);
 	}
 	
+	// get_neighborhood_geojson - get the geojson geometry for a neighborhood based on a specified neighborhood name
+	function get_neighborhood_geojson ($neighborhood_name = null) {
+		
+		$neighborhood_name = (isset($neighborhood_name)) ? $neighborhood_name : (isset($_REQUEST['NeighborhoodName']) ? pg_escape_string($_REQUEST['NeighborhoodName']) : null);
+		
+		$query = "
+			SELECT 
+				ST_AsGeoJSON(geom) AS GeoJSON
+			FROM v2vneighborhood WHERE neighshape ILIKE '$neighborhood_name'
+			LIMIT 1
+		";
+		
+		$conn = get_postgresql_db_connection('postgres');
+		
+		$result = pg_query($conn, $query) 
+			or die ('Error: ' + pg_last_error($conn) + '\n');
+		
+		$neighborhood_geojson = null;
+		$row = pg_fetch_row($result);
+		$neighborhood_geojson = array(
+			'GeoJSON' => $row[0]
+		);
+		
+		pg_close($conn);
+		
+		echo json_encode($neighborhood_geojson);
+	}
+	
 	// get_area_statistics_by_location - Gathers a number of statistics over a specified radius from a center point
 	function get_area_statistics_by_location ($lat = null, $lng = null, $radius_miles = null) {
 		
@@ -156,18 +185,30 @@
 		
 		// Include additional details if the user is logged in
 		$additional_details = (isset($_SESSION['Username'])) ? '
-				, ROUND(AVG(CAST(mktval AS INT)), 2) AS MarketValue 			-- Market Value
-				, ROUND(AVG(CAST(sqft AS INT)), 2) AS Sqft 						-- Square Feet
+				, ROUND(AVG(CAST(mktval AS INT)), 2) AS MarketValue
+				, ROUND(AVG(CAST(sqft AS INT)), 2) AS Sqft
 		' : '';
 		
+		$where_condition = isset($_SESSION['Username']) ?
+			" AND (ST_Distance_Sphere(geom, ST_MakePoint($lng, $lat)) <= $radius_miles)" :
+			" AND (neigh ILIKE ( 
+				SELECT neighshape 
+				FROM public.v2vneighborhood N 
+				WHERE ST_Contains( 
+					  ST_SetSRID(N.geom, 4326) 
+					, ST_SetSRID(ST_MakePoint($lng, $lat), 4326) 
+				) LIMIT 1 
+			))";
+		
 		$query = "
-			SELECT
-				  COUNT(*) AS PropertyCount
-				, ROUND(AVG(CAST(yearacq AS INT)), 0) AS AverageYearsOld 		-- Average years old
-				, ROUND(AVG(CAST(yearsold AS INT)), 0) AS AverageYearAcquired	-- Average year acquired
-				$additional_details
-			FROM landbankprops
-			WHERE ST_Distance_Sphere(geom, ST_MakePoint($lng, $lat)) <= $radius_miles
+			SELECT 
+				  COUNT(*) AS PropertyCount 
+				, ROUND(AVG(CAST(yearacq AS INT)), 0) AS AverageYearSold 
+				, ROUND(AVG(CAST(yearsold AS INT)), 0) AS AverageYearAcquired 
+				$additional_details 
+			FROM landbankprops 
+			WHERE (1 = 1) 
+			$where_condition
 		";
 		
 		$conn = get_postgresql_db_connection('postgres');
@@ -180,18 +221,17 @@
 			if (isset($_SESSION['Username'])) {
 				$area_stats = array(
 					  'PropertyCount' => $row[0]
-					, 'AverageYearsOld' => 	$row[1]
+					, 'AverageYearSold' => 	$row[1]
 					, 'AverageYearAcquired' => 	$row[2]
 					, 'MarketValue' => 	$row[3]
 					, 'Sqft' => 	$row[4]
 				);
 			} else {
-					$area_stats = array(
+				$area_stats = array(
 					  'PropertyCount' => $row[0]
-					, 'AverageYearsOld' => 	$row[1]
+					, 'AverageYearSold' => 	$row[1]
 					, 'AverageYearAcquired' => 	$row[2]
 				);
-
 			}
 		}
 		
@@ -299,11 +339,14 @@
 		$properties = array();
 		
 		while ($row = pg_fetch_row($result)) {
+			
+			$sold_avail = (strtolower($row[3]) == 'disp') ? 'Sold' : ucwords(strtolower($row[3]));
+			
 			$properties[] = array(
 				  'PropertyId' => $row[0]
 				, 'Lat' => 	$row[1]
 				, 'Lng' => 	$row[2]
-				, 'SolAvail' => $row[3]
+				, 'SoldAvail' => $sold_avail
 				, 'Condition' => $row[4]
 			);
 		}
@@ -342,8 +385,11 @@
 		
 		$result = pg_query($conn, $query) 
 			or die ('Error: ' + pg_last_error($conn) + '\n');
-
+			
 		$row = pg_fetch_row($result);
+		
+		$sold_avail = (strtolower($row[8]) == 'disp') ? 'Sold' : ucwords(strtolower($row[8]));
+		
 		$propertyDetails = array(
 			  'Gid' => $row[0]
 			, 'Address' => $row[1]
@@ -351,9 +397,9 @@
 			, 'Neighborhood' => $row[3]
 			, 'Zip' => $row[4]
 			, 'YearAcq' => $row[5]
-			, 'YearsOld' => $row[6]
+			, 'YearSold' => $row[6]
 			, 'PropClass' => $row[7]
-			, 'SoldAvail' => ucwords(strtolower($row[8]))
+			, 'SoldAvail' => $sold_avail
 			, 'Condition' => ucwords(strtolower($row[9]))
 			, 'Mktval' => $row[10]
 			, 'MktvalDisplay' => number_format($row[10], 0, '.', ',')

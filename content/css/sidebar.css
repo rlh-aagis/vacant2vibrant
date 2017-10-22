@@ -42,6 +42,9 @@
 #divSidebar.active #divSidebarWrapper {
     left: 350px;
 }
+#divSidebar:not(.active) #sidebar {
+	display: none;
+}
 #sidebar_menu li a, .sidebar-nav li a {
     color: #999;
     display: block;
@@ -62,15 +65,19 @@
 }
 
 #divSideBarMenuToggle > .sub_icon {
-	color: #606060;
+	color: #A5A5A5;
 	cursor: pointer;
 	float: right;
-	right: 4px; 
+	right: 4px;
 	top: 32px;
 }
 
 #divSideBarMenuToggle:hover > .sub_icon {
-	color: #959595 !important;
+	color: #656565 !important;
+}
+
+#divSidebar.active #divSideBarMenuToggle > .sub_icon {
+	
 }
 
 #divAreaStatsSubheading {
@@ -166,17 +173,21 @@
 	}
 }
 
-.sidebar-item { }
+.sidebar-item { 
+	display: none;
+}
 
 .sidebar-item-label {
 	display: inline-block;
 	text-transform: capitalize;
-	width: 140px;
+	width: 185px;
 }
 
 .sidebar-item-value {
 	display: inline-block;
 	font-weight: bold;
-	width: 75px;
+	margin: 0 0 0 -25px;
+	text-align: right;
+	width: 95px;
 }
 

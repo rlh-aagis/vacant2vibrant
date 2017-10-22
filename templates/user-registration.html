@@ -43,6 +43,15 @@
 								<p class="help-block"> Please confirm password </p>
 							</div>
 						</div>
+						
+						<div class="control-group row">
+							<label class="control-label col-md-2" for="txtCreatePurchasedBefore"> Purchased before ? </label>
+							<div class="controls col-md-8">
+								<input type="radio" name="CreatePurchasedBefore" value="1"> Yes <br/>
+								<input type="radio" name="CreatePurchasedBefore" value="0" checked> No <br/>
+								<p class="help-block"> Have you purchased a Land Bank property before ?  </p>
+							</div>
+						</div>
 
 						<div class="control-group row">
 							<label class="control-label col-md-2" for="txtCreateGender"> Gender </label>
@@ -50,6 +59,15 @@
 								<input type="text" id="txtCreateGender"
 									placeholder="" class="form-control input-xlarge">
 								<p class="help-block"> Please provide your gender </p>
+							</div>
+						</div>
+						
+						<div class="control-group row">
+							<label class="control-label col-md-2" for="txtCreateAge"> Age </label>
+							<div class="controls col-md-8">
+								<input type="text" id="txtCreateAge"
+									placeholder="" class="form-control input-xlarge">
+								<p class="help-block"> Please provide your age </p>
 							</div>
 						</div>
 						
@@ -68,7 +86,7 @@
             <div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal" style="float: left;"> Cancel </button>
 				<div data-toggle="modal" data-target="#divUserActivationModal" class="link" style="display: inline-block; line-height: 14px; margin: 0 20px 0 0;"> Already registered? Activate User Now </div>
-				<button class="btn btn-success" onclick="registerUser()"> Register </button>
+				<button id="btnRegisterUser" class="btn btn-success" onclick="registerUser()"> Register </button>
             </div>
         </div>
     </div>

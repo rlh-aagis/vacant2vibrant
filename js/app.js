@@ -1,6 +1,7 @@
 
 var app = {
 	autocompleteItems: [],
+	languageCode: 'eng',
 	languageData: null,
 	loggedIn: false,
 	page: 'landing',
@@ -47,7 +48,10 @@ function bindMapModals () {
 	if (app.page == 'landing') return;
 	
 	$('<div id="divUserLoginModalContainer"></div>').load('templates/user-login.html', function (response, status, xhr) { 
-	
+		$('#divUserLoginModalContainer #txtLoginPassword').keyup(function (e) {
+			e.preventDefault();
+			if (e.keyCode == 13) $('#btnLogin').trigger('click');
+		});
 	}).appendTo('body > .container');
 	$('<div id="divUserProfileModalContainer"></div>').load('templates/user-profile.html', function (response, status, xhr) { 
 	
@@ -107,6 +111,9 @@ function initSearch (searchElementId) {
 	});
 	
 	$('#' + searchElementId).keyup(function (e) {
+		
+		e.preventDefault();
+		
 		// On enter key, search
 		if (e.keyCode == 13) _search();
 	});
@@ -114,13 +121,15 @@ function initSearch (searchElementId) {
 
 function landingSearch (autocompleteItem) {
 	
-	if ((! isDefined(app.autocompleteItems)) || (app.autocompleteItems.length == 0)) {
+	if (($('#txtLandingSearch').val().trim().length != 0) 
+		&& ((! isDefined(app.autocompleteItems)) || (app.autocompleteItems.length == 0))) {
 		
 		$('#divMessageModal').addClass('error-modal');
 		$('#divMessageModal .modal-title').html('Search Not Found');
 		$('#divMessageModal .modal-body').html('Search query not found; please check spelling or go to map view.');
 		$('#divMessageModal').modal('show');
 	} else {
+		
 		$('#divDisclaimerModal').data('AutocompleteItem', autocompleteItem)
 		$('#divDisclaimerModal').modal('show');
 	}
@@ -139,7 +148,16 @@ function performLandingSearch(autocompleteItem) {
 	$('#divSidebar').load('templates/sidebar.html', function( response, status, xhr ) { 
 		$('#divSideBarMenuToggle').click(function (e) {
 			e.preventDefault();
+			
 			$('#divSidebar').toggleClass('active');
+			
+			$('#divSideBarMenuToggle .sub_icon').removeClass('glyphicon-chevron-left glyphicon-chevron-right');
+			
+			if ($('#divSidebar').hasClass('active')) {
+				$('#divSideBarMenuToggle .sub_icon').addClass('glyphicon-chevron-left');
+			} else {
+				$('#divSideBarMenuToggle .sub_icon').addClass('glyphicon-chevron-right');
+			}
 		});
 	}).fadeIn();
 	
@@ -168,21 +186,31 @@ function search (autocompleteItem) {
 		};
 	}
 	
-	if (! isDefined(autocompleteItem)) return;
-	
-	userLocation.category = autocompleteItem.category;
-	userLocation.label = autocompleteItem.label;
+	var searchValue = null;
+	if (isDefined(autocompleteItem)) {
+		
+		searchValue = autocompleteItem.value;
+		userLocation.category = autocompleteItem.category;
+		userLocation.label = autocompleteItem.label;
+	} else {
+		
+		userLocation.category = 'city';
+		userLocation.label = 'Kansas City';
+	}
 	
 	searchMap(
-		autocompleteItem.value,
+		searchValue,
 		userLocation.label,
 		userLocation.category,
 		null,
 		null
 	);
+
+	app.autocompleteItems = [];
 	
 	setTimeout(function () {
-		$('#txtTopSearch').val(autocompleteItem.label);
+		if (userLocation.category != 'city')
+			$('#txtTopSearch').val(userLocation.label);
 	}, 50);
 }
 
@@ -201,14 +229,16 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 	var areaStatsHeaderHTML = '';
 	switch (locationCategory) {
 		case 'address':
-			areaStatsHeaderHTML = 'Within 0.25 Miles of ' +
-				'(' + userLocation.lng + ', ' + userLocation.lat + ')';
+			areaStatsHeaderHTML = ((app.loggedIn) ? 'Within 0.25 Miles of ' : 'Neighborhood of ') + userLocation.label;
 			break;
 		case 'nbrhd':
 			areaStatsHeaderHTML = locationLabel + ' Neighborhood';
 			break;
 		case 'zip':
 			areaStatsHeaderHTML = 'Zip ' + locationLabel;
+			break;
+		case 'city':
+			areaStatsHeaderHTML = locationLabel;
 			break;
 	}
 	$('#divAreaStatsSubheading').html(areaStatsHeaderHTML);
@@ -229,10 +259,10 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 				
 				// Property Count
 				$('#txtPropertyCount').text(formatNumber(results.PropertyCount)).closest('.sidebar-item').fadeIn();
-				// Average Years Old
-				$('#txtAverageYearsOld').text(formatNumber(results.AverageYearsOld)).closest('.sidebar-item').fadeIn();
+				// Average Year Sold
+				$('#txtAverageYearSold').text(results.AverageYearSold).closest('.sidebar-item').fadeIn();
 				// Average Year Acquired
-				$('#txtAverageYearAcquired').text(formatNumber(results.AverageYearAcquired)).closest('.sidebar-item').fadeIn();
+				$('#txtAverageYearAcquired').text(results.AverageYearAcquired).closest('.sidebar-item').fadeIn();
 				// Market Value
 				if (isDefined(results.MarketValue))
 					$('#txtMarketValue').text('$' + formatNumber(results.MarketValue)).closest('.sidebar-item').fadeIn();
@@ -248,7 +278,7 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 				results = JSON.parse(results);
 				
 				// Share of parcels owned by absentee owner number
-				$('#txtAbsenteeOwnerShares').text(formatNumber(results.AbsenteeOwnerShares)).closest('.sidebar-item').fadeIn();
+				$('#txtAbsenteeOwnerShares').text(formatNumber(results.AbsenteeOwnerShares) + '%').closest('.sidebar-item').fadeIn();
 				// Number of 311 Calls Visible from Street
 				$('#txtStreetVisible311Calls').text(formatNumber(results.StreetVisible311Calls)).closest('.sidebar-item').fadeIn();
 				// Property Violations Visible from Street
@@ -283,14 +313,27 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 				$('#divSidebarWrapper .load-indicator').fadeOut();
 			});
 			break;
+		case 'city':
+		
+			// Property Count
+			$('#txtPropertyCount').text(formatNumber(mapLayers.markers.length)).closest('.sidebar-item').fadeIn();
+		
+			$('#divSidebarWrapper .load-indicator').fadeOut();
+			break;
 	}
 };
 
-function setLanguage (languageCode) {
+function toggleLanguage () {
 	
-	var languageURL = 'js/translations/' + languageCode + '.json';
+	if (app.languageCode == 'eng') {
+		app.languageCode = 'spa';
+	} else {
+		app.languageCode = 'eng';
+	}
+	
+	var languageURL = 'js/translations/' + app.languageCode + '.json';
 
-	$('.language-menu .language-label .language-code').html(languageCode);
+	$('.language-menu .language-label .language-code').html(app.languageCode);
 	
 	$('.language-data').load(languageURL, function() {
 		
@@ -324,7 +367,9 @@ function registerUser () {
 		CreatePassword: $('#txtCreatePassword').val(),
 		CreateRepeatPassword: $('#txtCreateConfirmPassword').val(),
 		CreateEmailAddress: $('#txtCreateEmailAddress').val(),
+		CreatePurchasedBefore: $('[name="CreatePurchasedBefore"]').val(),
 		CreateGender: $('#txtCreateGender').val(),
+		CreateAge: $('#txtCreateAge').val(),
 		CreateZip: $('#txtCreateZip').val()
 	};
 	
@@ -333,9 +378,12 @@ function registerUser () {
 	$('#txtCreatePassword').val('');
 	$('#txtCreateConfirmPassword').val('');
 	$('#txtCreateEmailAddress').val('');
+	$('[name="CreatePurchasedBefore"]').val('no');
 	$('#txtCreateGender').val('');
+	$('#txtCreateAge').val('');
 	$('#txtCreateZip').val('');
-
+	$('#btnRegisterUser').attr('disabled', 'disabled');
+	
 	authService.createUser(createUserViewModel).then(function (results) {
 		// Success
 	});
@@ -344,6 +392,7 @@ function registerUser () {
 	
 	setTimeout(function () {
 		$('#divUserActivationModal').modal('show');
+		$('#btnRegisterUser').removeAttr('disabled');
 	}, 300);
 }
 
@@ -421,10 +470,13 @@ function openUserDetails () {
 		results = JSON.parse(results);
 	
 		var userActiveStatus = (results.IsActive == '1') ? 'Active' : 'Inactive';
+		var userPurchasedBefore = (results.PurchasedBefore == '1') ? 'Yes' : 'No';
 	
 		$('#divUserDetailsModal #txtUserEmailAddress').val(results.Email);
 		$('#divUserDetailsModal #txtUserActiveStatus').val(userActiveStatus);
+		$('#divUserDetailsModal #txtPurchasedBefore').val(userPurchasedBefore);
 		$('#divUserDetailsModal #txtUserGender').val(results.Gender);
+		$('#divUserDetailsModal #txtUserAge').val(results.Age);
 		$('#divUserDetailsModal #txtUserZip').val(results.Zip);
 	
 		$('#divUserDetailsModal').modal('show');
@@ -436,33 +488,51 @@ function toggleMapLegend () {
 	$('.map-legend').toggleClass('visible');
 }
 
+function favoriteSearch (favoriteElement) {
+	
+	var favoriteItem = $(favoriteElement).data('favorite-data');
+	
+	if (! isDefined(favoriteItem)) return;
+	
+	map.closePopup();
+	
+	$('#txtTopSearch').val(favoriteItem.SearchText);
+	$('#txtTopSearch').autocomplete('search');
+	setTimeout(function () {
+		$('.ui-autocomplete .ui-menu-item').hide();
+	}, 300);
+	setTimeout(function () {
+		$('.top-search-button').trigger('click');
+	}, 500);
+}
+
 function refreshUserFavorites () {
 	
-	$('.favorite-toggle').toggleClass('visible', app.LoggedIn);
-	$('.favorites-list').toggleClass('visible', app.LoggedIn);
-	$('.favorites-list .nav-menu-selector').empty();
+	$('.favorite-search-button').toggleClass('visible', app.loggedIn);
+	$('.favorites-list').toggleClass('visible', app.loggedIn);
+	$('.favorites-list .nav-menu-list-content').empty();
 	
-	if (app.LoggedIn) {
+	if (! app.loggedIn) return;
 		
-		authService.getUserFavorites().then(function (results) {
+	authService.getUserFavorites().then(function (results) {
+		
+		if (!isDefined(results)) return;
+		
+		results = JSON.parse(results);
+		
+		for (var i = 0; i < results.length; i++) {
+		
+			var favoriteItem = $(
+				'<div class="nav-menu-list-item favorite-item" onclick="favoriteSearch(this)">' +
+					'<span> ' + results[i].SearchText + ' </span>' +
+				'</div>');
+			favoriteItem.data('favorite-data', results[i]);
+		
+			$('.favorites-list .nav-menu-list-content').append(favoriteItem);
 			
-			if (!isDefined(results)) return;
-			
-			results = JSON.parse(results);
-			
-			for (var i = 0; i < results.length; i++) {
-			
-				var favoriteItem = 
-					'<div class="nav-menu-item">' +
-						'<span> ' + results[i].SearchText + ' </span>' +
-					'</div>';
-			
-				$('.favorites-list .nav-menu-selector').append(favoriteItem);
-				
-				if (i == 5) break;
-			}
-		});
-	}
+			if (i == 5) break;
+		}
+	});
 }
 
 function setUserFavorite () {

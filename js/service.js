@@ -4,6 +4,7 @@ var service = {
 	//apiUrl: 'http://localhost/php/v2v-api.php', // DEV
 	apiUrl: 'http://aagis.net/v2v/php/v2v-api.php', // PROD
 	getMapProperties: null,
+	getNeighborhoodGeojson: null,
 	getPropertyDetail: null,
 	getAutocompleteItemGeojson: null,
 	getAutocompleteItemLatLng: null
@@ -155,3 +156,20 @@ service.getAutocompleteItemLatLng = function (gid) {
 	return deferred;
 };
 
+service.getNeighborhoodGeojson = function (neighborhoodName) {
+
+	var url = service.apiUrl + '?action=GetNeighborhoodGeojson';
+	if (isDefined(neighborhoodName)) url += '&NeighborhoodName=' + neighborhoodName;
+	url += '&key=' + service.apiKey;
+
+	var deferred = $.ajax({
+		url: url,
+		type: 'GET',
+		beforeSend: function (xhr) { },
+		success: function (data, textStatus, xhr) { },
+		complete: function (xhr, textStatus) { },
+		error: function (xhr, textStatus, errorThrown) { }
+	});
+	
+	return deferred;
+};

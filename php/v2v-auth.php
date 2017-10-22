@@ -43,14 +43,18 @@
 			'password' => (isset($_POST['CreatePassword']) ? $_POST['CreatePassword'] : null),
 			'repeat_password' => (isset($_POST['CreateRepeatPassword']) ? $_POST['CreateRepeatPassword'] : null),
 			'email_address' => (isset($_POST['CreateEmailAddress']) ? $_POST['CreateEmailAddress'] : null),
+			'purchased_before' => (isset($_POST['CreatePurchasedBefore']) ? $_POST['CreatePurchasedBefore'] : null),
 			'gender' => (isset($_POST['CreateGender']) ? $_POST['CreateGender'] : null),
+			'age' => (isset($_POST['CreateAge']) ? $_POST['CreateAge'] : null),
 			'zip' => (isset($_POST['CreateZip']) ? $_POST['CreateZip'] : null),
 			'account_type' => 'user'
 		];
 	
 		// Set additional create user parameters
 		$params = array(
+			'purchased_before' => $auth_data->purchased_before,
 			'gender' => $auth_data->gender,
+			'age' => $auth_data->age,
 			'zip' => $auth_data->zip 
 		);
 	
@@ -156,7 +160,9 @@
 				, email
 				, isactive
 				, account_type
+				, purchased_before
 				, gender
+				, age
 				, zip
 			FROM public.users
 			WHERE (1 = 1)
@@ -174,8 +180,10 @@
 			, 'Email' => $row[1]
 			, 'IsActive' => $row[2]
 			, 'AccountType' => $row[3]
-			, 'Gender' => $row[4]
-			, 'Zip' => $row[5]
+			, 'PurchasedBefore' => $row[4]
+			, 'Gender' => $row[5]
+			, 'Age' => $row[6]
+			, 'Zip' => $row[7]
 		);
 		
 		pg_close($conn);
@@ -201,15 +209,18 @@
 		$result = pg_query($conn, $query) 
 			or die ('Error: ' + pg_last_error($conn) + '\n');
 
-		$row = pg_fetch_row($result);
-		$userFavorites = array(
-			  'Id' => $row[0]
-			, 'SearchText' => $row[1]
-		);
+		$user_favorites = array();
+		
+		while ($row = pg_fetch_row($result)) {
+			$user_favorites[] = array(
+				  'Id' => $row[0]
+				, 'SearchText' => $row[1]
+			);
+		}
 		
 		pg_close($conn);
 		
-		echo json_encode($userFavorites);
+		echo json_encode($user_favorites);
 	}
 	
 	// set_user_favorite - Sets a new user favorite
@@ -219,17 +230,22 @@
 			pg_escape_string($_REQUEST['SearchText']) : null);
 		
 		$query = "
-			DELETE FROM (			
-				SELECT 
-					  UF.id
-					, UF.search_text
-				FROM public.user_favorites UF
-				LEFT OUTER JOIN public.users U ON UF.id = U.user_id
-				WHERE (1 = 1)
-				AND (U.email ILIKE '" . $_SESSION['Username'] . "')
-				ORDER BY created_date ASC
-				LIMIT 1
-			) _UF;
+			DELETE FROM public.user_favorites WHERE id IN (SELECT 
+				  UF.id
+			FROM public.user_favorites UF
+			LEFT OUTER JOIN public.users U ON UF.user_id = U.id
+			WHERE (1 = 1)
+			AND (U.email ILIKE '" . $_SESSION['Username'] . "')
+			AND ((SELECT COUNT(*) FROM public.user_favorites UF WHERE UF.user_id = U.id) >= 5)   
+			ORDER BY created_date ASC
+			LIMIT 1);
+			
+			INSERT INTO public.user_favorites (user_id, search_text, created_date) 
+			VALUES (
+				(SELECT id FROM users WHERE email ILIKE '" . $_SESSION['Username'] . "'),
+				'$search_text',
+				now()
+			)
 		";
 			
 		$conn = get_postgresql_db_connection('v2v_auth');

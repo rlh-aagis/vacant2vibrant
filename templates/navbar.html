@@ -17,16 +17,15 @@
 		<div id="navbar" class="navbar-collapse collapse">
 			
 			<ul class="nav navbar-nav">
-				<li class="active"><a href="javascript:void(0);" translate="map" 
-					style="text-transform: capitalize;"> Map </a></li>
+				<li class="active"><a href="javascript:void(0);" translate="home" 
+					onclick="location.reload();" style="text-transform: capitalize;"> Home </a></li>
+				<li class="menu-register-user">
+					<a href="#" data-toggle="modal" data-target="#divUserRegistrationModal" translate="register"> Register </a>
+				</li>
 			</ul>
 			
 			<ul class="nav navbar-nav navbar-right">
 
-				<li class="menu-register-user">
-					<a href="#" data-toggle="modal" data-target="#divUserRegistrationModal"> Register </a>
-				</li>
-				
 				<li class="menu-login-user">
 					<a href="#" data-toggle="modal" data-target="#divUserLoginModal"> Login </a>
 				</li>
@@ -35,7 +34,7 @@
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown" 
 						role="button" aria-haspopup="true" aria-expanded="false">
 						<i class="glyphicon glyphicon-user"></i>
-						<span class="menu-username" translate="user"> Guest </span>
+						<span class="menu-username"> Guest </span>
 						<span class="caret"></span>
 					</a>
 					
@@ -48,56 +47,36 @@
 				
 				<li class="language-menu">
 					<div class="language-data" style="display: none;"></div>
-					<a href="javascript:void(0);" class="language-label"> 
-						<!-- <span translate="language:"> Language: </span>  -->
+					<a href="javascript:void(0);" class="language-label" onclick="toggleLanguage()"> 
 						<span class="language-code"> ENG </span>
 					</a>
-					<div class="language-selector">
-						<div class="language-item" onclick="setLanguage('eng')"> 
-							<img src="content/images/languages/eng.png" />
-							<span> English </span> 
-						</div>
-						<div class="language-item" onclick="setLanguage('fra')"> 
-							<img src="content/images/languages/fra.png" />
-							<span> French </span>
-						</div>
-						<div class="language-item" onclick="setLanguage('spa')"> 
-							<img src="content/images/languages/spa.png" />
-							<span> Spanish </span>
-						</div>
-					</div>
 				</li>
 				
 				<li class="nav-menu-list favorites-list">
-					<div class="language-data" style="display: none;"></div>
-					<a href="javascript:void(0);" class="language-label">
-						<span class="language-code"> Favorites </span>
+					<div class="nav-menu-list-data" style="display: none;"></div>
+					<a href="javascript:void(0);" class="nav-menu-list-label">
+						Saved Searches
 					</a>
-					<div class="nav-menu-selector"></div>
+					<div class="nav-menu-list-content"></div>
 				</li>
 				
-				<li style="width: 50%;">
-					<form class="navbar-form" role="search">
-						<div class="input-group" style="width: 100%;">
-							<input type="text" id="txtTopSearch" class="form-control" 
-								translate-placeholder="search" placeholder="Search" name="q">
-							<div class="input-group-btn">
-								<button class="btn btn-default" type="button" 
-									style="padding: 6px 10px;" onclick="clearSearch()">
-									<i class="glyphicon glyphicon-erase"></i>
-								</button>
-								<button class="btn btn-default top-search-button" type="button" 
-									onclick="search()">
-									<i class="glyphicon glyphicon-search"></i>
-								</button>
-							</div>
+				<li style="margin: 0 24px 0 0; padding: 8px 12px; width: 45%;">
+					<div class="input-group" style="width: 100%;">
+						<input type="text" id="txtTopSearch" class="form-control" 
+							translate-placeholder="search" placeholder="Enter an address, neighborhood, or Zip Code" name="q">
+						<div class="favorite-search-button" onclick="setUserFavorite()">
+							<i class="glyphicon glyphicon-star"></i>
 						</div>
-					</form>
-				</li>
-				
-				<li class="favorite-toggle">
-					<div class="favorite-nav-button" onclick="setUserFavorite()">
-						<i class="glyphicon glyphicon-star"></i>
+						<div class="input-group-btn">
+							<button class="btn btn-default" type="button" 
+								style="padding: 6px 10px;" onclick="clearSearch()">
+								<i class="glyphicon glyphicon-erase"></i>
+							</button>
+							<button class="btn btn-default top-search-button" type="button" 
+								onclick="search()">
+								<i class="glyphicon glyphicon-search"></i>
+							</button>
+						</div>
 					</div>
 				</li>
 				
