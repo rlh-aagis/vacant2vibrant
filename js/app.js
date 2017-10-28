@@ -247,6 +247,46 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 	
 	$('#divSidebarWrapper .load-indicator').show();
 	
+	
+	
+/*
+·         ABSSHNUM                        Share of parcels owned by absentee owner number
+
+·         ABS_QR_DES                     Quintile Rank 1-5 with higher number lower value
+
+·         AVGASSVAL                       Average Assessed Value
+
+·         AVGAV_QRD                     Average AV Quintile Descending
+
+·         Visible                                   Number of 311 Calls Visible from Street
+
+·         VIZ3_QRA                           Visible 311 Calls Quintile Rank descending (5 is high)
+
+·         PVVIS                                    Property Violations Visible from Street
+
+·         PVIS_QRA                           PV Quintile Rank Descending
+
+·         CRPERSON                          Crimes against persons Number
+
+·         CRPER_QRA                       Crimes against person Quintile Descending
+
+·         CRPROP                               Crimes against Property Number
+
+·         CPROP_QRA                      Crimes against property Quintile Rank Descending
+
+·         ADD1f                                   Number of BP Additions to Single Family
+
+·         BPA1F_QRD                       BP 1 Family Additions in Ascending Order (higher number lower)
+	
+•	Absentee Ownership ABS_QR_DES Quintile Rank 1-5 value
+•	311 Calls Visible From Street VIZ3_QRA Visible 311 Calls Quintile Rank (5 is high)
+•	Property Violations Visible from Street PVIS_QRA PV Quintile Rank
+•	Crimes Against Persons CRPER_QRA Quintile Descending
+•	Crimes Agains Property CPROP_QRA Quintile Rank Descending
+	
+	
+	-- abs_qr_des, viz3_qra, pvis_qra, crper_qra, cprop_qra
+	*/
 	// Call area stats service method based on location category
 	switch (locationCategory) {
 		case 'address':
@@ -259,10 +299,6 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 				
 				// Property Count
 				$('#txtPropertyCount').text(formatNumber(results.PropertyCount)).closest('.sidebar-item').fadeIn();
-				// Average Year Sold
-				$('#txtAverageYearSold').text(results.AverageYearSold).closest('.sidebar-item').fadeIn();
-				// Average Year Acquired
-				$('#txtAverageYearAcquired').text(results.AverageYearAcquired).closest('.sidebar-item').fadeIn();
 				// Market Value
 				if (isDefined(results.MarketValue))
 					$('#txtMarketValue').text('$' + formatNumber(results.MarketValue)).closest('.sidebar-item').fadeIn();
@@ -278,18 +314,42 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 				results = JSON.parse(results);
 				
 				// Share of parcels owned by absentee owner number
-				$('#txtAbsenteeOwnerShares').text(formatNumber(results.AbsenteeOwnerShares) + '%').closest('.sidebar-item').fadeIn();
+				$('#txtAbsenteeOwnerShares').text(formatNumber(results.AbsenteeOwnerShares)).closest('.sidebar-item').fadeIn();
+				$('#divAbsenteeOwnerSharesValue').css({
+					'background-color': getQuintileValue(results.AbsenteeOwnerShares), 
+					'width' : (((results.AbsenteeOwnerShares / 5) * 100) + '%') 
+				});
 				// Number of 311 Calls Visible from Street
 				$('#txtStreetVisible311Calls').text(formatNumber(results.StreetVisible311Calls)).closest('.sidebar-item').fadeIn();
+				$('#divStreetVisible311CallsValue').css({
+					'background-color': getQuintileValue(results.StreetVisible311Calls), 
+					'width' : (((results.StreetVisible311Calls / 5) * 100) + '%') 
+				});
 				// Property Violations Visible from Street
 				$('#txtStreetVisiblePropertyViolations').text(formatNumber(results.StreetVisiblePropertyViolations)).closest('.sidebar-item').fadeIn();
+				$('#divStreetVisiblePropertyViolationsValue').css({
+					'background-color': getQuintileValue(results.StreetVisiblePropertyViolations), 
+					'width' : (((results.StreetVisiblePropertyViolations / 5) * 100) + '%') 
+				});
 				// Crimes against persons Number
 				$('#txtCrimesAgainstPersons').text(formatNumber(results.CrimesAgainstPersons)).closest('.sidebar-item').fadeIn();
+				$('#divCrimesAgainstPersonsValue').css({
+					'background-color': getQuintileValue(results.CrimesAgainstPersons), 
+					'width' : (((results.CrimesAgainstPersons / 5) * 100) + '%') 
+				});
 				// Crimes against persons Number
 				$('#txtCrimesAgainstProperty').text(formatNumber(results.CrimesAgainstProperty)).closest('.sidebar-item').fadeIn();
+				$('#divCrimesAgainstPropertyValue').css({
+					'background-color': getQuintileValue(results.CrimesAgainstProperty), 
+					'width' : (((results.CrimesAgainstProperty / 5) * 100) + '%') 
+				});
 				// Single Family BP additions
 				$('#txtSingleFamilyBPAdditions').text(formatNumber(results.SingleFamilyBPAdditions)).closest('.sidebar-item').fadeIn();
-
+				$('#divSingleFamilyBPAdditionsValue').css({
+					'background-color': getQuintileValue(results.SingleFamilyBPAdditions), 
+					'width' : (((results.SingleFamilyBPAdditions / 5) * 100) + '%') 
+				});
+				
 				$('#divSidebarWrapper .load-indicator').fadeOut();
 			});
 			break;
@@ -299,16 +359,40 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 				
 				// Share of parcels owned by absentee owner number
 				$('#txtAbsenteeOwnerShares').text(formatNumber(results.AbsenteeOwnerShares)).closest('.sidebar-item').fadeIn();
+				$('#divAbsenteeOwnerSharesValue').css({
+					'background-color': getQuintileValue(results.AbsenteeOwnerShares), 
+					'width' : (((results.AbsenteeOwnerShares / 5) * 100) + '%') 
+				});
 				// Number of 311 Calls Visible from Street
 				$('#txtStreetVisible311Calls').text(formatNumber(results.StreetVisible311Calls)).closest('.sidebar-item').fadeIn();
+				$('#divStreetVisible311CallsValue').css({
+					'background-color': getQuintileValue(results.StreetVisible311Calls), 
+					'width' : (((results.StreetVisible311Calls / 5) * 100) + '%') 
+				});
 				// Property Violations Visible from Street
 				$('#txtStreetVisiblePropertyViolations').text(formatNumber(results.StreetVisiblePropertyViolations)).closest('.sidebar-item').fadeIn();
+				$('#divStreetVisiblePropertyViolationsValue').css({
+					'background-color': getQuintileValue(results.StreetVisiblePropertyViolations), 
+					'width' : (((results.StreetVisiblePropertyViolations / 5) * 100) + '%') 
+				});
 				// Crimes against persons Number
 				$('#txtCrimesAgainstPersons').text(formatNumber(results.CrimesAgainstPersons)).closest('.sidebar-item').fadeIn();
+				$('#divCrimesAgainstPersonsValue').css({
+					'background-color': getQuintileValue(results.CrimesAgainstPersons), 
+					'width' : (((results.CrimesAgainstPersons / 5) * 100) + '%') 
+				});
 				// Crimes against persons Number
 				$('#txtCrimesAgainstProperty').text(formatNumber(results.CrimesAgainstProperty)).closest('.sidebar-item').fadeIn();
+				$('#divCrimesAgainstPropertyValue').css({
+					'background-color': getQuintileValue(results.CrimesAgainstProperty), 
+					'width' : (((results.CrimesAgainstProperty / 5) * 100) + '%') 
+				});
 				// Single Family BP additions
 				$('#txtSingleFamilyBPAdditions').text(formatNumber(results.SingleFamilyBPAdditions)).closest('.sidebar-item').fadeIn();
+				$('#divSingleFamilyBPAdditionsValue').css({
+					'background-color': getQuintileValue(results.SingleFamilyBPAdditions), 
+					'width' : (((results.SingleFamilyBPAdditions / 5) * 100) + '%') 
+				});
 
 				$('#divSidebarWrapper .load-indicator').fadeOut();
 			});
@@ -322,6 +406,24 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 			break;
 	}
 };
+
+function getQuintileValue (value) {
+	
+	var ret = '';
+	
+	if (value <= 1) {
+		ret = '#EA0B0B';
+	} else if (value <= 2) {
+		ret = '#EA7107';
+	} else if (value <= 3) {
+		ret = '#FCD735';
+	} else if (value <= 4) {
+		ret = '#E4F407';
+	} else if (value <= 5) {
+		ret = '#41BC25';
+	}
+	return ret;
+}
 
 function toggleLanguage () {
 	

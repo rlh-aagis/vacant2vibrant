@@ -191,3 +191,34 @@
 	width: 95px;
 }
 
+.sidebar-item-bar {
+	border: 1px solid #AAA;
+    height: 20px;
+    margin: 0 10%;
+    position: relative;
+	width: 80%;
+}
+
+.sidebar-item-bar-value {
+	background-color: rgba(0, 0, 0, 0.2);
+	color: #FFF;
+	font-weight: normal;
+	height: 18px;
+	left: 0;
+	line-height: 18px;
+	margin: 0;
+	position: absolute;
+	text-align: center;
+	text-indent: 0;
+	top: 0px;
+	width: 45px;
+}
+
+.sidebar-item-inner-bar {
+	background-color: #AAA;
+	height: 18px; 
+	width: 0%;
+}
+
+
+

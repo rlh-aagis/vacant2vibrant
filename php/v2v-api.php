@@ -1,9 +1,8 @@
 <?php
 
+	require_once('conn.php');
+
 	if (! session_id()) session_start();
-	
-	error_reporting(E_ALL | E_STRICT);
-	ini_set('display_errors', 'On');
 	
 	header('Access-Control-Allow-Headers: Content-Type');
 	header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
@@ -27,22 +26,6 @@
 		case 'GetMapProperties': get_map_properties(); break;
 		case 'GetNeighborhoodGeojson': get_neighborhood_geojson(); break;
 		case 'GetPropertyDetails': get_property_details(); break;
-	}
-	
-	function check_access_key () {
-		
-		// List of allowed keys
-		$keys = array(
-			'D77C71BCE446924A2F7E1D21C44C7',	// Dev Key
-		);
-		
-		// Get and check access key
-		if ((! isset($_REQUEST['key'])) || (! in_array($_REQUEST['key'], $keys))) {
-			echo(json_encode(array( 
-				'error' => 'Invalid access key supplied')
-			));
-			die();
-		}
 	}
 	
 	// autocomplete - Returns autocomplete results for land bank properties based on a search string 
@@ -247,14 +230,17 @@
 
 		$query = "
 			SELECT 
-				  ROUND(AVG(CAST(ABSSHNUM AS INT)), 0) AS AbsenteeOwnerShares
-				, ROUND(AVG(CAST(Visible AS INT)), 0) AS StreetVisible311Calls
-				, ROUND(AVG(CAST(PVVIS AS INT)), 0) AS StreetVisiblePropertyViolations
-				, ROUND(AVG(CAST(CRPERSON AS INT)), 0) AS CrimesAgainstPersons
-				, ROUND(AVG(CAST(CRPROP AS INT)), 0) AS CrimesAgainstProperty
-				, ROUND(AVG(CAST(ADD1f AS INT)), 0) AS SingleFamilyBPAdditions 
-			FROM public.v2vneighborhood 
-			WHERE (neighshape ILIKE '$neighborhood') 
+				  ROUND(AVG(CAST(abs_qr_des AS INT)), 2)
+				, ROUND(AVG(CAST(viz3_qra AS INT)), 2)
+				, ROUND(AVG(CAST(pvis_qra AS INT)), 2)
+				, ROUND(AVG(CAST(crper_qra AS INT)), 2)
+				, ROUND(AVG(CAST(cprop_qra AS INT)), 2)
+				, ROUND(AVG(CAST(bpa1f_qra AS INT)), 2)
+			FROM public.quintilecityblock Q
+			WHERE ST_Intersects(Q.geom, (SELECT 
+				geom 
+				FROM public.v2vneighborhood N 
+				WHERE (neighshape ILIKE '$neighborhood')))
 			LIMIT 1 
 		";
 		
@@ -287,15 +273,18 @@
 		
 		$query = "
 			SELECT 
-				  ROUND(AVG(CAST(ABSSHNUM AS INT)), 0) AS AbsenteeOwnerShares
-				, ROUND(AVG(CAST(Visible AS INT)), 0) AS StreetVisible311Calls
-				, ROUND(AVG(CAST(PVVIS AS INT)), 0) AS StreetVisiblePropertyViolations
-				, ROUND(AVG(CAST(CRPERSON AS INT)), 0) AS CrimesAgainstPersons
-				, ROUND(AVG(CAST(CRPROP AS INT)), 0) AS CrimesAgainstProperty
-				, ROUND(AVG(CAST(ADD1f AS INT)), 0) AS SingleFamilyBPAdditions 
-			FROM public.v2vzipcode 
-			WHERE (zipcode ILIKE '$zip_code')
-			LIMIT 1 
+				  ROUND(AVG(CAST(abs_qr_des AS INT)), 2)
+				, ROUND(AVG(CAST(viz3_qra AS INT)), 2)
+				, ROUND(AVG(CAST(pvis_qra AS INT)), 2)
+				, ROUND(AVG(CAST(crper_qra AS INT)), 2)
+				, ROUND(AVG(CAST(cprop_qra AS INT)), 2)
+				, ROUND(AVG(CAST(bpa1f_qra AS INT)), 2)
+			FROM public.quintilecityblock Q
+			WHERE ST_Intersects(Q.geom, (SELECT 
+				geom 
+				FROM public.v2vzipcode Z 
+				WHERE (Z.zipcode ILIKE '$zip_code')))
+			LIMIT 1
 		";
 		
 		$conn = get_postgresql_db_connection('postgres');
@@ -519,19 +508,15 @@
 	
 	function get_postgresql_db_connection ($db_name='postgres') {
 		
-		// AAGIS PostgreSQL Server
-		$host = '45.40.137.203';
-		$port = '5432';
-		$user = 'geoadmin2';
-		$password = 'geo9126';
-
-		$pgdbconn = pg_connect("
-			host=$host 
-			port=$port 
-			dbname=$db_name 
-			user=$user 
-			password=$password
-		") or die ('An error occurred.\n');
+		global $data_conn;
+		
+		$pgdbconn = pg_connect(
+			" host=" . $data_conn->host . 
+			" port=" . $data_conn->port .
+			" dbname=" . $db_name . 
+			" user=" . $data_conn->user . 
+			" password=" . $data_conn->password
+		) or die ('An error occurred.\n');
 		
 		return $pgdbconn;
 	}

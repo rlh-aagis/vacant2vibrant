@@ -1,12 +1,15 @@
 <?php
 
-	if (! session_id()) session_start();
+	require_once('conn.php');
 
-	error_reporting(E_ALL | E_STRICT);
-	ini_set('display_errors', 'On');
+	if (! session_id()) session_start();
 	
-	if (! isset($dbh)) $dbh = new PDO("pgsql:dbname=v2v_auth;host=45.40.137.203", 'postgres', 'geo9126'); // AAGIS Dev Environment
-	//if (! isset($dbh)) $dbh = new PDO("pgsql:dbname=v2v_auth;host=localhost", 'v2v_user', 'password'); 	// Local Dev Environment
+	if (! isset($dbh)) $dbh = new PDO("pgsql:" .
+		"dbname=" . $auth_conn->db_name . 
+		";host=" . $auth_conn->host, 
+		$auth_conn->user, 
+		$auth_conn->password
+	);
 	
 	header('Access-Control-Allow-Headers: Content-Type');
 	header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
@@ -247,7 +250,7 @@
 				now()
 			)
 		";
-			
+		
 		$conn = get_postgresql_db_connection('v2v_auth');
 		
 		$result = pg_query($conn, $query) 
@@ -260,19 +263,15 @@
 	
 	function get_postgresql_db_connection ($db_name='v2v_auth') {
 		
-		// AAGIS PostgreSQL Server
-		$host = '45.40.137.203';
-		$port = '5432';
-		$user = 'geoadmin2';
-		$password = 'geo9126';
-
-		$pgdbconn = pg_connect("
-			host=$host 
-			port=$port 
-			dbname=$db_name 
-			user=$user 
-			password=$password
-		") or die ('An error occurred.\n');
+		global $auth_conn;
+		
+		$pgdbconn = pg_connect(
+			" host=" . $auth_conn->host . 
+			" port=" . $auth_conn->port .
+			" dbname=" . $db_name . 
+			" user=" . $auth_conn->user . 
+			" password=" . $auth_conn->password
+		) or die ('An error occurred.\n');
 		
 		return $pgdbconn;
 	}
