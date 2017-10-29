@@ -226,13 +226,17 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 	if (! isDefined(locationCategory)) 
 		locationCategory = userLocation.category || 'address';
 	
+	var adjustedLocationCategory = ((locationCategory == 'address') 
+		&& (mapInfo.radiusType == 'neighborhood')) ? 'nbrhd' : locationCategory;
+		
 	var areaStatsHeaderHTML = '';
-	switch (locationCategory) {
+	switch (adjustedLocationCategory) {
 		case 'address':
-			areaStatsHeaderHTML = ((app.loggedIn) ? 'Within 0.25 Miles of ' : 'Neighborhood of ') + userLocation.label;
+			areaStatsHeaderHTML = (app.loggedIn) ? ('Within 0.25 Miles of ' + userLocation.label) : 
+				('Neighborhood of ' + userLocation.neighborhood);
 			break;
 		case 'nbrhd':
-			areaStatsHeaderHTML = locationLabel + ' Neighborhood';
+			areaStatsHeaderHTML = 'Neighborhood of ' + (userLocation.neighborhood || locationLabel);
 			break;
 		case 'zip':
 			areaStatsHeaderHTML = 'Zip ' + locationLabel;
@@ -256,6 +260,7 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 				userLocation.searchRadiusMiles,
 				mapInfo.radiusType).then(function (results) {
 				
+				if (! isDefined(results)) return;
 				results = JSON.parse(results);
 				
 				// Property Count

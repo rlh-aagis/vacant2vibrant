@@ -25,6 +25,7 @@
 		case 'GetAutocompleteItemLatLng': get_autocomplete_item_lat_lng(); break;
 		case 'GetMapProperties': get_map_properties(); break;
 		case 'GetNeighborhoodGeojson': get_neighborhood_geojson(); break;
+		case 'GetAddressNeighborhoodGeojson': get_address_neighborhood_geojson(); break;
 		case 'GetPropertyDetails': get_property_details(); break;
 	}
 	
@@ -37,12 +38,18 @@
 		
 		$query = "
 			SELECT 
-				  TA.gid AS Gid
+				  COALESCE(LBP1.gid, Z.gid, N.gid, TA.gid) AS Gid
 				, TA.name AS Name
 				, TA.category AS Category
-			FROM v2vtypeahead TA 
-			LEFT OUTER JOIN landbankprops LBP ON TA.gid = LBP.gid
-			WHERE name ILIKE '%$search%'
+			FROM v2vtypeahead TA
+			LEFT OUTER JOIN landbankprops LBP1 ON (TA.name ILIKE LBP1.address)
+			LEFT OUTER JOIN v2vzipcode Z ON (TA.name ILIKE ('%' || Z.zipcode || '%'))
+			LEFT OUTER JOIN v2vneighborhood N ON (TA.name ILIKE ('%' || N.neighshape || '%'))
+			WHERE (1 = 1)
+			AND (((category ILIKE '%address%') AND (LBP1.address LIKE '%$search%'))
+			OR (category ILIKE '%zip%')
+			OR (category ILIKE '%nbrhd%'))
+			AND (TA.name ILIKE '%$search%')
 			ORDER BY Name 
 			LIMIT 10
 		";
@@ -97,10 +104,10 @@
 		echo json_encode($area_stats);
 	}
 	
-	// get_autocomplete_item_geojson - get the geojson geometry for an autocomplete item based on the specified gid
-	function get_autocomplete_item_geojson ($gid = null) {
+	// get_autocomplete_item_geojson - get the geojson geometry for an autocomplete item based on the specified name
+	function get_autocomplete_item_geojson ($name = null) {
 		
-		$gid = (isset($gid)) ? $gid : (isset($_REQUEST['Gid']) ? pg_escape_string($_REQUEST['Gid']) : null);
+		$name = (isset($name)) ? $name : (isset($_REQUEST['Name']) ? pg_escape_string($_REQUEST['Name']) : null);
 		
 		$query = "
 			SELECT 
@@ -108,7 +115,7 @@
 				, ST_Y(ST_Centroid(geom)) AS CenterLat
 				, ST_X(ST_Centroid(geom)) AS CenterLng	  
 				, ST_AsGeoJSON(geom) AS GeoJSON
-			FROM v2vtypeahead WHERE gid = $gid
+			FROM v2vtypeahead WHERE name ILIKE '%$name%'
 		";
 		
 		$conn = get_postgresql_db_connection('postgres');
@@ -159,6 +166,36 @@
 		echo json_encode($neighborhood_geojson);
 	}
 	
+	// get_address_neighborhood_geojson - get the geojson geometry for a neighborhood based on a specified address gid
+	function get_address_neighborhood_geojson ($gid = null) {
+		
+		$gid = (isset($gid)) ? $gid : (isset($_REQUEST['Gid']) ? pg_escape_string($_REQUEST['Gid']) : null);
+		
+		$query = "
+			SELECT 
+				ST_AsGeoJSON(H.geom) AS GeoJSON 
+			FROM landbankprops LBP 
+			LEFT OUTER JOIN v2vneighborhood H ON (LBP.neigh ILIKE neighshape) 
+			WHERE (LBP.gid = $gid) 
+			LIMIT 1 
+		";
+		
+		$conn = get_postgresql_db_connection('postgres');
+		
+		$result = pg_query($conn, $query) 
+			or die ('Error: ' + pg_last_error($conn) + '\n');
+		
+		$neighborhood_geojson = null;
+		$row = pg_fetch_row($result);
+		$neighborhood_geojson = array(
+			'GeoJSON' => $row[0]
+		);
+		
+		pg_close($conn);
+		
+		echo json_encode($neighborhood_geojson);
+	}
+	
 	// get_area_statistics_by_location - Gathers a number of statistics over a specified radius from a center point
 	function get_area_statistics_by_location ($lat = null, $lng = null, $radius_miles = null) {
 		
@@ -178,7 +215,7 @@
 				, ROUND(AVG(CAST(bpa1f_qra AS INT)), 2) AS SingleFamilyBPAdditions
 			FROM public.quintilecityblock Q 
 			WHERE ST_Intersects(Q.geom, 
-				ST_Buffer(ST_SetSRID(ST_MakePoint($lng, $lat), 4326), $radius_miles)) 
+				ST_Buffer(ST_MakePoint($lng, $lat)::geography, 402.336)) 
 			LIMIT 1)"
 			:
 			" (SELECT 

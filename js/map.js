@@ -317,9 +317,10 @@ function searchMap (locationGid, locationName, locationCategory, locationLat, lo
 	
 		// For neighborhood and zip searches
 		case 'nbrhd':
+			userLocation.neighborhood = locationName;
 		case 'zip':
 			map.closePopup();
-			searchByNeighborhoodOrZip(locationGid);
+			searchByNeighborhoodOrZip(locationName);
 			break;
 			
 		// For city searches
@@ -374,6 +375,26 @@ function searchByAddress (locationGid, locationLat, locationLng) {
 			refreshMarkers();
 			
 		// If user is not logged in, draw the search property's encompasing neighborhood
+		} else if (isDefined(locationGid)) {
+			
+			service.getAddressNeighborhoodGeojson(locationGid).then(function (results) {
+				
+				if (! isDefined(results)) return;
+				
+				try {
+					results = JSON.parse(results);
+					var geojson = JSON.parse(results.GeoJSON);
+					
+					mapLayers.searchRadiusLayer = new L.geoJson(geojson, { style: layerStyleFcn });
+					mapLayers.searchRadiusLayer.addTo(map);
+					
+					setTimeout(function () {
+						map.fitBounds(mapLayers.searchRadiusLayer.getBounds());
+						refreshMarkers(locationGid);
+					}, 100);
+					
+				} catch (ex) { }
+			});
 		} else {
 			
 			service.getNeighborhoodGeojson(userLocation.neighborhood).then(function (results) {
@@ -388,7 +409,8 @@ function searchByAddress (locationGid, locationLat, locationLng) {
 					mapLayers.searchRadiusLayer.addTo(map);
 					
 					setTimeout(function () {
-						refreshMarkers();
+						map.fitBounds(mapLayers.searchRadiusLayer.getBounds());
+						refreshMarkers(locationGid);
 					}, 100);
 					
 				} catch (ex) { }
@@ -410,7 +432,7 @@ function searchByAddress (locationGid, locationLat, locationLng) {
 	}
 }
 
-function searchByNeighborhoodOrZip (locationGid) {
+function searchByNeighborhoodOrZip (locationName) {
 	
 	var layerStyleFcn = function (feature) {
 		return {
@@ -422,7 +444,7 @@ function searchByNeighborhoodOrZip (locationGid) {
 		};
 	};
 	
-	service.getAutocompleteItemGeojson(locationGid).then(function (results) {
+	service.getAutocompleteItemGeojson(locationName).then(function (results) {
 		
 		results = JSON.parse(results);
 		var geojson = JSON.parse(results.GeoJSON);
@@ -484,7 +506,7 @@ function searchByCity () {
 	} catch (ex) { }
 }
 
-function refreshMarkers () {
+function refreshMarkers (selectedPropertyId) {
 	
 	for (var i = 0; i < mapLayers.markers.length; i++) {
 
@@ -494,7 +516,7 @@ function refreshMarkers () {
 		if (app.loggedIn && (userLocation.category == 'address') && (mapInfo.radiusType != 'neighborhood')) {
 			var userLatLng = new L.LatLng(userLocation.lat, userLocation.lng);
 			propertyOutsideBounds = (userLatLng.distanceTo(propertyLocation) > userLocation.searchRadiusMiles);
-		} else if (isDefined(mapLayers.searchRadiusLayer)) {
+		} else if ((userLocation.category == 'address') && (isDefined(mapLayers.searchRadiusLayer))) {
 			
 			propertyOutsideBounds = (leafletPip.pointInLayer(propertyLocation, mapLayers.searchRadiusLayer, true).length == 0);
 		}
@@ -513,17 +535,24 @@ function refreshMarkers () {
 		
 		mapLayers.markers[i].setIcon(markerIcon);
 
-		if (mapLayers.markers[i] == mapLayers.selectedMarker)
-			$(mapLayers.selectedMarker._icon).addClass('selected');
+		if ((mapLayers.markers[i] == mapLayers.selectedMarker) 
+			|| (mapLayers.markers[i].propertyId == selectedPropertyId)) {
+			$(mapLayers.markers[i]._icon).trigger('click');
+			$(mapLayers.markers[i]._icon).addClass('selected');
+		}
+		
+		mapLayers.selectedMarker = null;
 	}
 }
 
 function refreshProperties () {
 	
 	var markerClickEvent = function (e) {
-
+	
 		mapLayers.selectedMarker = e.target;
 		var markerImg = $(e.target._icon);
+		
+		L.DomEvent.disableClickPropagation(mapLayers.selectedMarker);
 		
 		service.getPropertyDetails(e.target.propertyId).then(function (results) {
 	

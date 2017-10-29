@@ -5,6 +5,7 @@ var service = {
 	apiUrl: 'http://aagis.net/v2v/php/v2v-api.php', // PROD
 	getMapProperties: null,
 	getNeighborhoodGeojson: null,
+	getAddressNeighborhoodGeojson: null,
 	getPropertyDetail: null,
 	getAutocompleteItemGeojson: null,
 	getAutocompleteItemLatLng: null
@@ -121,12 +122,12 @@ service.autocomplete = function (search, maxResults) {
 	return deferred;
 };
 
-service.getAutocompleteItemGeojson = function (gid) {
+service.getAutocompleteItemGeojson = function (name) {
 
 	var url = service.apiUrl + '?action=GetAutocompleteItemGeojson';
-	if (isDefined(gid)) url += '&Gid=' + gid;
+	if (isDefined(name)) url += '&Name=' + name;
 	url += '&key=' + service.apiKey;
-
+	
 	var deferred = $.ajax({
 		url: url,
 		type: 'GET',
@@ -161,6 +162,24 @@ service.getNeighborhoodGeojson = function (neighborhoodName) {
 
 	var url = service.apiUrl + '?action=GetNeighborhoodGeojson';
 	if (isDefined(neighborhoodName)) url += '&NeighborhoodName=' + neighborhoodName;
+	url += '&key=' + service.apiKey;
+
+	var deferred = $.ajax({
+		url: url,
+		type: 'GET',
+		beforeSend: function (xhr) { },
+		success: function (data, textStatus, xhr) { },
+		complete: function (xhr, textStatus) { },
+		error: function (xhr, textStatus, errorThrown) { }
+	});
+	
+	return deferred;
+};
+
+service.getAddressNeighborhoodGeojson = function (addressGid) {
+
+	var url = service.apiUrl + '?action=GetAddressNeighborhoodGeojson';
+	if (isDefined(addressGid)) url += '&Gid=' + addressGid;
 	url += '&key=' + service.apiKey;
 
 	var deferred = $.ajax({
