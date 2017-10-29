@@ -220,5 +220,49 @@
 	width: 0%;
 }
 
+.q1-box,
+.q2-box,
+.q3-box,
+.q4-box,
+.q5-box {
+	border-left: 1px dotted #959595;
+	display: inline-block;
+	height: 18px;
+	left: auto;
+	position: absolute;
+	width: 20%;
+}
+
+.q1-box {
+	border: 0;
+	left: 0;
+}
+
+.q2-box {
+	left: 20%;
+}
+
+.q3-box {
+	left: 40%;
+}
+
+.q4-box {
+	left: 60%;
+}
+
+.q5-box {
+	left: 80%;
+}
+
+.q-city-average {
+	border-left: 4px solid rgba(255, 20, 20, 0.7);
+    border-radius: 3px;
+	display: inline-block;
+    height: 22px;
+    left: 0;
+    position: absolute;
+	top: -2px;
+    width: 3px;
+}
 
 

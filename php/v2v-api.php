@@ -165,14 +165,43 @@
 		$lat = (isset($lat)) ? $lat : (isset($_REQUEST['Lat']) ? pg_escape_string($_REQUEST['Lat']) : null);
 		$lng = (isset($lng)) ? $lng : (isset($_REQUEST['Lng']) ? pg_escape_string($_REQUEST['Lng']) : null);
 		$radius_miles = (isset($radius_miles)) ? $radius_miles : (isset($_REQUEST['Radius']) ? pg_escape_string($_REQUEST['Radius']) : null);
-		
+		$radius_type = (isset($radius_type)) ? $radius_type : (isset($_REQUEST['RadiusType']) ? pg_escape_string($_REQUEST['RadiusType']) : null);
+
 		// Include additional details if the user is logged in
-		$additional_details = (isset($_SESSION['Username'])) ? '
-				, ROUND(AVG(CAST(mktval AS INT)), 2) AS MarketValue
-				, ROUND(AVG(CAST(sqft AS INT)), 2) AS Sqft
-		' : '';
-		
-		$where_condition = isset($_SESSION['Username']) ?
+		$quintiles_query = (isset($_SESSION['Username']) && ($radius_type != 'neighborhood')) ? 
+			" (SELECT 
+				  ROUND(AVG(CAST(abs_qr_des AS INT)), 2) AS AbsenteeOwnerShares
+				, ROUND(AVG(CAST(viz3_qra AS INT)), 2) AS StreetVisible311Calls
+				, ROUND(AVG(CAST(pvis_qra AS INT)), 2) AS StreetVisiblePropertyViolations
+				, ROUND(AVG(CAST(crper_qra AS INT)), 2) AS CrimesAgainstPersons
+				, ROUND(AVG(CAST(cprop_qra AS INT)), 2) AS CrimesAgainstProperty
+				, ROUND(AVG(CAST(bpa1f_qra AS INT)), 2) AS SingleFamilyBPAdditions
+			FROM public.quintilecityblock Q 
+			WHERE ST_Intersects(Q.geom, 
+				ST_Buffer(ST_SetSRID(ST_MakePoint($lng, $lat), 4326), $radius_miles)) 
+			LIMIT 1)"
+			:
+			" (SELECT 
+				  ROUND(AVG(CAST(abs_qr_des AS INT)), 2) AS AbsenteeOwnerShares
+				, ROUND(AVG(CAST(viz3_qra AS INT)), 2) AS StreetVisible311Calls
+				, ROUND(AVG(CAST(pvis_qra AS INT)), 2) AS StreetVisiblePropertyViolations
+				, ROUND(AVG(CAST(crper_qra AS INT)), 2) AS CrimesAgainstPersons
+				, ROUND(AVG(CAST(cprop_qra AS INT)), 2) AS CrimesAgainstProperty
+				, ROUND(AVG(CAST(bpa1f_qra AS INT)), 2) AS SingleFamilyBPAdditions
+			FROM public.quintilecityblock Q 
+			WHERE ST_Intersects(Q.geom, (SELECT 
+				geom 
+				FROM public.v2vneighborhood N 
+				WHERE (neighshape ILIKE (SELECT neighshape 
+					FROM public.v2vneighborhood N 
+					WHERE ST_Contains( 
+						  ST_SetSRID(N.geom, 4326) 
+						, ST_SetSRID(ST_MakePoint($lng, $lat), 4326) 
+					) LIMIT 1)
+				))) 
+			LIMIT 1)";
+			
+		$where_condition = (isset($_SESSION['Username']) && ($radius_type != 'neighborhood')) ?
 			" AND (ST_Distance_Sphere(geom, ST_MakePoint($lng, $lat)) <= $radius_miles)" :
 			" AND (neigh ILIKE ( 
 				SELECT neighshape 
@@ -182,16 +211,24 @@
 					, ST_SetSRID(ST_MakePoint($lng, $lat), 4326) 
 				) LIMIT 1 
 			))";
-		
+			
 		$query = "
 			SELECT 
 				  COUNT(*) AS PropertyCount 
-				, ROUND(AVG(CAST(yearacq AS INT)), 0) AS AverageYearSold 
-				, ROUND(AVG(CAST(yearsold AS INT)), 0) AS AverageYearAcquired 
-				$additional_details 
-			FROM landbankprops 
+				, Qnt.AbsenteeOwnerShares
+				, Qnt.StreetVisible311Calls
+				, Qnt.StreetVisiblePropertyViolations
+				, Qnt.CrimesAgainstPersons
+				, Qnt.CrimesAgainstProperty
+				, Qnt.SingleFamilyBPAdditions
+				, ROUND(AVG(CAST(LBP.mktval AS INT)), 2) AS MarketValue
+				, ROUND(AVG(CAST(LBP.sqft AS INT)), 2) AS Sqft
+			FROM landbankprops LBP, $quintiles_query AS Qnt
 			WHERE (1 = 1) 
 			$where_condition
+			GROUP BY Qnt.AbsenteeOwnerShares, Qnt.StreetVisible311Calls,
+				Qnt.StreetVisiblePropertyViolations, Qnt.CrimesAgainstPersons, 
+				Qnt.CrimesAgainstProperty, Qnt.SingleFamilyBPAdditions
 		";
 		
 		$conn = get_postgresql_db_connection('postgres');
@@ -204,16 +241,24 @@
 			if (isset($_SESSION['Username'])) {
 				$area_stats = array(
 					  'PropertyCount' => $row[0]
-					, 'AverageYearSold' => 	$row[1]
-					, 'AverageYearAcquired' => 	$row[2]
-					, 'MarketValue' => 	$row[3]
-					, 'Sqft' => 	$row[4]
+					, 'AbsenteeOwnerShares' => $row[1]
+					, 'StreetVisible311Calls' => $row[2]
+					, 'StreetVisiblePropertyViolations' => $row[3]
+					, 'CrimesAgainstPersons' => $row[4]
+					, 'CrimesAgainstProperty' => $row[5]
+					, 'SingleFamilyBPAdditions' => $row[6]
+					, 'MarketValue' => $row[7]
+					, 'Sqft' => $row[8]
 				);
 			} else {
 				$area_stats = array(
 					  'PropertyCount' => $row[0]
-					, 'AverageYearSold' => 	$row[1]
-					, 'AverageYearAcquired' => 	$row[2]
+					, 'AbsenteeOwnerShares' => $row[1]
+					, 'StreetVisible311Calls' => $row[2]
+					, 'StreetVisiblePropertyViolations' => $row[3]
+					, 'CrimesAgainstPersons' => $row[4]
+					, 'CrimesAgainstProperty' => $row[5]
+					, 'SingleFamilyBPAdditions' => $row[6]
 				);
 			}
 		}

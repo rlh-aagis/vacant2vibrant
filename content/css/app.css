@@ -25,6 +25,10 @@ body {
 	}
 }
 
+.display-inline-block {
+	display: inline-block !important;
+}
+
 .hide-overflow {
 	overflow-x: hidden;
     text-overflow: ellipsis;
@@ -59,6 +63,12 @@ body > .container > div {
 	color: #22B;
 }
 
+.toggle-value-label {
+	display: inline-block;
+	font-size: 13px;
+	margin: 4px 4px 0 4px;
+	vertical-align: top;
+}
 
 /* Landing Page Styles - Begin */
 
@@ -121,7 +131,7 @@ body > .container > div {
 .leaflet-top.leaflet-left {
 	left: auto;
     right: 11px;
-	top: 186px;
+	top: 232px;
 }
 
 .leaflet-top.leaflet-right {
@@ -296,6 +306,7 @@ body > .container > div {
 
 .map-button.map-back-view-button > i.glyphicon {
 	position: absolute;
+	right: 3px;
 	top: 7px;
 }
 
@@ -305,11 +316,23 @@ body > .container > div {
 }
 
 .leaflet-marker-icon.selected {
-	border: 2px dotted rgba(255, 255, 255, 0.8);
+	border: 2px dotted rgba(255, 255, 20, 1.0);
 	border-radius: 20px;
     height: 34px !important;
 	padding: 4px;
     width: 34px !important;
+}
+
+.map-settings-content {
+	background-color: rgba(255, 255, 255, 0.92);
+	border: 2px solid rgba(0,0,0,0.2);
+	border-radius: 3px;
+	display: none;
+	font-size: 14px;
+	padding: 8px;
+	position: absolute;
+	right: -2px;
+	width: 232px;
 }
 
 /* Navbar Styles */
@@ -587,4 +610,71 @@ nav.navbar li.active  > a {
 }
 
 /* Auth screens related styles - End */
+
+/* Toggle Switch Styles - Begin */
+
+/* The switch - the box around the slider */
+.switch {
+	position: relative;
+	display: inline-block;
+	width: 60px;
+	height: 28px;
+}
+
+/* Hide default HTML checkbox */
+.switch input { 
+	display:none; 
+}
+
+/* The slider */
+.slider {
+	position: absolute;
+	cursor: pointer;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: #ccc;
+	-webkit-transition: .4s;
+	transition: .4s;
+}
+
+.slider:before {
+	position: absolute;
+	content: "";
+	height: 24px;
+	width: 24px;
+	left: 4px;
+	bottom: 2px;
+	background-color: white;
+	-webkit-transition: .4s;
+	transition: .4s;
+}
+
+input:checked + .slider {
+	background-color: #2196F3;
+}
+
+input:focus + .slider {
+	box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+	-webkit-transform: translateX(26px);
+	-ms-transform: translateX(26px);
+	transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+	border-radius: 28px;
+}
+
+.slider.round:before {
+	border-radius: 50%;
+}
+
+/* Toggle Switch Styles - End */
+
+
 

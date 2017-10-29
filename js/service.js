@@ -45,12 +45,13 @@ service.getPropertyDetails = function (propertyId) {
 	return deferred;
 };
 
-service.getAreaStatisticsByLocation = function (lat, lng, radius) {
+service.getAreaStatisticsByLocation = function (lat, lng, radius, radiusType) {
 
 	var url = service.apiUrl + '?action=GetAreaStatisticsByLocation';
 	if (isDefined(lat)) url += '&Lat=' + lat;
 	if (isDefined(lng)) url += '&Lng=' + lng;
 	if (isDefined(radius)) url += '&Radius=' + radius;
+	if (isDefined(radiusType)) url += '&RadiusType=' + radiusType;
 	url += '&key=' + service.apiKey;
 
 	var deferred = $.ajax({

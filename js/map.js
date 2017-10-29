@@ -12,7 +12,8 @@ var markerIcons = {
 
 var mapLayers = {
 	markers: [],
-	searchRadiusLayer: null
+	searchRadiusLayer: null,
+	selectedMarker: null
 };
 
 var userLocation = {
@@ -26,6 +27,7 @@ var userLocation = {
 };
 
 var mapInfo = {
+	radiusType: 'quarter-mile',
 	viewHistory: [{
 		Lat: userLocation.lat,
 		Lng: userLocation.lng,
@@ -146,11 +148,11 @@ function initMap (mapElementId) {
 			var backViewButton = L.DomUtil.create('div');
 			
 			$(backViewButton).addClass('map-button map-back-view-button')
-				.html('<i class="glyphicon glyphicon-zoom-in"></i>');
+				.html('<i class="glyphicon glyphicon-zoom-in" title="Go to previous map view"></i>');
 
 			$(backViewButton).bind('click', function () {
 				
-				console.log('Clicked back view button w/ map view history: ', mapInfo.viewHistory); // Debug
+				//console.log('Clicked back view button w/ map view history: ', mapInfo.viewHistory); // Debug
 				
 				if (mapInfo.viewHistory.length == 0) return;
 				
@@ -171,9 +173,48 @@ function initMap (mapElementId) {
 	};
 	L.control.backView({ position: 'topright' }).addTo(map);
 
+	// Add map settings button control to map
+	L.Control.MapSettings = L.Control.extend({
+		onAdd: function (map) {
+			var mapSettingsButton = L.DomUtil.create('div');
+			
+			$(mapSettingsButton).addClass('map-button map-settings-button').html(
+				'<i class="glyphicon glyphicon-cog" title="Map Settings" style="left: 3px; top: 2px;"></i>' +
+				'<div class="map-settings-content">' +
+					'<div style="margin: 0 0 8px 0;"> Map Search Type Preferred </div>' +
+					'<div class="toggle-value-label"> 0.25 Mile </div>' +
+					'<label class="switch">' +
+						'<input type="checkbox" onchange="toggleRadiusType()">' +
+						'<span class="slider round"></span>' +
+					'</label>' +
+					'<div class="toggle-value-label"> Neighborhood </div>' +
+				'</div>'
+			);
+
+			$(mapSettingsButton).bind('click', function () {
+				$('.map-settings-content').toggle();
+			});
+				
+			return mapSettingsButton;
+		},
+		onRemove: function(map) { }
+	});
+	L.control.mapSettings = function (opts) {
+		return new L.Control.MapSettings(opts);
+	};
+	L.control.mapSettings({ position: 'topright' }).addTo(map);
+	
 	initMarkerIcons();
 	
 	refreshProperties();
+}
+
+function toggleRadiusType () {
+	if (mapInfo.radiusType == 'quarter-mile') {
+		mapInfo.radiusType = 'neighborhood';
+	} else {
+		mapInfo.radiusType = 'quarter-mile';
+	}
 }
 
 function initMarkerIcons() {
@@ -318,19 +359,19 @@ function searchByAddress (locationGid, locationLat, locationLng) {
 			);    
 		}
 		
-		refreshMarkers();
-		
 		if (isDefined(mapLayers.searchRadiusLayer))
 			map.removeLayer(mapLayers.searchRadiusLayer);
 		
 		// If user is logged in, draw search radius circle
-		if (app.loggedIn) {
+		if ((app.loggedIn) && (mapInfo.radiusType != 'neighborhood')) {
 
 			mapLayers.searchRadiusLayer = L.circle([
 				userLocation.lat, 
 				userLocation.lng
 			], userLocation.searchRadiusMiles, layerStyleFcn());
 			mapLayers.searchRadiusLayer.addTo(map);
+			
+			refreshMarkers();
 			
 		// If user is not logged in, draw the search property's encompasing neighborhood
 		} else {
@@ -345,6 +386,11 @@ function searchByAddress (locationGid, locationLat, locationLng) {
 					
 					mapLayers.searchRadiusLayer = new L.geoJson(geojson, { style: layerStyleFcn });
 					mapLayers.searchRadiusLayer.addTo(map);
+					
+					setTimeout(function () {
+						refreshMarkers();
+					}, 100);
+					
 				} catch (ex) { }
 			});
 		}
@@ -442,11 +488,15 @@ function refreshMarkers () {
 	
 	for (var i = 0; i < mapLayers.markers.length; i++) {
 
+		var propertyLocation = new L.LatLng(mapLayers.markers[i]._latlng.lat, mapLayers.markers[i]._latlng.lng);
 		var propertyOutsideBounds = false;
-		if (userLocation.category == 'address') {
-			var propertyLocation = new L.LatLng(mapLayers.markers[i]._latlng.lat, mapLayers.markers[i]._latlng.lng);
+		
+		if (app.loggedIn && (userLocation.category == 'address') && (mapInfo.radiusType != 'neighborhood')) {
 			var userLatLng = new L.LatLng(userLocation.lat, userLocation.lng);
 			propertyOutsideBounds = (userLatLng.distanceTo(propertyLocation) > userLocation.searchRadiusMiles);
+		} else if (isDefined(mapLayers.searchRadiusLayer)) {
+			
+			propertyOutsideBounds = (leafletPip.pointInLayer(propertyLocation, mapLayers.searchRadiusLayer, true).length == 0);
 		}
 		
 		var isSold = (mapLayers.markers[i].soldAvail.toLowerCase() == 'sold');
@@ -462,6 +512,9 @@ function refreshMarkers () {
 		if (! markerIcon) continue;
 		
 		mapLayers.markers[i].setIcon(markerIcon);
+
+		if (mapLayers.markers[i] == mapLayers.selectedMarker)
+			$(mapLayers.selectedMarker._icon).addClass('selected');
 	}
 }
 
@@ -469,6 +522,7 @@ function refreshProperties () {
 	
 	var markerClickEvent = function (e) {
 
+		mapLayers.selectedMarker = e.target;
 		var markerImg = $(e.target._icon);
 		
 		service.getPropertyDetails(e.target.propertyId).then(function (results) {
@@ -535,7 +589,7 @@ function refreshProperties () {
 						'</div>' +
 						
 						'<div class="map-popup-item">' + 
-						'<div class="map-popup-item-label"> Sold / Available </div><div class="map-popup-item-value">' + (propertyDetails.SoldAvail || '-') + '</div>' + 
+						'<div class="map-popup-item-label"> Sold/Unsold </div><div class="map-popup-item-value">' + (propertyDetails.SoldAvail || '-') + '</div>' + 
 						'</div>' +
 						'<div class="map-popup-item">' + 
 						'<div class="map-popup-item-label"> Year Acquired </div><div class="map-popup-item-value">' + (propertyDetails.YearAcq || '-') + '</div>' + 
