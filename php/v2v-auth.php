@@ -27,6 +27,7 @@
 		case 'GetUserDetails': get_user_details(); break;
 		case 'GetUserFavorites': get_user_favorites(); break;
 		case 'SetUserFavorite': set_user_favorite(); break;
+		case 'DeleteUserFavorite': delete_user_favorite(); break;
 		case 'LoginUser': login_user(); break;
 		case 'LogoutUser': logout_user(); break;
 	}
@@ -250,6 +251,24 @@
 				now()
 			)
 		";
+		
+		$conn = get_postgresql_db_connection('v2v_auth');
+		
+		$result = pg_query($conn, $query) 
+			or die ('Error: ' + pg_last_error($conn) + '\n');
+		
+		pg_close($conn);
+		
+		echo json_encode(true);
+	}
+	
+	// delete_user_favorite - Deletes a specified user favorite by id
+	function delete_user_favorite () {
+		
+		$favorite_id = (isset($favorite_id)) ? $favorite_id : (isset($_REQUEST['FavoriteId']) ? 
+			pg_escape_string($_REQUEST['FavoriteId']) : null);
+		
+		$query = "DELETE FROM public.user_favorites WHERE id = $favorite_id;";
 		
 		$conn = get_postgresql_db_connection('v2v_auth');
 		

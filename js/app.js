@@ -260,8 +260,10 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 				userLocation.searchRadiusMiles,
 				mapInfo.radiusType).then(function (results) {
 				
+				try {
+					results = JSON.parse(results);
+				} catch (ex) { }
 				if (! isDefined(results)) return;
-				results = JSON.parse(results);
 				
 				// Property Count
 				$('#txtPropertyCount').text(formatNumber(results.PropertyCount)).closest('.sidebar-item').fadeIn();
@@ -299,67 +301,78 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 
 function refreshQuintiles (results) {
 	
-	var cityQuintileAverages = [2.97, 3.01, 3.02, 3.01, 3.00, 3.03];
+	var cityQuintileAverages = [2.97, 3.03, 3.01, 3.02, 3.01, 3.00, 3.03];
 	
 	// Share of parcels owned by absentee owner number
 	$('#txtAbsenteeOwnerShares').text(formatNumber(results.AbsenteeOwnerShares)).closest('.sidebar-item').fadeIn();
 	$('#divAbsenteeOwnerSharesValue').css({
-		'background-color': getQuintileValue(results.AbsenteeOwnerShares), 
-		'width' : (((results.AbsenteeOwnerShares / 5) * 100) + '%') 
+		'background-color': getQuintileValue(results.AbsenteeOwnerSharesQnt), 
+		'width' : (((results.AbsenteeOwnerSharesQnt / 5) * 100) + '%') 
 	});
 	$('#divAbsenteeOwnerSharesValue').empty().append('<div class="q1-box"></div><div class="q2-box">' +
 		'</div><div class="q3-box"></div><div class="q4-box"></div><div class="q5-box"></div>');
 	$('#divAbsenteeOwnerSharesValue').append('<div class="q-city-average" style="left: ' + (cityQuintileAverages[0] / 5 * 100) + '%;"></div>');
 	
+	// Average Assessed Value
+	var assessedValue = (results.AverageAssessedValue == 0) ? 'n/a' : formatNumber(results.AverageAssessedValue);
+	$('#txtAverageAssessedValue').text(assessedValue).closest('.sidebar-item').fadeIn();
+	$('#divAverageAssessedValue').css({
+		'background-color': getQuintileValue(results.AverageAssessedValueQnt), 
+		'width' : (((results.AverageAssessedValueQnt / 5) * 100) + '%') 
+	});
+	$('#divAverageAssessedValue').empty().append('<div class="q1-box"></div><div class="q2-box">' +
+		'</div><div class="q3-box"></div><div class="q4-box"></div><div class="q5-box"></div>');
+	$('#divAverageAssessedValue').append('<div class="q-city-average" style="left: ' + (cityQuintileAverages[1] / 5 * 100) + '%;"></div>');
+	
 	// Number of 311 Calls Visible from Street
 	$('#txtStreetVisible311Calls').text(formatNumber(results.StreetVisible311Calls)).closest('.sidebar-item').fadeIn();
 	$('#divStreetVisible311CallsValue').css({
-		'background-color': getQuintileValue(results.StreetVisible311Calls), 
-		'width' : (((results.StreetVisible311Calls / 5) * 100) + '%') 
+		'background-color': getQuintileValue(results.StreetVisible311CallsQnt), 
+		'width' : (((results.StreetVisible311CallsQnt / 5) * 100) + '%') 
 	});
 	$('#divStreetVisible311CallsValue').empty().append('<div class="q1-box"></div><div class="q2-box">' +
 		'</div><div class="q3-box"></div><div class="q4-box"></div><div class="q5-box"></div>');
-	$('#divStreetVisible311CallsValue').append('<div class="q-city-average" style="left: ' + (cityQuintileAverages[1] / 5 * 100) + '%;"></div>');
+	$('#divStreetVisible311CallsValue').append('<div class="q-city-average" style="left: ' + (cityQuintileAverages[2] / 5 * 100) + '%;"></div>');
 	
 	// Property Violations Visible from Street
 	$('#txtStreetVisiblePropertyViolations').text(formatNumber(results.StreetVisiblePropertyViolations)).closest('.sidebar-item').fadeIn();
 	$('#divStreetVisiblePropertyViolationsValue').css({
-		'background-color': getQuintileValue(results.StreetVisiblePropertyViolations), 
-		'width' : (((results.StreetVisiblePropertyViolations / 5) * 100) + '%') 
+		'background-color': getQuintileValue(results.StreetVisiblePropertyViolationsQnt), 
+		'width' : (((results.StreetVisiblePropertyViolationsQnt / 5) * 100) + '%') 
 	});
 	$('#divStreetVisiblePropertyViolationsValue').empty().append('<div class="q1-box"></div><div class="q2-box">' +
 		'</div><div class="q3-box"></div><div class="q4-box"></div><div class="q5-box"></div>');
-	$('#divStreetVisiblePropertyViolationsValue').append('<div class="q-city-average" style="left: ' + (cityQuintileAverages[2] / 5 * 100) + '%;"></div>');
+	$('#divStreetVisiblePropertyViolationsValue').append('<div class="q-city-average" style="left: ' + (cityQuintileAverages[3] / 5 * 100) + '%;"></div>');
 	
 	// Crimes against persons Number
 	$('#txtCrimesAgainstPersons').text(formatNumber(results.CrimesAgainstPersons)).closest('.sidebar-item').fadeIn();
 	$('#divCrimesAgainstPersonsValue').css({
-		'background-color': getQuintileValue(results.CrimesAgainstPersons), 
-		'width' : (((results.CrimesAgainstPersons / 5) * 100) + '%') 
+		'background-color': getQuintileValue(results.CrimesAgainstPersonsQnt), 
+		'width' : (((results.CrimesAgainstPersonsQnt / 5) * 100) + '%') 
 	});
 	$('#divCrimesAgainstPersonsValue').empty().append('<div class="q1-box"></div><div class="q2-box">' +
 		'</div><div class="q3-box"></div><div class="q4-box"></div><div class="q5-box"></div>');
-	$('#divCrimesAgainstPersonsValue').append('<div class="q-city-average" style="left: ' + (cityQuintileAverages[3] / 5 * 100) + '%;"></div>');
+	$('#divCrimesAgainstPersonsValue').append('<div class="q-city-average" style="left: ' + (cityQuintileAverages[4] / 5 * 100) + '%;"></div>');
 	
 	// Crimes against persons Number
 	$('#txtCrimesAgainstProperty').text(formatNumber(results.CrimesAgainstProperty)).closest('.sidebar-item').fadeIn();
 	$('#divCrimesAgainstPropertyValue').css({
-		'background-color': getQuintileValue(results.CrimesAgainstProperty), 
-		'width' : (((results.CrimesAgainstProperty / 5) * 100) + '%') 
+		'background-color': getQuintileValue(results.CrimesAgainstPropertyQnt), 
+		'width' : (((results.CrimesAgainstPropertyQnt / 5) * 100) + '%') 
 	});
 	$('#divCrimesAgainstPropertyValue').empty().append('<div class="q1-box"></div><div class="q2-box">' +
 		'</div><div class="q3-box"></div><div class="q4-box"></div><div class="q5-box"></div>');
-	$('#divCrimesAgainstPropertyValue').append('<div class="q-city-average" style="left: ' + (cityQuintileAverages[4] / 5 * 100) + '%;"></div>');
+	$('#divCrimesAgainstPropertyValue').append('<div class="q-city-average" style="left: ' + (cityQuintileAverages[5] / 5 * 100) + '%;"></div>');
 	
 	// Single Family BP additions
 	$('#txtSingleFamilyBPAdditions').text(formatNumber(results.SingleFamilyBPAdditions)).closest('.sidebar-item').fadeIn();
 	$('#divSingleFamilyBPAdditionsValue').css({
-		'background-color': getQuintileValue(results.SingleFamilyBPAdditions), 
-		'width' : (((results.SingleFamilyBPAdditions / 5) * 100) + '%') 
+		'background-color': getQuintileValue(results.SingleFamilyBPAdditionsQnt), 
+		'width' : (((results.SingleFamilyBPAdditionsQnt / 5) * 100) + '%') 
 	});
 	$('#divSingleFamilyBPAdditionsValue').empty().append('<div class="q1-box"></div><div class="q2-box">' +
 		'</div><div class="q3-box"></div><div class="q4-box"></div><div class="q5-box"></div>');
-	$('#divSingleFamilyBPAdditionsValue').append('<div class="q-city-average" style="left: ' + (cityQuintileAverages[5] / 5 * 100) + '%;"></div>');
+	$('#divSingleFamilyBPAdditionsValue').append('<div class="q-city-average" style="left: ' + (cityQuintileAverages[6] / 5 * 100) + '%;"></div>');
 	
 	$('#divSidebarWrapper .load-indicator').fadeOut();
 }
@@ -565,6 +578,24 @@ function favoriteSearch (favoriteElement) {
 	}, 500);
 }
 
+function clearFavorite (favoriteElement) {
+	
+	var favoriteItem = $(favoriteElement).data('favorite-data');
+	
+	if (! isDefined(favoriteItem)) return;
+	
+	map.closePopup();
+	
+	$('#txtTopSearch').val(favoriteItem.SearchText);
+	$('#txtTopSearch').autocomplete('search');
+	setTimeout(function () {
+		$('.ui-autocomplete .ui-menu-item').hide();
+	}, 300);
+	setTimeout(function () {
+		$('.top-search-button').trigger('click');
+	}, 500);
+}
+
 function refreshUserFavorites () {
 	
 	$('.favorite-search-button').toggleClass('visible', app.loggedIn);
@@ -583,7 +614,10 @@ function refreshUserFavorites () {
 		
 			var favoriteItem = $(
 				'<div class="nav-menu-list-item favorite-item" onclick="favoriteSearch(this)">' +
-					'<span> ' + results[i].SearchText + ' </span>' +
+					'<span>' + results[i].SearchText + '</span>' +
+					'<span class="delete-button" onclick="removeUserFavorite(event, ' + results[i].Id + ')">' +
+						'<i class="glyphicon glyphicon-trash" />' +
+					'</span>' +
 				'</div>');
 			favoriteItem.data('favorite-data', results[i]);
 		
@@ -603,3 +637,14 @@ function setUserFavorite () {
 		refreshUserFavorites();
 	});
 }
+
+function removeUserFavorite (event, favoriteId) {
+	
+	event.preventDefault();
+	event.stopPropagation();
+	
+	authService.deleteUserFavorite(favoriteId).then(function (results) {
+		refreshUserFavorites();
+	});
+}
+

@@ -39,6 +39,21 @@ var map = null;
 
 function initMap (mapElementId) {
 	
+	var OpenStreetMap_Mapnik = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		maxZoom: 19,
+		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+	});
+	
+	var OpenStreetMap_DE = L.tileLayer('https://{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png', {
+		maxZoom: 18,
+		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+	});
+	
+	var OpenTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+		maxZoom: 17,
+		attribution: 'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+	});
+	
 	var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
 		attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
 	});
@@ -58,14 +73,18 @@ function initMap (mapElementId) {
 	$('#' + mapElementId).fadeIn(200);
 	
 	var baseLayers = {
-		'Esri World Imagery': Esri_WorldImagery,
-		'Esri World Street Map': Esri_WorldStreetMap
+		'OpenStreetMap_Mapnik': OpenStreetMap_Mapnik,
+		'OpenStreetMap_DE': OpenStreetMap_DE,
+		'OpenTopoMap': OpenTopoMap
+		//'Esri World Imagery': Esri_WorldImagery,
+		//'Esri World Street Map': Esri_WorldStreetMap
 	};
 
 	var overlayLayers = { };
 	
 	L.control.layers(baseLayers, overlayLayers).addTo(map);
-	baseLayers['Esri World Street Map'].addTo(map);
+	//baseLayers['Esri World Street Map'].addTo(map);
+	baseLayers['OpenStreetMap_Mapnik'].addTo(map);
 	
 	// Set click event on map
 	map.on('click', function onMapClick (e) {
@@ -130,6 +149,10 @@ function initMap (mapElementId) {
 					'<div class="map-legend-row">' +
 						'<img src="content/images/house-gray.svg" />' + 
 						'<span> Outside Search Area </span>' +
+					'</div>' +
+					'<div class="map-legend-row">' +
+						'<img src="content/images/house-outline-sold.svg" />' + 
+						'<span> Sold </span>' +
 					'</div>'
 				);
 
@@ -372,7 +395,7 @@ function searchByAddress (locationGid, locationLat, locationLng) {
 			], userLocation.searchRadiusMiles, layerStyleFcn());
 			mapLayers.searchRadiusLayer.addTo(map);
 			
-			refreshMarkers();
+			refreshMarkers(locationGid);
 			
 		// If user is not logged in, draw the search property's encompasing neighborhood
 		} else if (isDefined(locationGid)) {
@@ -391,6 +414,14 @@ function searchByAddress (locationGid, locationLat, locationLng) {
 					setTimeout(function () {
 						map.fitBounds(mapLayers.searchRadiusLayer.getBounds());
 						refreshMarkers(locationGid);
+						
+						// setTimeout(function () {
+							// var x = this.latLngToContainerPoint(e.latlng.lat).x + 0;
+							// var y = this.latLngToContainerPoint(e.latlng.lng).y + 100;
+							// var point = this.containerPointToLatLng([x, y]);
+							// map.setView(point, map.getZoom(), { pan: { animate: false } });
+						// }, 1000);
+						
 					}, 100);
 					
 				} catch (ex) { }
@@ -405,13 +436,16 @@ function searchByAddress (locationGid, locationLat, locationLng) {
 					results = JSON.parse(results);
 					var geojson = JSON.parse(results.GeoJSON);
 					
-					mapLayers.searchRadiusLayer = new L.geoJson(geojson, { style: layerStyleFcn });
-					mapLayers.searchRadiusLayer.addTo(map);
-					
-					setTimeout(function () {
-						map.fitBounds(mapLayers.searchRadiusLayer.getBounds());
-						refreshMarkers(locationGid);
-					}, 100);
+					if (isDefined(geojson)) {
+						
+						mapLayers.searchRadiusLayer = new L.geoJson(geojson, { style: layerStyleFcn });
+						mapLayers.searchRadiusLayer.addTo(map);
+						
+						setTimeout(function () {
+							map.fitBounds(mapLayers.searchRadiusLayer.getBounds());
+							refreshMarkers(locationGid);
+						}, 100);
+					}
 					
 				} catch (ex) { }
 			});
@@ -541,6 +575,19 @@ function refreshMarkers (selectedPropertyId) {
 			$(mapLayers.markers[i]._icon).addClass('selected');
 		}
 		
+		$(mapLayers.markers[i]._icon).attr('data-index', i);
+		$(mapLayers.markers[i]._icon).unbind('mouseenter.movalue').bind('mouseenter.movalue', function () {
+			var hoverLabel = $('<div class="leaflet-marker-hover-label"> ' + 
+				mapLayers.markers[$(this).attr('data-index')].address + '<br/>$' + 
+				mapLayers.markers[$(this).attr('data-index')].marketValue + 
+			'</div>');
+			hoverLabel.css({ 'left': $(this).position().left + 30, 'top': $(this).position().top });
+			$(this).after(hoverLabel);
+		});
+		$(mapLayers.markers[i]._icon).unbind('mouseleave.movalue').bind('mouseleave.movalue', function () {
+			$(this).next('.leaflet-marker-hover-label').remove();
+		});
+		
 		mapLayers.selectedMarker = null;
 	}
 }
@@ -653,6 +700,8 @@ function refreshProperties () {
 			marker.propertyId = propertyData[i].PropertyId;
 			marker.condition = propertyData[i].Condition;
 			marker.soldAvail = propertyData[i].SoldAvail;
+			marker.marketValue = propertyData[i].MarketValue;
+			marker.address = propertyData[i].Address;
 			marker.on('click', markerClickEvent);
 			
 			marker.addTo(map);

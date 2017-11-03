@@ -46,6 +46,10 @@ body > .container > div {
 	z-index: 4;
 }
 
+input[type="radio"] + label {
+	font-weight: normal;
+}
+
 .load-indicator {
 	display: none;
 	left: 50%;
@@ -131,7 +135,7 @@ body > .container > div {
 .leaflet-top.leaflet-left {
 	left: auto;
     right: 11px;
-	top: 232px;
+	top: 260px;
 }
 
 .leaflet-top.leaflet-right {
@@ -144,6 +148,11 @@ body > .container > div {
 	display: block !important;
 	padding: 6px 10px 6px 6px !important;
 	position: relative !important;
+}
+
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+	background-color: rgba(255, 255, 255, 0.84) !important;
 }
 
 .leaflet-control-layers .leaflet-control-layers-toggle {
@@ -323,6 +332,21 @@ body > .container > div {
     width: 34px !important;
 }
 
+.leaflet-marker-hover-label {
+	background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: #FFF;
+    display: block;
+    height: 44px;
+    font-size: 12px;
+    padding: 2px 6px;
+    position: absolute;
+    text-align: left;
+    width: 155px;
+    z-index: 5701;
+}
+
 .map-settings-content {
 	background-color: rgba(255, 255, 255, 0.92);
 	border: 2px solid rgba(0,0,0,0.2);
@@ -353,8 +377,28 @@ nav.navbar {
 	z-index: 10;
 }
 
-.navbar-nav.navbar-right {
-	width: 65%;
+.navbar-nav.navbar-right { 
+	width: 64%;
+}
+
+@media screen and (max-width: 1000px)  {
+	.navbar-nav.navbar-right {
+		width: 57%;
+	}
+}
+
+@media screen and (max-width: 830px)  {
+	.navbar-nav.navbar-right {
+		width: 50%;
+	}
+}
+
+@media screen and (max-width: 768px)  {
+	.navbar-nav.navbar-right,
+	.navbar-nav.navbar-right > li {
+		margin: 0 !important;
+		width: 100% !important;
+	}
 }
 
 .navbar-nav.navbar-right > li {
@@ -408,6 +452,24 @@ nav.navbar li.active  > a {
 	width: 55px;
 }
 
+.delete-button {
+	border-radius: 20px;
+	color: #656565;
+	cursor: pointer;
+	font-size: 14px;
+	height: 28px;
+	padding: 4px;
+	position: absolute;
+	right: 8px;
+	text-align: center;
+	top: 4px;
+	width: 28px;
+}
+
+.delete-button:hover {
+	background-color: rgba(255, 255, 255, 0.2);
+}
+
 .mobile-nav-button {
     color: rgba(255, 255, 255, 0.9);
 	cursor: pointer;
@@ -437,19 +499,24 @@ nav.navbar li.active  > a {
 }
 
 .favorite-search-button {
-	color: #E3E3E3;
+	background-color: rgba(0, 0, 0, 0.07);
+	border-radius: 3px;
+	color: #808080;
 	cursor: pointer;
 	display: none;
-	font-size: 18px;
-	padding: 12px 10px;
+	font-size: 13px;
+	height: 22px;
+	line-height: 18px;
+	padding: 2px 10px;
     position: absolute;
-    right: 90px;
-	top: -5px;
+    right: 96px;
+	top: 6px;
     z-index: 5;
 }
 
 .favorite-search-button:hover {
-	color: #909090;
+	background-color: rgba(0, 0, 0, 0.5);
+	color: #FFF;
 }
 
 .favorite-search-button.visible {
@@ -460,8 +527,26 @@ nav.navbar li.active  > a {
 	display: none !important;
 }
 
+@media screen and (max-width: 400px)  { 
+	.favorites-list {
+		display: inline-block;
+	}
+}
+
 .favorites-list.visible {
 	display: list-item !important;
+}
+
+.search-menu {
+	margin: 0 24px 0 0; 
+	padding: 8px 12px; 
+	width: 60%;
+}
+
+@media screen and (max-width: 830px)  { 
+	.search-menu {
+		width: 58%;
+	}
 }
 
 .language-code {
@@ -505,11 +590,16 @@ nav.navbar li.active  > a {
 
 /* User Auth Modals - Begin */
 
+.control-group {
+	color: #737373;
+	margin: 0 0 12px 0;
+}
+
 .control-label {
 	display: inline-block;
 	margin: 6px 10px 0 0;
 	vertical-align: top;
-	width: 100px;
+	width: 104px;
 }
 
 .control-label.long-width {
@@ -520,6 +610,10 @@ nav.navbar li.active  > a {
 	display: inline-block;
 	vertical-align: top;
 	width: 350px;
+}
+
+.control-label + .controls p {
+	margin: 2px 0 4px 0;
 }
 
 /* User Auth Modals - End */
@@ -562,6 +656,7 @@ nav.navbar li.active  > a {
 	height: 48px;
 	min-width: 200px;
 	padding: 8px 16px;
+	position: relative;
 	
 	-webkit-transition: all 0.3s ease;
     -moz-transition: all 0.3s ease;
@@ -571,11 +666,11 @@ nav.navbar li.active  > a {
 }
 
 .nav-menu-list-content .nav-menu-list-item:hover {
-	background-color: rgba(230, 230, 230, 0.8);
+	background-color: rgba(0, 0, 0, 0.5);
 }
 
 .nav-menu-list-content .nav-menu-list-item:hover > span {
-	color: #404040;
+	color: #FFF;
 }
 
 .nav-menu-list-content .nav-menu-list-item > span {

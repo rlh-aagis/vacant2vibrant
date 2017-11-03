@@ -137,3 +137,27 @@ authService.setUserFavorite = function (searchText) {
 	
 	return deferred;
 };
+
+authService.deleteUserFavorite = function (favoriteId) {
+	
+	if (! favoriteId) return;
+	
+	// Format post data
+	favoriteData = {
+		Action: 'DeleteUserFavorite',
+		FavoriteId: favoriteId
+	};
+
+	var deferred = $.ajax({
+		url: authService.authUrl,
+		type: 'POST',
+		data: favoriteData,
+		success: function (results) { },
+		error: function (e) {
+			console.log(e.message);
+		}
+	});
+	
+	return deferred;
+};
+

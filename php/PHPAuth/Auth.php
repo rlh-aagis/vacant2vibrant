@@ -793,7 +793,7 @@ class Auth
 				//function SendEmail ($name, $email, $topic, $contents) {
 
 				
-			$email_from = 'CRE PjM';
+			$email_from = 'V2V';
 			
 			$to = $email;
 			$subject = ($type == "activation") ?
