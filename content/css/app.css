@@ -73,6 +73,57 @@ input[type="radio"] + label {
 	margin: 4px 4px 0 4px;
 	vertical-align: top;
 }
+    
+.hover-help-icon {
+    background: rgba(255, 255, 255, 1);
+    border-radius: 20px;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    color: #656565;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 16px;
+	margin: 0;
+    padding: 1px 10px 1px 8px;
+    position: absolute;
+    right: 12px;
+	text-align: center;
+	text-indent: 0;
+    top: 32px;
+	width: 0;
+    z-index: 100;
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    -ms-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+}
+
+    .hover-help-icon + .hover-help-content {
+        background: rgba(255, 255, 255, 0.96);
+        border: 0;
+		border-radius: 3px;
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        display: none;
+		line-height: 18px;
+		margin: 18px 0 0 0;
+        max-width: 400px;
+        min-width: 200px;
+        padding: 8px 8px;
+        position: absolute;
+        white-space: normal;
+        z-index: 101;
+        -webkit-transition: all 0.3s ease;
+        -moz-transition: all 0.3s ease;
+        -o-transition: all 0.3s ease;
+        -ms-transition: all 0.3s ease;
+        transition: all 0.3s ease;
+    }
+
+    .hover-help-icon:hover + .hover-help-content,
+	.hover-help-content:hover {
+        display: block;
+    }
 
 /* Landing Page Styles - Begin */
 
@@ -163,6 +214,10 @@ input[type="radio"] + label {
 	display: block !important;
 }
 
+.leaflet-popup {
+	margin-top: 15px;
+}
+
 .leaflet-popup-content-wrapper {
 	border-radius: 3px !important;
 }
@@ -206,6 +261,7 @@ input[type="radio"] + label {
 .map-popup-item {
 	display: inline-block;
 	margin: 0 0 4px 0;
+	vertical-align: top;
 	width: 190px;
 }
 
@@ -370,7 +426,7 @@ input[type="radio"] + label {
 }
 
 nav.navbar {
-	background-color: rgba(25, 135, 25, 0.7);
+	background-color: rgba(22, 140, 22, 0.73);
 	border: 0;
 	border-radius: 0;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
@@ -592,7 +648,7 @@ nav.navbar li.active  > a {
 
 .control-group {
 	color: #737373;
-	margin: 0 0 12px 0;
+	margin: 0 0 10px 0;
 }
 
 .control-label {
@@ -692,6 +748,13 @@ nav.navbar li.active  > a {
 	display: list-item !important;
 }
 
+.menu-user > .dropdown-toggle {
+	overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 160px;
+}
+
 .menu-username {
 	text-transform: capitalize;
 }
@@ -770,6 +833,5 @@ input:checked + .slider:before {
 }
 
 /* Toggle Switch Styles - End */
-
 
 

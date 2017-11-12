@@ -17,16 +17,27 @@ var leafletPip = {
 
         var results = [];
 
-        layer.eachLayer(function(l) {
-            if (first && results.length) return;
+		if (layer.eachLayer) {
+			
+			layer.eachLayer(function(l) {
+				if (first && results.length) return;
 
-            if (isPoly(l) && gju.pointInPolygon({
-                type: 'Point',
-                coordinates: p
-            }, l.toGeoJSON().geometry)) {
-                results.push(l);
-            }
-        });
+				if (isPoly(l) && gju.pointInPolygon({
+					type: 'Point',
+					coordinates: p
+				}, l.toGeoJSON().geometry)) {
+					results.push(l);
+				}
+			});
+		} else {
+			
+			if (isPoly(layer) && gju.pointInPolygon({
+				type: 'Point',
+				coordinates: p
+			}, layer.toGeoJSON().geometry)) {
+				results.push(layer);
+			}
+		}
         return results;
     }
 };

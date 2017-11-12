@@ -23,7 +23,7 @@ var userLocation = {
 	lng: -94.519982,
 	neighborhood: null,
 	searchRadiusMiles: (0.25 * 1609.34),
-	zoom: 16
+	zoom: 14
 };
 
 var mapInfo = {
@@ -73,18 +73,18 @@ function initMap (mapElementId) {
 	$('#' + mapElementId).fadeIn(200);
 	
 	var baseLayers = {
-		'OpenStreetMap_Mapnik': OpenStreetMap_Mapnik,
-		'OpenStreetMap_DE': OpenStreetMap_DE,
-		'OpenTopoMap': OpenTopoMap
-		//'Esri World Imagery': Esri_WorldImagery,
-		//'Esri World Street Map': Esri_WorldStreetMap
+		'Esri World Street Map': Esri_WorldStreetMap,
+		'Esri World Imagery': Esri_WorldImagery,
+		'OpenStreetMap_Mapnik': OpenStreetMap_Mapnik
+		
+		//'OpenStreetMap_DE': OpenStreetMap_DE,
+		//'OpenTopoMap': OpenTopoMap
 	};
 
 	var overlayLayers = { };
 	
 	L.control.layers(baseLayers, overlayLayers).addTo(map);
-	//baseLayers['Esri World Street Map'].addTo(map);
-	baseLayers['OpenStreetMap_Mapnik'].addTo(map);
+	baseLayers['Esri World Street Map'].addTo(map);
 	
 	// Set click event on map
 	map.on('click', function onMapClick (e) {
@@ -129,33 +129,37 @@ function initMap (mapElementId) {
 			
 			$(legendContainer).addClass('map-legend')
 				.html(
-					'<div class="map-legend-title"> Map Legend </div>' +
+					'<div class="map-legend-title" translate="map legend"> Map Legend </div>' +
 					'<div class="map-legend-row">' +
 						'<img src="content/images/house-green.svg" />' +
-						'<span> Good Condition </span>' +
+						'<span translate="good condition"> Good Condition </span>' +
 					'</div>' +
 					'<div class="map-legend-row">' +
 						'<img src="content/images/house-orange.svg" />' +
-						'<span> Fair Condition </span>' +
+						'<span translate="fair condition"> Fair Condition </span>' +
 					'</div>' +
 					'<div class="map-legend-row">' +
 						'<img src="content/images/house-red.svg" />' + 
-						'<span> Distressed Condition </span>' +
+						'<span translate="distressed condition"> Distressed Condition </span>' +
 					'</div>' +
 					'<div class="map-legend-row">' +
 						'<img src="content/images/house-blue.svg" />' +
-						'<span> Other Condition </span>' +
+						'<span translate="other condition"> Other Condition </span>' +
 					'</div>' +
 					'<div class="map-legend-row">' +
 						'<img src="content/images/house-gray.svg" />' + 
-						'<span> Outside Search Area </span>' +
+						'<span translate="outside search area"> Outside Search Area </span>' +
 					'</div>' +
 					'<div class="map-legend-row">' +
 						'<img src="content/images/house-outline-sold.svg" />' + 
-						'<span> Sold </span>' +
+						'<span translate="sold"> Sold </span>' +
 					'</div>'
 				);
 
+			setTimeout(function () {
+				translate('.map-legend');
+			}, 300);
+				
 			return legendContainer;
 		},
 		onRemove: function(map) { }
@@ -204,15 +208,17 @@ function initMap (mapElementId) {
 			$(mapSettingsButton).addClass('map-button map-settings-button').html(
 				'<i class="glyphicon glyphicon-cog" title="Map Settings" style="left: 3px; top: 2px;"></i>' +
 				'<div class="map-settings-content">' +
-					'<div style="margin: 0 0 8px 0;"> Map Search Type Preferred </div>' +
+					'<div style="margin: 0 0 8px 0;" translate="map search type preferred"> Map Search Type Preferred </div>' +
 					'<div class="toggle-value-label"> 0.25 Mile </div>' +
 					'<label class="switch">' +
 						'<input type="checkbox" onchange="toggleRadiusType()">' +
 						'<span class="slider round"></span>' +
 					'</label>' +
-					'<div class="toggle-value-label"> Neighborhood </div>' +
+					'<div class="toggle-value-label" translate="neighborhood"> Neighborhood </div>' +
 				'</div>'
 			);
+			
+			translate('.map-button');
 
 			$(mapSettingsButton).bind('click', function () {
 				$('.map-settings-content').toggle();
@@ -387,14 +393,21 @@ function searchByAddress (locationGid, locationLat, locationLng) {
 			map.removeLayer(mapLayers.searchRadiusLayer);
 		
 		// If user is logged in, draw search radius circle
-		if ((app.loggedIn) && (mapInfo.radiusType != 'neighborhood')) {
+		if (mapInfo.radiusType != 'neighborhood') {
 
 			mapLayers.searchRadiusLayer = L.circle([
 				userLocation.lat, 
 				userLocation.lng
 			], userLocation.searchRadiusMiles, layerStyleFcn());
 			mapLayers.searchRadiusLayer.addTo(map);
+
+			map.fitBounds(mapLayers.searchRadiusLayer.getBounds());
 			
+			setTimeout(function () {
+				var mapZoom = map.getZoom();
+				map.setZoom(mapZoom - 1);
+			}, 100);
+						
 			refreshMarkers(locationGid);
 			
 		// If user is not logged in, draw the search property's encompasing neighborhood
@@ -412,16 +425,9 @@ function searchByAddress (locationGid, locationLat, locationLng) {
 					mapLayers.searchRadiusLayer.addTo(map);
 					
 					setTimeout(function () {
+						
 						map.fitBounds(mapLayers.searchRadiusLayer.getBounds());
 						refreshMarkers(locationGid);
-						
-						// setTimeout(function () {
-							// var x = this.latLngToContainerPoint(e.latlng.lat).x + 0;
-							// var y = this.latLngToContainerPoint(e.latlng.lng).y + 100;
-							// var point = this.containerPointToLatLng([x, y]);
-							// map.setView(point, map.getZoom(), { pan: { animate: false } });
-						// }, 1000);
-						
 					}, 100);
 					
 				} catch (ex) { }
@@ -547,7 +553,7 @@ function refreshMarkers (selectedPropertyId) {
 		var propertyLocation = new L.LatLng(mapLayers.markers[i]._latlng.lat, mapLayers.markers[i]._latlng.lng);
 		var propertyOutsideBounds = false;
 		
-		if (app.loggedIn && (userLocation.category == 'address') && (mapInfo.radiusType != 'neighborhood')) {
+		if ((userLocation.category == 'address') && (mapInfo.radiusType != 'neighborhood')) {
 			var userLatLng = new L.LatLng(userLocation.lat, userLocation.lng);
 			propertyOutsideBounds = (userLatLng.distanceTo(propertyLocation) > userLocation.searchRadiusMiles);
 		} else if ((userLocation.category == 'address') && (isDefined(mapLayers.searchRadiusLayer))) {
@@ -623,7 +629,7 @@ function refreshProperties () {
 				countyParcelLabel = pid;
 			}
 
-			var popup = L.popup()
+			var popup = L.responsivePopup()
 				.setLatLng(e.latlng)
 				.setContent(
 					'<div class="map-popup-title" translate="property details"> Property Details </div>' +
@@ -635,47 +641,71 @@ function refreshProperties () {
 					'<div class="map-popup-content">' +
 					
 						'<div class="map-popup-item">' + 
-						'<div class="map-popup-item-label"> Address </div><div class="map-popup-item-value">' + (propertyDetails.Address || '-') + '</div>' + 
+						'<div class="map-popup-item-label" translate="address"> Address </div>' + 
+						'<div class="map-popup-item-value">' + (propertyDetails.Address || '-') + '</div>' + 
 						'</div>' +
 						'<div class="map-popup-item">' + 
-						'<div class="map-popup-item-label"> Property Type </div><div class="map-popup-item-value">' + (propertyDetails.PropClass || '-') + '</div>' + 
-						'</div>' +
-						
-						'<div class="map-popup-item">' + 
-						'<div class="map-popup-item-label"> Zip Code </div><div class="map-popup-item-value">' + (propertyDetails.Zip || '-') + '</div>' + 
-						'</div>' +
-						'<div class="map-popup-item">' + 
-						'<div class="map-popup-item-label"> Condition </div><div class="map-popup-item-value">' + (propertyDetails.Condition || '-') + '</div>' + 
+						'<div class="map-popup-item-label" translate="property type"> Property Type </div>' + 
+						'<div class="map-popup-item-value">' + (propertyDetails.PropClass || '-') + '</div>' + 
 						'</div>' +
 						
 						'<div class="map-popup-item">' + 
-						'<div class="map-popup-item-label"> Neighborhood </div><div class="map-popup-item-value">' + (propertyDetails.Neighborhood || '-') + '</div>' + 
+						'<div class="map-popup-item-label" translate="zip code"> Zip Code </div>' + 
+						'<div class="map-popup-item-value">' + (propertyDetails.Zip || '-') + '</div>' + 
 						'</div>' +
 						'<div class="map-popup-item">' + 
-						'<div class="map-popup-item-label"> Market Value </div><div class="map-popup-item-value"> $' + (propertyDetails.MktvalDisplay || '-') + '</div>' + 
+						'<div class="map-popup-item-label" translate="condition"> Condition </div>' + 
+						'<div class="map-popup-item-value">' + (propertyDetails.Condition || '-') + '</div>' + 
 						'</div>' +
 						
 						'<div class="map-popup-item">' + 
-						'<div class="map-popup-item-label"> County Parcel Number </div><div class="map-popup-item-value">' +
+						'<div class="map-popup-item-label" translate="neighborhood"> Neighborhood </div>' + 
+						'<div class="map-popup-item-value">' + (propertyDetails.Neighborhood || '-') + '</div>' + 
+						'</div>' +
+						'<div class="map-popup-item">' + 
+						'<div class="map-popup-item-label" translate="market value"> Market Value </div>' + 
+						'<div class="map-popup-item-value"> $' + (propertyDetails.MktvalDisplay || '-') + '</div>' + 
+						'</div>' +
+						
+						'<div class="map-popup-item">' + 
+						'<div class="map-popup-item-label" translate="link to county data"> Link to County Data </div>' + 
+						'<div class="map-popup-item-value">' +
 							'<a href="' + countyParcelLink + '" target="_blank"> ' + countyParcelLabel + ' </a>' +
 						'</div>' + 
 						'</div>' +
 						'<div class="map-popup-item">' + 
-						'<div class="map-popup-item-label"> Sqft </div><div class="map-popup-item-value">' + (propertyDetails.SqftDisplay || '-') + '</div>' + 
+						'<div class="map-popup-item-label" translate="sqft"> Sqft </div>' + 
+						'<div class="map-popup-item-value">' + (propertyDetails.SqftDisplay || '-') + '</div>' + 
 						'</div>' +
 						
 						'<div class="map-popup-item">' + 
-						'<div class="map-popup-item-label"> Sold/Unsold </div><div class="map-popup-item-value">' + (propertyDetails.SoldAvail || '-') + '</div>' + 
+						'<div class="map-popup-item-label" translate="sold/unsold"> Sold/Unsold </div>' + 
+						'<div class="map-popup-item-value">' + (propertyDetails.SoldAvail || '-') + '</div>' + 
 						'</div>' +
 						'<div class="map-popup-item">' + 
-						'<div class="map-popup-item-label"> Year Acquired </div><div class="map-popup-item-value">' + (propertyDetails.YearAcq || '-') + '</div>' + 
+						'<div class="map-popup-item-label" translate="year acquired"> Year Acquired </div>' + 
+						'<div class="map-popup-item-value">' + (propertyDetails.YearAcq || '-') + '</div>' + 
 						'</div>' +
 						
 						'<div class="map-popup-item">' + 
-						'<div class="map-popup-item-label"> Year Sold </div><div class="map-popup-item-value">' + (propertyDetails.YearsOld || '-') + '</div>' + 
+						'<div class="map-popup-item-label" translate="year sold"> Year Sold </div>' + 
+						'<div class="map-popup-item-value">' + (propertyDetails.YearsOld || '-') + '</div>' + 
 						'</div>' +
+						
+						'<div class="map-popup-item">' +
+							//'<div class="map-popup-item-label"> Link to County Data </div>' + 
+							'<div class="map-popup-item-value">' +
+								'<a href="http://maps.kcmo.org/apps/parcelviewer/" target="_blank" translate="kansas city parcel viewer">' + 
+									'Kansas City Parcel Viewer' + 
+								'</a>' +
+							'</div>' +
+						'</div>' +
+						
 					'</div>'
 				).openOn(map);
+				
+				translate('.map-popup-title');
+				translate('.map-popup-content');
 				
 			setTimeout(function () {
 				markerImg.addClass('selected');

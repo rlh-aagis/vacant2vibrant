@@ -19,11 +19,11 @@ require(dirname(__FILE__)."/../ZxcvbnPhp/ScorerInterface.php");
 require(dirname(__FILE__)."/../ZxcvbnPhp/Scorer.php");
 require(dirname(__FILE__)."/../ZxcvbnPhp/Zxcvbn.php");
 
-require(dirname(__FILE__)."/../PHPMailer/class.smtp.php");
-require(dirname(__FILE__)."/../PHPMailer/class.phpmailer.php");
+//require(dirname(__FILE__)."/../PHPMailer/class.smtp.php");
+//require(dirname(__FILE__)."/../PHPMailer/class.phpmailer.php");
 
 use ZxcvbnPhp\Zxcvbn;
-use PHPMailer;
+//use PHPMailer;
 
 /***
 * Auth class
@@ -220,7 +220,8 @@ class Auth
 	
 		$return['error'] = false;
 		$return['message'] = ($sendmail == true ? $this->lang["register_success"] : $this->lang['register_success_emailmessage_suppressed'] );
-
+		$return['email_data'] = $addUser['email_data'];
+		
 		return $return;
 	}
 
@@ -315,7 +316,8 @@ class Auth
 
 		$return['error'] = false;
 		$return['message'] = ($sendmail == true ? $this->lang["reset_requested"] : $this->lang['reset_requested_emailmessage_suppressed']);
-
+		$return['email_data'] = $addRequest['email_data'];
+		
 		return $return;
 	}
 
@@ -550,8 +552,11 @@ class Auth
 		$email = htmlentities(strtolower($email));
 
 		if($sendmail) {
+			
 			$addRequest = $this->addRequest($uid, $email, "activation", $sendmail);
 
+			$return['email_data'] = $addRequest['email_data'];
+			
 			if($addRequest['error'] == 1) {
 				$query = $this->dbh->prepare("DELETE FROM {$this->config->table_users} WHERE id = ?");
 				$query->execute(array($uid));
@@ -789,85 +794,46 @@ class Auth
 
 		if ($sendmail === true)
         {
-		
-				//function SendEmail ($name, $email, $topic, $contents) {
-
-				
-			$email_from = 'V2V';
-			
-			$to = $email;
+			// Set email subject
 			$subject = ($type == "activation") ?
-				sprintf($this->lang['email_activation_subject'], $this->config->site_name) :
-				sprintf($this->lang['email_reset_subject'], $this->config->site_name);
+				sprintf($this->lang['email_activation_subject'], 
+					$this->config->site_name
+				) :
+				sprintf($this->lang['email_reset_subject'], 
+					$this->config->site_name
+				);
 				
-			$headers = 'MIME-Version: 1.0' . "\r\n";
-			$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-			$headers .= "From: ".$email_from."\r\n";
+			// Set email headers
+			$header_fields = array(
+				"From: Vacant to Vibrant",
+				"MIME-Version: 1.0",
+				"Content-Type: text/html; charset=ISO-8859-1"
+			);
+			$header = implode("\r\n", $header_fields);
+			
+			// Set email message
 			$message = ($type == "activation")  ?
-				sprintf($this->lang['email_activation_body'], $this->config->site_url, $this->config->site_activation_page, $key) :
-				sprintf($this->lang['email_reset_body'], $this->config->site_url, $this->config->site_password_reset_page, $key);
+				sprintf($this->lang['email_activation_body'], 
+					$this->config->site_url, 
+					$this->config->site_activation_page, 
+					$key
+				)
+				:
+				sprintf($this->lang['email_reset_body'], 
+					$this->config->site_url, 
+					$this->config->site_password_reset_page, 
+					$key
+				);
 				
-			//($type == "activation") 
-					//$mail->Subject = sprintf($this->lang['email_activation_subject'], $this->config->site_name);
-					//$mail->Body = sprintf($this->lang['email_activation_body'], $this->config->site_url, $this->config->site_activation_page, $key);
-					//$mail->AltBody = sprintf($this->lang['email_activation_altbody'], $this->config->site_url, $this->config->site_activation_page, $key);
-				//}
-	        //else {
-				//$mail->Subject = sprintf($this->lang['email_reset_subject'], $this->config->site_name);
-				//$mail->Body = sprintf($this->lang['email_reset_body'], $this->config->site_url, $this->config->site_password_reset_page, $key);
-				//$mail->AltBody = sprintf($this->lang['email_reset_altbody'], $this->config->site_url, $this->config->site_password_reset_page, $key);
-			//}
+			// Use default mail method
+			// $sent_email = mail($email, $subject, $message, $header);
 			
-			$sent_email = mail($to, $subject, $message, $headers);
-
-			/*
-			// Check configuration for SMTP parameters	
-			$mail = new PHPMailer;
-			
-			echo '<br/>$this->config: |<br/>';
-			echo print_r($this->config);
-			echo '|<br/><br/>';
-			
-			if($this->config->smtp) {
-				$mail->isSMTP();
-				$mail->Host = $this->config->smtp_host;
-				$mail->SMTPAuth = $this->config->smtp_auth;
-				
-				if(!is_null($this->config->smtp_auth)) {
-					$mail->Username = $this->config->smtp_username;
-					$mail->Password = $this->config->smtp_password;
-				}
-				$mail->Port = $this->config->smtp_port;
-
-				if(!is_null($this->config->smtp_security)) {
-					$mail->SMTPSecure = $this->config->smtp_security;
-				}
-			}
-	
-			$mail->From = $this->config->site_email;
-			$mail->FromName = $this->config->site_name;
-			$mail->addAddress($email);
-			$mail->isHTML(true);
-	
-			if($type == "activation") {
-	
-					$mail->Subject = sprintf($this->lang['email_activation_subject'], $this->config->site_name);
-					$mail->Body = sprintf($this->lang['email_activation_body'], $this->config->site_url, $this->config->site_activation_page, $key);
-					$mail->AltBody = sprintf($this->lang['email_activation_altbody'], $this->config->site_url, $this->config->site_activation_page, $key);
-				}
-	        else {
-				$mail->Subject = sprintf($this->lang['email_reset_subject'], $this->config->site_name);
-				$mail->Body = sprintf($this->lang['email_reset_body'], $this->config->site_url, $this->config->site_password_reset_page, $key);
-				$mail->AltBody = sprintf($this->lang['email_reset_altbody'], $this->config->site_url, $this->config->site_password_reset_page, $key);
-			}
-	
-			if(!$mail->send()) {
-				$this->deleteRequest($request_id);
-				echo 'Mailer Error: ' . $mail->ErrorInfo;
-				$return['message'] = $this->lang["system_error"] . " #10";
-				return $return;
-			}
-			*/
+			$return['email_data'] = array(
+				'email' => $email,
+				'header' => $header,
+				'message' => $message,
+				'subject' => $subject
+			);
         }
 
 		$return['error'] = false;
@@ -1124,6 +1090,8 @@ class Auth
 
 		$return['error'] = false;
 		$return['message'] = $this->lang["activation_sent"];
+		$return['email_data'] = $addRequest['email_data'];
+		
 		return $return;
 	}
 

@@ -2,7 +2,7 @@
 var app = {
 	autocompleteItems: [],
 	languageCode: 'eng',
-	languageData: null,
+	languageData: [],
 	loggedIn: false,
 	page: 'landing',
 	refreshSidebar: null
@@ -47,22 +47,28 @@ function bindMapModals () {
 	
 	if (app.page == 'landing') return;
 	
-	$('<div id="divUserLoginModalContainer"></div>').load('templates/user-login.html', function (response, status, xhr) { 
+	$('<div id="divUserLoginModalContainer"></div>').load('templates/user/user-login.html', function (response, status, xhr) { 
 		$('#divUserLoginModalContainer #txtLoginPassword').keyup(function (e) {
 			e.preventDefault();
 			if (e.keyCode == 13) $('#btnLogin').trigger('click');
 		});
 	}).appendTo('body > .container');
-	$('<div id="divUserProfileModalContainer"></div>').load('templates/user-profile.html', function (response, status, xhr) { 
+	$('<div id="divUserProfileModalContainer"></div>').load('templates/user/user-profile.html', function (response, status, xhr) { 
 	
 	}).appendTo('body > .container');
-	$('<div id="divUserRegModalContainer"></div>').load('templates/user-registration.html', function (response, status, xhr) { 
+	$('<div id="divUserRegModalContainer"></div>').load('templates/user/user-registration.html', function (response, status, xhr) { 
 	
 	}).appendTo('body > .container');
-	$('<div id="divUserActivationModalContainer"></div>').load('templates/user-activation.html', function (response, status, xhr) { 
+	$('<div id="divUserActivationModalContainer"></div>').load('templates/user/user-activation.html', function (response, status, xhr) { 
 	
 	}).appendTo('body > .container');
-	$('<div id="divUserDetailsModalContainer"></div>').load('templates/user-details.html', function (response, status, xhr) { 
+	$('<div id="divUserForgotPasswordRequestModalContainer"></div>').load('templates/user/user-forgot-password-request.html', function (response, status, xhr) { 
+	
+	}).appendTo('body > .container');
+	$('<div id="divUserForgotPasswordConfirmModalContainer"></div>').load('templates/user/user-forgot-password-confirm.html', function (response, status, xhr) { 
+	
+	}).appendTo('body > .container');
+	$('<div id="divUserDetailsModalContainer"></div>').load('templates/user/user-details.html', function (response, status, xhr) { 
 	
 	}).appendTo('body > .container');
 }
@@ -198,6 +204,8 @@ function search (autocompleteItem) {
 		userLocation.label = 'Kansas City';
 	}
 	
+	authService.saveSearch(userLocation.label);
+	
 	searchMap(
 		searchValue,
 		userLocation.label,
@@ -233,10 +241,10 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 	switch (adjustedLocationCategory) {
 		case 'address':
 			areaStatsHeaderHTML = (app.loggedIn) ? ('Within 0.25 Miles of ' + userLocation.label) : 
-				('Neighborhood of ' + userLocation.neighborhood);
+				('<span translate="neighborhood of"> Neighborhood of </span>&nbsp;<span>' + userLocation.neighborhood + '</span>');
 			break;
 		case 'nbrhd':
-			areaStatsHeaderHTML = 'Neighborhood of ' + (userLocation.neighborhood || locationLabel);
+			areaStatsHeaderHTML = '<span translate="neighborhood of"> Neighborhood of </span>&nbsp;<span>' + (userLocation.neighborhood || locationLabel) + '</span>';
 			break;
 		case 'zip':
 			areaStatsHeaderHTML = 'Zip ' + locationLabel;
@@ -246,6 +254,7 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 			break;
 	}
 	$('#divAreaStatsSubheading').html(areaStatsHeaderHTML);
+	translate('#divAreaStatsSubheading');
 	
 	$('#divSidebarWrapper .sidebar-item').hide();
 	
@@ -306,12 +315,14 @@ function refreshQuintiles (results) {
 	// Share of parcels owned by absentee owner number
 	$('#txtAbsenteeOwnerShares').text(formatNumber(results.AbsenteeOwnerShares)).closest('.sidebar-item').fadeIn();
 	$('#divAbsenteeOwnerSharesValue').css({
-		'background-color': getQuintileValue(results.AbsenteeOwnerSharesQnt), 
+		'background-color': getQuintileValue(results.AbsenteeOwnerSharesQnt, true), 
 		'width' : (((results.AbsenteeOwnerSharesQnt / 5) * 100) + '%') 
 	});
 	$('#divAbsenteeOwnerSharesValue').empty().append('<div class="q1-box"></div><div class="q2-box">' +
 		'</div><div class="q3-box"></div><div class="q4-box"></div><div class="q5-box"></div>');
-	$('#divAbsenteeOwnerSharesValue').append('<div class="q-city-average" style="left: ' + (cityQuintileAverages[0] / 5 * 100) + '%;"></div>');
+	$('#divAbsenteeOwnerSharesValue').append('<div class="q-city-average"' + 
+		' title="City Average: ' + cityQuintileAverages[0].toFixed(2) + '"' + 
+		' style="left: ' + (cityQuintileAverages[0] / 5 * 100) + '%;"></div>');
 	
 	// Average Assessed Value
 	var assessedValue = (results.AverageAssessedValue == 0) ? 'n/a' : formatNumber(results.AverageAssessedValue);
@@ -322,47 +333,57 @@ function refreshQuintiles (results) {
 	});
 	$('#divAverageAssessedValue').empty().append('<div class="q1-box"></div><div class="q2-box">' +
 		'</div><div class="q3-box"></div><div class="q4-box"></div><div class="q5-box"></div>');
-	$('#divAverageAssessedValue').append('<div class="q-city-average" style="left: ' + (cityQuintileAverages[1] / 5 * 100) + '%;"></div>');
+	$('#divAverageAssessedValue').append('<div class="q-city-average"' + 
+		' title="City Average: ' + cityQuintileAverages[1].toFixed(2) + '"' + 
+		' style="left: ' + (cityQuintileAverages[1] / 5 * 100) + '%;"></div>');
 	
 	// Number of 311 Calls Visible from Street
 	$('#txtStreetVisible311Calls').text(formatNumber(results.StreetVisible311Calls)).closest('.sidebar-item').fadeIn();
 	$('#divStreetVisible311CallsValue').css({
-		'background-color': getQuintileValue(results.StreetVisible311CallsQnt), 
+		'background-color': getQuintileValue(results.StreetVisible311CallsQnt, true), 
 		'width' : (((results.StreetVisible311CallsQnt / 5) * 100) + '%') 
 	});
 	$('#divStreetVisible311CallsValue').empty().append('<div class="q1-box"></div><div class="q2-box">' +
 		'</div><div class="q3-box"></div><div class="q4-box"></div><div class="q5-box"></div>');
-	$('#divStreetVisible311CallsValue').append('<div class="q-city-average" style="left: ' + (cityQuintileAverages[2] / 5 * 100) + '%;"></div>');
+	$('#divStreetVisible311CallsValue').append('<div class="q-city-average"' +
+		' title="City Average: ' + cityQuintileAverages[2].toFixed(2) + '"' + 
+		' style="left: ' + (cityQuintileAverages[2] / 5 * 100) + '%;"></div>');
 	
 	// Property Violations Visible from Street
 	$('#txtStreetVisiblePropertyViolations').text(formatNumber(results.StreetVisiblePropertyViolations)).closest('.sidebar-item').fadeIn();
 	$('#divStreetVisiblePropertyViolationsValue').css({
-		'background-color': getQuintileValue(results.StreetVisiblePropertyViolationsQnt), 
+		'background-color': getQuintileValue(results.StreetVisiblePropertyViolationsQnt, true), 
 		'width' : (((results.StreetVisiblePropertyViolationsQnt / 5) * 100) + '%') 
 	});
 	$('#divStreetVisiblePropertyViolationsValue').empty().append('<div class="q1-box"></div><div class="q2-box">' +
 		'</div><div class="q3-box"></div><div class="q4-box"></div><div class="q5-box"></div>');
-	$('#divStreetVisiblePropertyViolationsValue').append('<div class="q-city-average" style="left: ' + (cityQuintileAverages[3] / 5 * 100) + '%;"></div>');
+	$('#divStreetVisiblePropertyViolationsValue').append('<div class="q-city-average"' + 
+		' title="City Average: ' + cityQuintileAverages[3].toFixed(2) + '"' + 
+		' style="left: ' + (cityQuintileAverages[3] / 5 * 100) + '%;"></div>');
 	
-	// Crimes against persons Number
+	// Crimes Against Persons Number
 	$('#txtCrimesAgainstPersons').text(formatNumber(results.CrimesAgainstPersons)).closest('.sidebar-item').fadeIn();
 	$('#divCrimesAgainstPersonsValue').css({
-		'background-color': getQuintileValue(results.CrimesAgainstPersonsQnt), 
+		'background-color': getQuintileValue(results.CrimesAgainstPersonsQnt, true), 
 		'width' : (((results.CrimesAgainstPersonsQnt / 5) * 100) + '%') 
 	});
 	$('#divCrimesAgainstPersonsValue').empty().append('<div class="q1-box"></div><div class="q2-box">' +
 		'</div><div class="q3-box"></div><div class="q4-box"></div><div class="q5-box"></div>');
-	$('#divCrimesAgainstPersonsValue').append('<div class="q-city-average" style="left: ' + (cityQuintileAverages[4] / 5 * 100) + '%;"></div>');
+	$('#divCrimesAgainstPersonsValue').append('<div class="q-city-average"' + 
+		' title="City Average: ' + cityQuintileAverages[4].toFixed(2) + '"' + 
+		' style="left: ' + (cityQuintileAverages[4] / 5 * 100) + '%;"></div>');
 	
-	// Crimes against persons Number
+	// Crimes Against Property Number
 	$('#txtCrimesAgainstProperty').text(formatNumber(results.CrimesAgainstProperty)).closest('.sidebar-item').fadeIn();
 	$('#divCrimesAgainstPropertyValue').css({
-		'background-color': getQuintileValue(results.CrimesAgainstPropertyQnt), 
+		'background-color': getQuintileValue(results.CrimesAgainstPropertyQnt, true), 
 		'width' : (((results.CrimesAgainstPropertyQnt / 5) * 100) + '%') 
 	});
 	$('#divCrimesAgainstPropertyValue').empty().append('<div class="q1-box"></div><div class="q2-box">' +
 		'</div><div class="q3-box"></div><div class="q4-box"></div><div class="q5-box"></div>');
-	$('#divCrimesAgainstPropertyValue').append('<div class="q-city-average" style="left: ' + (cityQuintileAverages[5] / 5 * 100) + '%;"></div>');
+	$('#divCrimesAgainstPropertyValue').append('<div class="q-city-average"' + 
+		' title="City Average: ' + cityQuintileAverages[5].toFixed(2) + '"' + 
+		' style="left: ' + (cityQuintileAverages[5] / 5 * 100) + '%;"></div>');
 	
 	// Single Family BP additions
 	$('#txtSingleFamilyBPAdditions').text(formatNumber(results.SingleFamilyBPAdditions)).closest('.sidebar-item').fadeIn();
@@ -372,25 +393,41 @@ function refreshQuintiles (results) {
 	});
 	$('#divSingleFamilyBPAdditionsValue').empty().append('<div class="q1-box"></div><div class="q2-box">' +
 		'</div><div class="q3-box"></div><div class="q4-box"></div><div class="q5-box"></div>');
-	$('#divSingleFamilyBPAdditionsValue').append('<div class="q-city-average" style="left: ' + (cityQuintileAverages[6] / 5 * 100) + '%;"></div>');
+	$('#divSingleFamilyBPAdditionsValue').append('<div class="q-city-average"' + 
+		' title="City Average: ' + cityQuintileAverages[6].toFixed(2) + '"' + 
+		' style="left: ' + (cityQuintileAverages[6] / 5 * 100) + '%;"></div>');
 	
 	$('#divSidebarWrapper .load-indicator').fadeOut();
 }
 
-function getQuintileValue (value) {
+function getQuintileValue (value, isReverse) {
 	
 	var ret = '';
 	
-	if (value <= 1) {
-		ret = '#EA0B0B';
-	} else if (value <= 2) {
-		ret = '#EA7107';
-	} else if (value <= 3) {
-		ret = '#FCD735';
-	} else if (value <= 4) {
-		ret = '#E4F407';
-	} else if (value <= 5) {
-		ret = '#41BC25';
+	if (! isReverse) {
+		if (value <= 1) {
+			ret = '#EA0B0B';
+		} else if (value <= 2) {
+			ret = '#EA7107';
+		} else if (value <= 3) {
+			ret = '#FCD735';
+		} else if (value <= 4) {
+			ret = '#E4F407';
+		} else if (value <= 5) {
+			ret = '#41BC25';
+		}
+	} else {
+		if (value <= 1) {
+			ret = '#41BC25';
+		} else if (value <= 2) {
+			ret = '#E4F407';
+		} else if (value <= 3) {
+			ret = '#FCD735';
+		} else if (value <= 4) {
+			ret = '#EA7107';
+		} else if (value <= 5) {
+			ret = '#EA0B0B';
+		}
 	}
 	return ret;
 }
@@ -403,7 +440,7 @@ function toggleLanguage () {
 		app.languageCode = 'eng';
 	}
 	
-	var languageURL = 'js/translations/' + app.languageCode + '.json';
+	var languageURL = 'translations/' + app.languageCode + '.json';
 
 	$('.language-menu .language-label .language-code').html(app.languageCode);
 	
@@ -420,15 +457,22 @@ function toggleLanguage () {
 			.replace(/\\f/g, "\\f");
 		app.languageData = $.parseJSON(app.languageData);
 		
-		$('[translate]').each(function () {
-			var translation = app.languageData[$(this).attr('translate')] || $(this).attr('translate');
-			if (isDefined(translation)) $(this).html(translation);
-		});
-		
-		$('[translate-placeholder]').each(function () {
-			var translation = app.languageData[$(this).attr('translate-placeholder')] || $(this).attr('translate-placeholder');
-			if (isDefined(translation)) $(this).attr('placeholder', translation);
-		});
+		translate();
+	});
+}
+
+function translate (selector) {
+	
+	if (! selector) selector = 'body';
+	
+	$(selector + '[translate]').add($(selector).find('[translate]')).each(function () {
+		var translation = app.languageData[$(this).attr('translate')]; // || $(this).attr('translate');
+		if (isDefined(translation)) $(this).html(translation);
+	});
+	
+	$(selector + '[translate-placeholder]').add($(selector).find('[translate-placeholder]')).each(function () {
+		var translation = app.languageData[$(this).attr('translate-placeholder')]; // || $(this).attr('translate-placeholder');
+		if (isDefined(translation)) $(this).attr('placeholder', translation);
 	});
 }
 
@@ -440,7 +484,7 @@ function registerUser () {
 		CreateRepeatPassword: $('#txtCreateConfirmPassword').val(),
 		CreateEmailAddress: $('#txtCreateEmailAddress').val(),
 		CreatePurchasedBefore: $('[name="CreatePurchasedBefore"]').val(),
-		CreateGender: $('#txtCreateGender').val(),
+		CreateGender: $('#selCreateGender').val(),
 		CreateAge: $('#txtCreateAge').val(),
 		CreateZip: $('#txtCreateZip').val()
 	};
@@ -451,7 +495,7 @@ function registerUser () {
 	$('#txtCreateConfirmPassword').val('');
 	$('#txtCreateEmailAddress').val('');
 	$('[name="CreatePurchasedBefore"]').val('no');
-	$('#txtCreateGender').val('');
+	$('#selCreateGender').val('');
 	$('#txtCreateAge').val('');
 	$('#txtCreateZip').val('');
 	$('#btnRegisterUser').attr('disabled', 'disabled');
@@ -465,6 +509,53 @@ function registerUser () {
 	setTimeout(function () {
 		$('#divUserActivationModal').modal('show');
 		$('#btnRegisterUser').removeAttr('disabled');
+	}, 300);
+}
+
+function requestResetPassword () {
+	
+	var requestResetPasswordViewModel = {
+		ResetEmailAddress: $('#txtForgotPasswordEmailAddress').val(),
+	};
+	
+	// Clear fields
+	$('#txtForgotPasswordEmailAddress').val('');
+	$('#btnRequestResetPassword').attr('disabled', 'disabled');
+	
+	authService.requestResetPassword(requestResetPasswordViewModel).then(function (results) {
+		// Success
+	});
+	
+	$('#divUserLoginModal').modal('hide');
+	
+	setTimeout(function () {
+		$('#divUserForgotPasswordRequestModal').modal('hide');
+		$('#divUserForgotPasswordConfirmModal').modal('show');
+		$('#btnRequestResetPassword').removeAttr('disabled');
+	}, 300);
+}
+
+function confirmResetPassword () {
+	
+	var confirmResetPasswordViewModel = {
+		ResetKey: $('#txtResetKey').val(),
+		ResetPassword: $('#txtResetPassword').val(),
+		ResetPasswordConfirm: $('#txtResetConfirmPassword').val()
+	};
+	
+	// Clear fields
+	$('#txtResetKey').val('');
+	$('#txtResetPassword').val('');
+	$('#txtResetConfirmPassword').val('');
+	$('#btnConfirmResetPassword').attr('disabled', 'disabled');
+	
+	authService.confirmResetPassword(confirmResetPasswordViewModel).then(function (results) {
+		// Success
+	});
+	
+	setTimeout(function () {
+		$('#btnConfirmResetPassword').removeAttr('disabled');
+		$('#divUserForgotPasswordConfirmModal').modal('hide');
 	}, 300);
 }
 

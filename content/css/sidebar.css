@@ -177,9 +177,12 @@
 	display: none;
 }
 
+.sidebar-item > a {
+	position: relative;
+}
+
 .sidebar-item-label {
 	display: inline-block;
-	text-transform: capitalize;
 	width: 185px;
 }
 
@@ -263,6 +266,7 @@
     position: absolute;
 	top: -2px;
     width: 3px;
+	z-index: 5;
 }
 
 

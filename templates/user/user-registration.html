@@ -47,20 +47,23 @@
 						<div class="control-group row">
 							<label class="control-label col-md-3" for="txtCreatePurchasedBefore"> Purchased before ? </label>
 							<div class="controls col-md-8">
-								<p> Have you purchased a Land Bank property before ?  </p>
-								<input type="radio" id="radCreatePurchasedBeforeYes" name="CreatePurchasedBefore" value="1"> 
-								<label for="radCreatePurchasedBeforeYes"> Yes </label>
-								<input type="radio" id="radCreatePurchasedBeforeNo" name="CreatePurchasedBefore" value="0" checked style="margin: 0 0 0 16px;">
-								<label for="radCreatePurchasedBeforeNo"> No </label>
-								<br/>
+								<select name="CreatePurchasedBefore" class="form-control" style="width: 160px;">
+									<option value="1"> Yes </option>
+									<option value="0" selected> No </option>
+								</select>
+								<p> Purchased a Land Bank property before ?  </p>
 							</div>
 						</div>
 
 						<div class="control-group row">
 							<label class="control-label col-md-3" for="txtCreateGender"> Gender </label>
 							<div class="controls col-md-8">
-								<input type="text" id="txtCreateGender"
-									placeholder="" class="form-control input-xlarge">
+								<select name="selCreateGender" class="form-control" style="width: 160px;">
+									<option value="" selected disabled> Select gender </option>
+									<option value="male"> Male </option>
+									<option value="female"> Female </option>
+									<option value="other"> Other </option>
+								</select>
 								<p> Please provide your gender </p>
 							</div>
 						</div>

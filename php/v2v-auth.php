@@ -24,9 +24,12 @@
 		// POST methods
 		case 'ActivateUser': activate_user(); break;
 		case 'CreateUser': create_user(); break;
+		case 'RequestResetPassword': request_reset_password(); break;
+		case 'ConfirmResetPassword': confirm_reset_password(); break;
 		case 'GetUserDetails': get_user_details(); break;
 		case 'GetUserFavorites': get_user_favorites(); break;
 		case 'SetUserFavorite': set_user_favorite(); break;
+		case 'SaveSearch': set_search(); break;
 		case 'DeleteUserFavorite': delete_user_favorite(); break;
 		case 'LoginUser': login_user(); break;
 		case 'LogoutUser': logout_user(); break;
@@ -61,8 +64,8 @@
 			'age' => $auth_data->age,
 			'zip' => $auth_data->zip 
 		);
-	
-		sleep(2); // Wait to prevent too many requests
+		
+		sleep(1); // Wait to prevent too many requests
 	
 		$register = $auth->register(
 			$auth_data->email_address, 
@@ -75,14 +78,99 @@
 		if (isset($register['error']) && ($register['error'] == 1)) {
 			$message = $register['message'];
 			$is_error = true;
+			
 		} else {
 			// Registration was successful
 			$message = $register['message'];
+			
+			// Send email using relay
+			global $email_relay;
+			
+			// Post to relay server
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $email_relay->url);
+			curl_setopt($ch, CURLOPT_POST, 1);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, array(
+				'key' => $email_relay->key,
+				'email' => $register['email_data']['email'],
+				'header' => $register['email_data']['header'],
+				'message' => $register['email_data']['message'],
+				'subject' => $register['email_data']['subject']
+			));
+			curl_exec($ch);
+			curl_close($ch);
 		}
-		
+
 		echo $message;
 	}
 	
+	function request_reset_password () {
+		
+		require_once(dirname(__FILE__)."/PHPAuth/Config.php");
+		require_once(dirname(__FILE__)."/PHPAuth/Auth.php");
+
+		global $dbh;
+	
+		$config = new PHPAuth\Config($dbh);
+		$auth   = new PHPAuth\Auth($dbh, $config);
+		
+		$reset_email_address = isset($_POST['ResetEmailAddress']) ? $_POST['ResetEmailAddress'] : null;
+	
+		sleep(1); // Wait to prevent too many requests
+	
+		$reset = $auth->requestReset($reset_email_address, true);
+	
+		$message = '';
+		if (isset($reset['error']) && ($reset['error'] == 1)) {
+			$message = $reset['message'];
+			$is_error = true;
+			
+		} else {
+			// Registration was successful
+			$message = $reset['message'];
+			
+			// Send email using relay
+			global $email_relay;
+			
+			// Post to relay server
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $email_relay->url);
+			curl_setopt($ch, CURLOPT_POST, 1);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, array(
+				'key' => $email_relay->key,
+				'email' => $reset['email_data']['email'],
+				'header' => $reset['email_data']['header'],
+				'message' => $reset['email_data']['message'],
+				'subject' => $reset['email_data']['subject']
+			));
+			curl_exec($ch);
+			curl_close($ch);
+		}
+
+		echo $message;
+	}
+	
+	function confirm_reset_password () {
+		
+		require_once(dirname(__FILE__)."/PHPAuth/Config.php");
+		require_once(dirname(__FILE__)."/PHPAuth/Auth.php");
+
+		global $dbh;
+	
+		$config = new PHPAuth\Config($dbh);
+		$auth   = new PHPAuth\Auth($dbh, $config);
+		
+		$reset_key = isset($_POST['ResetKey']) ? $_POST['ResetKey'] : null;
+		$reset_password = isset($_POST['ResetPassword']) ? $_POST['ResetPassword'] : null;
+		$reset_password_confirm = isset($_POST['ResetPasswordConfirm']) ? $_POST['ResetPasswordConfirm'] : null;
+
+		$auth->resetPass($reset_key, $reset_password, $reset_password_confirm, true);
+	}
+
 	// activate_user - Activates a user that has been emailed an activation key after registering
 	function activate_user () {
 	
@@ -97,9 +185,9 @@
 		$auth_data = (object) [
 			'activation_key' => (isset($_POST['ActivationKey']) ? $_POST['ActivationKey'] : null)
 		];
-	
+		
 		sleep(2); // Wait to prevent too many requests
-	
+		
 		$activation = $auth->activate($auth_data->activation_key);
 		
 		$message = '';
@@ -245,6 +333,33 @@
 			LIMIT 1);
 			
 			INSERT INTO public.user_favorites (user_id, search_text, created_date) 
+			VALUES (
+				(SELECT id FROM users WHERE email ILIKE '" . $_SESSION['Username'] . "'),
+				'$search_text',
+				now()
+			)
+		";
+		
+		$conn = get_postgresql_db_connection('v2v_auth');
+		
+		$result = pg_query($conn, $query) 
+			or die ('Error: ' + pg_last_error($conn) + '\n');
+		
+		pg_close($conn);
+		
+		echo json_encode(true);
+	}
+	
+	// set_search - Saves a user's search
+	function set_search () {
+		
+		if (! isset($_SESSION['Username'])) return;
+		
+		$search_text = (isset($search_text)) ? $search_text : (isset($_REQUEST['SearchText']) ? 
+			pg_escape_string($_REQUEST['SearchText']) : null);
+		
+		$query = "
+			INSERT INTO public.user_searches (user_id, search_text, created_date) 
 			VALUES (
 				(SELECT id FROM users WHERE email ILIKE '" . $_SESSION['Username'] . "'),
 				'$search_text',

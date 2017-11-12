@@ -50,6 +50,7 @@
 			OR (category ILIKE '%zip%')
 			OR (category ILIKE '%nbrhd%'))
 			AND (TA.name ILIKE '%$search%')
+			AND (TA.active = 1)
 			ORDER BY Name 
 			LIMIT 10
 		";
@@ -115,7 +116,10 @@
 				, ST_Y(ST_Centroid(geom)) AS CenterLat
 				, ST_X(ST_Centroid(geom)) AS CenterLng	  
 				, ST_AsGeoJSON(geom) AS GeoJSON
-			FROM v2vtypeahead WHERE name ILIKE '%$name%'
+			FROM v2vtypeahead 
+			WHERE (1 = 1)
+			AND (name ILIKE '%$name%') 
+			AND (active = 1)
 		";
 		
 		$conn = get_postgresql_db_connection('postgres');
@@ -205,7 +209,7 @@
 		$radius_type = (isset($radius_type)) ? $radius_type : (isset($_REQUEST['RadiusType']) ? pg_escape_string($_REQUEST['RadiusType']) : null);
 
 		// Include additional details if the user is logged in
-		$quintiles_query = (isset($_SESSION['Username']) && ($radius_type != 'neighborhood')) ? 
+		$quintiles_query = ($radius_type != 'neighborhood') ? 
 			" (SELECT 
 				  AVG(CAST(absshnum AS FLOAT)) AS AbsenteeOwnerShares
 				, AVG(CAST(abs_qr_des AS FLOAT)) AS AbsenteeOwnerSharesQnt
@@ -220,7 +224,7 @@
 				, AVG(CAST(crprop AS FLOAT)) AS CrimesAgainstProperty
 				, AVG(CAST(cprop_qra AS FLOAT)) AS CrimesAgainstPropertyQnt
 				, AVG(CAST(add1f AS FLOAT)) AS SingleFamilyBPAdditions
-				, (5 - AVG(CAST(bpa1f_qra AS FLOAT))) AS SingleFamilyBPAdditionsQnt
+				, AVG(CAST(bpa1f_qra AS FLOAT)) AS SingleFamilyBPAdditionsQnt
 			FROM public.quintilecityblock Q 
 			WHERE ST_Intersects(Q.geom, 
 				ST_Buffer(ST_MakePoint($lng, $lat)::geography, 402.336)) 
@@ -240,7 +244,7 @@
 				, AVG(CAST(crprop AS FLOAT)) AS CrimesAgainstProperty
 				, AVG(CAST(cprop_qra AS FLOAT)) AS CrimesAgainstPropertyQnt
 				, AVG(CAST(add1f AS FLOAT)) AS SingleFamilyBPAdditions
-				, (5 - AVG(CAST(bpa1f_qra AS FLOAT))) AS SingleFamilyBPAdditionsQnt
+				, AVG(CAST(bpa1f_qra AS FLOAT)) AS SingleFamilyBPAdditionsQnt
 			FROM public.quintilecityblock Q 
 			WHERE ST_Intersects(Q.geom, (SELECT 
 				geom 
@@ -254,7 +258,7 @@
 				))) 
 			LIMIT 1)";
 			
-		$where_condition = (isset($_SESSION['Username']) && ($radius_type != 'neighborhood')) ?
+		$where_condition = ($radius_type != 'neighborhood') ?
 			" AND (ST_Distance_Sphere(geom, ST_MakePoint($lng, $lat)) <= $radius_miles)" :
 			" AND (neigh ILIKE ( 
 				SELECT neighshape 
@@ -282,8 +286,8 @@
 				, Qnt.CrimesAgainstPropertyQnt
 				, Qnt.SingleFamilyBPAdditions
 				, Qnt.SingleFamilyBPAdditionsQnt
-				, ROUND(AVG(CAST(LBP.mktval AS INT)), 2) AS MarketValue
-				, ROUND(AVG(CAST(LBP.sqft AS INT)), 2) AS Sqft
+				, AVG(CAST(LBP.mktval AS INT)) AS MarketValue
+				, AVG(CAST(LBP.sqft AS INT)) AS Sqft
 			FROM landbankprops LBP, $quintiles_query AS Qnt
 			WHERE (1 = 1) 
 			$where_condition
@@ -305,7 +309,7 @@
 		while ($row = pg_fetch_row($result)) {
 			if (isset($_SESSION['Username'])) {
 				$area_stats = array(
-					  'PropertyCount' => number_format($row[0], 2, '.', ',')
+					  'PropertyCount' => number_format($row[0], 0, '.', ',')
 					, 'AbsenteeOwnerShares' => number_format($row[1], 2, '.', ',')
 					, 'AbsenteeOwnerSharesQnt' => number_format($row[2], 2, '.', ',')
 					, 'AverageAssessedValue' => number_format($row[3], 2, '.', ',')
@@ -320,12 +324,12 @@
 					, 'CrimesAgainstPropertyQnt' => number_format($row[12], 2, '.', ',')
 					, 'SingleFamilyBPAdditions' => number_format($row[13], 2, '.', ',')
 					, 'SingleFamilyBPAdditionsQnt' => number_format($row[14], 2, '.', ',')
-					, 'MarketValue' => $row[15]
-					, 'Sqft' => $row[16]
+					, 'MarketValue' => number_format($row[15], 0, '.', ',')
+					, 'Sqft' => number_format($row[16], 0, '.', ',')
 				);
 			} else {
 				$area_stats = array(
-					  'PropertyCount' => number_format($row[0], 2, '.', ',')
+					  'PropertyCount' => number_format($row[0], 0, '.', ',')
 					, 'AbsenteeOwnerShares' => number_format($row[1], 2, '.', ',')
 					, 'AbsenteeOwnerSharesQnt' => number_format($row[2], 2, '.', ',')
 					, 'AverageAssessedValue' => number_format($row[3], 2, '.', ',')
@@ -356,25 +360,36 @@
 
 		$query = "
 			SELECT 
-				  AVG(CAST(absshnum AS FLOAT))
-				, AVG(CAST(abs_qr_des AS FLOAT))
-				, AVG(CAST(avgassval AS FLOAT))
-				, AVG(CAST(avgav_qrd AS FLOAT))
-				, AVG(CAST(visible AS FLOAT))
-				, AVG(CAST(viz3_qra AS FLOAT))
-				, AVG(CAST(pvvis AS FLOAT))
-				, AVG(CAST(pvis_qra AS FLOAT))
-				, AVG(CAST(crperson AS FLOAT))
-				, AVG(CAST(crper_qra AS FLOAT))
-				, AVG(CAST(crprop AS FLOAT))
-				, AVG(CAST(cprop_qra AS FLOAT))
-				, AVG(CAST(add1f AS FLOAT))
-				, (5 - AVG(CAST(bpa1f_qra AS FLOAT)))
+				  N.absshnum
+				, AVG(CAST(abs_qr_des AS FLOAT)) AS abs_qr_des
+				, AVG(CAST(avgassval AS FLOAT)) AS avgassval
+				, AVG(CAST(avgav_qrd AS FLOAT)) AS avgav_qrd
+				, N.visible
+				, AVG(CAST(viz3_qra AS FLOAT)) AS viz3_qra
+				, N.pvvis
+				, AVG(CAST(pvis_qra AS FLOAT)) AS pvis_qra
+				, N.crperson
+				, AVG(CAST(crper_qra AS FLOAT)) AS crper_qra
+				, N.crprop
+				, AVG(CAST(cprop_qra AS FLOAT)) AS cprop_qra
+				, N.add1f
+				, AVG(CAST(bpa1f_qra AS FLOAT)) AS bpa1f_qra
 			FROM public.quintilecityblock Q
+			LEFT OUTER JOIN (SELECT 
+					  COALESCE(CAST(_N.absshnum AS FLOAT), 0) AS absshnum
+					, COALESCE(CAST(_N.visible AS FLOAT), 0) AS visible
+					, COALESCE(CAST(_N.pvvis AS FLOAT), 0) AS pvvis
+					, COALESCE(CAST(_N.crperson AS FLOAT), 0) AS crperson
+					, COALESCE(CAST(_N.crprop AS FLOAT), 0) AS crprop
+					, COALESCE(CAST(_N.add1f AS FLOAT), 0) AS add1f
+				FROM public.v2vneighborhood _N
+				WHERE (_N.neighshape ILIKE '%$neighborhood%')
+			) N ON (1 = 1)
 			WHERE ST_Intersects(Q.geom, (SELECT 
 				geom 
 				FROM public.v2vneighborhood N 
-				WHERE (neighshape ILIKE '$neighborhood')))
+				WHERE (neighshape ILIKE '%$neighborhood%')))
+			GROUP BY N.absshnum, N.visible, N.pvvis, N.crperson, N.crprop, N.add1f
 			LIMIT 1 
 		";
 		
@@ -388,17 +403,17 @@
 		$area_stats = array(
 			  'AbsenteeOwnerShares' => number_format($row[0], 2, '.', ',')
 			, 'AbsenteeOwnerSharesQnt' => number_format($row[1], 2, '.', ',')
-			, 'AverageAssessedValue' => number_format($row[2], 2, '.', ',')
+			, 'AverageAssessedValue' => number_format($row[2], 0, '.', ',')
 			, 'AverageAssessedValueQnt' => number_format($row[3], 2, '.', ',')
-			, 'StreetVisible311Calls' => number_format($row[4], 2, '.', ',')
+			, 'StreetVisible311Calls' => number_format($row[4], 0, '.', ',')
 			, 'StreetVisible311CallsQnt' => number_format($row[5], 2, '.', ',')
-			, 'StreetVisiblePropertyViolations' => number_format($row[6], 2, '.', ',')
+			, 'StreetVisiblePropertyViolations' => number_format($row[6], 0, '.', ',')
 			, 'StreetVisiblePropertyViolationsQnt' => number_format($row[7], 2, '.', ',')
-			, 'CrimesAgainstPersons' => number_format($row[8], 2, '.', ',')
+			, 'CrimesAgainstPersons' => number_format($row[8], 0, '.', ',')
 			, 'CrimesAgainstPersonsQnt' => number_format($row[9], 2, '.', ',')
-			, 'CrimesAgainstProperty' => number_format($row[10], 2, '.', ',')
+			, 'CrimesAgainstProperty' => number_format($row[10], 0, '.', ',')
 			, 'CrimesAgainstPropertyQnt' => number_format($row[11], 2, '.', ',')
-			, 'SingleFamilyBPAdditions' => number_format($row[12], 2, '.', ',')
+			, 'SingleFamilyBPAdditions' => number_format($row[12], 0, '.', ',')
 			, 'SingleFamilyBPAdditionsQnt' => number_format($row[13], 2, '.', ',')
 		);
 		
@@ -415,26 +430,37 @@
 		
 		$query = "
 			SELECT 
-				  AVG(CAST(absshnum AS FLOAT))
-				, AVG(CAST(abs_qr_des AS FLOAT))
-				, AVG(CAST(avgassval AS FLOAT))
-				, AVG(CAST(avgav_qrd AS FLOAT))
-				, AVG(CAST(visible AS FLOAT))
-				, AVG(CAST(viz3_qra AS FLOAT))
-				, AVG(CAST(pvvis AS FLOAT))
-				, AVG(CAST(pvis_qra AS FLOAT))
-				, AVG(CAST(crperson AS FLOAT))
-				, AVG(CAST(crper_qra AS FLOAT))
-				, AVG(CAST(crprop AS FLOAT))
-				, AVG(CAST(cprop_qra AS FLOAT))
-				, AVG(CAST(add1f AS FLOAT))
-				, (5 - AVG(CAST(bpa1f_qra AS FLOAT)))
+				  N.absshnum
+				, AVG(CAST(abs_qr_des AS FLOAT)) AS abs_qr_des
+				, AVG(CAST(avgassval AS FLOAT)) AS avgassval
+				, AVG(CAST(avgav_qrd AS FLOAT)) AS avgav_qrd
+				, N.visible
+				, AVG(CAST(viz3_qra AS FLOAT)) AS viz3_qra
+				, N.pvvis
+				, AVG(CAST(pvis_qra AS FLOAT)) AS pvis_qra
+				, N.crperson
+				, AVG(CAST(crper_qra AS FLOAT)) AS crper_qra
+				, N.crprop
+				, AVG(CAST(cprop_qra AS FLOAT)) AS cprop_qra
+				, N.add1f
+				, AVG(CAST(bpa1f_qra AS FLOAT)) AS bpa1f_qra
 			FROM public.quintilecityblock Q
+			LEFT OUTER JOIN (SELECT 
+					  COALESCE(CAST(_Z.absshnum AS FLOAT), 0) AS absshnum
+					, COALESCE(CAST(_Z.visible AS FLOAT), 0) AS visible
+					, COALESCE(CAST(_Z.pvvis AS FLOAT), 0) AS pvvis
+					, COALESCE(CAST(_Z.crperson AS FLOAT), 0) AS crperson
+					, COALESCE(CAST(_Z.crprop AS FLOAT), 0) AS crprop
+					, COALESCE(CAST(_Z.add1f AS FLOAT), 0) AS add1f
+				FROM public.v2vzipcode _Z
+				WHERE (_Z.zipcode ILIKE '$zip_code')
+			) N ON (1 = 1)
 			WHERE ST_Intersects(Q.geom, (SELECT 
 				geom 
-				FROM public.v2vzipcode Z 
+				FROM public.v2vzipcode Z
 				WHERE (Z.zipcode ILIKE '$zip_code')))
-			LIMIT 1
+			GROUP BY N.absshnum, N.visible, N.pvvis, N.crperson, N.crprop, N.add1f
+			LIMIT 1 
 		";
 		
 		$conn = get_postgresql_db_connection('postgres');
@@ -447,17 +473,17 @@
 		$area_stats = array(
 			  'AbsenteeOwnerShares' => number_format($row[0], 2, '.', ',')
 			, 'AbsenteeOwnerSharesQnt' => number_format($row[1], 2, '.', ',')
-			, 'AverageAssessedValue' => number_format($row[2], 2, '.', ',')
+			, 'AverageAssessedValue' => number_format($row[2], 0, '.', ',')
 			, 'AverageAssessedValueQnt' => number_format($row[3], 2, '.', ',')
-			, 'StreetVisible311Calls' => number_format($row[4], 2, '.', ',')
+			, 'StreetVisible311Calls' => number_format($row[4], 0, '.', ',')
 			, 'StreetVisible311CallsQnt' => number_format($row[5], 2, '.', ',')
-			, 'StreetVisiblePropertyViolations' => number_format($row[6], 2, '.', ',')
+			, 'StreetVisiblePropertyViolations' => number_format($row[6], 0, '.', ',')
 			, 'StreetVisiblePropertyViolationsQnt' => number_format($row[7], 2, '.', ',')
-			, 'CrimesAgainstPersons' => number_format($row[8], 2, '.', ',')
+			, 'CrimesAgainstPersons' => number_format($row[8], 0, '.', ',')
 			, 'CrimesAgainstPersonsQnt' => number_format($row[9], 2, '.', ',')
-			, 'CrimesAgainstProperty' => number_format($row[10], 2, '.', ',')
+			, 'CrimesAgainstProperty' => number_format($row[10], 0, '.', ',')
 			, 'CrimesAgainstPropertyQnt' => number_format($row[11], 2, '.', ',')
-			, 'SingleFamilyBPAdditions' => number_format($row[12], 2, '.', ',')
+			, 'SingleFamilyBPAdditions' => number_format($row[12], 0, '.', ',')
 			, 'SingleFamilyBPAdditionsQnt' => number_format($row[13], 2, '.', ',')
 		);
 	
