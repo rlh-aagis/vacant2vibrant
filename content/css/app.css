@@ -29,6 +29,10 @@ body {
 	display: inline-block !important;
 }
 
+.always-visible {
+	display: list-item !important;
+}
+
 .hide-overflow {
 	overflow-x: hidden;
     text-overflow: ellipsis;
@@ -106,11 +110,12 @@ input[type="radio"] + label {
 		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
         display: none;
 		line-height: 18px;
-		margin: 18px 0 0 0;
+		margin: 18px 10px 0 10px;
         max-width: 400px;
         min-width: 200px;
         padding: 8px 8px;
         position: absolute;
+		text-indent: 0;
         white-space: normal;
         z-index: 101;
         -webkit-transition: all 0.3s ease;

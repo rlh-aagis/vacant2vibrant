@@ -307,44 +307,30 @@
 		$area_stats = null;
 		
 		while ($row = pg_fetch_row($result)) {
+			
+			// Add basic data for all searches
+			$area_stats = array(
+				  'PropertyCount' => number_format($row[0], 0, '.', ',')
+				, 'AbsenteeOwnerShares' => number_format($row[1], 2, '.', ',')
+				, 'AbsenteeOwnerSharesQnt' => number_format($row[2], 2, '.', ',')
+				, 'AverageAssessedValue' => number_format($row[3], 2, '.', ',')
+				, 'AverageAssessedValueQnt' => number_format($row[4], 2, '.', ',')
+				, 'StreetVisible311Calls' => number_format($row[5], 2, '.', ',')
+				, 'StreetVisible311CallsQnt' => number_format($row[6], 2, '.', ',')
+				, 'StreetVisiblePropertyViolations' => number_format($row[7], 2, '.', ',')
+				, 'StreetVisiblePropertyViolationsQnt' => number_format($row[8], 2, '.', ',')
+				, 'CrimesAgainstPersons' => number_format($row[9], 2, '.', ',')
+				, 'CrimesAgainstPersonsQnt' => number_format($row[10], 2, '.', ',')
+				, 'CrimesAgainstProperty' => number_format($row[11], 2, '.', ',')
+				, 'CrimesAgainstPropertyQnt' => number_format($row[12], 2, '.', ',')
+				, 'SingleFamilyBPAdditions' => number_format($row[13], 2, '.', ',')
+				, 'SingleFamilyBPAdditionsQnt' => number_format($row[14], 2, '.', ',')
+			);
+			
+			// Add additonal data only for registered users
 			if (isset($_SESSION['Username'])) {
-				$area_stats = array(
-					  'PropertyCount' => number_format($row[0], 0, '.', ',')
-					, 'AbsenteeOwnerShares' => number_format($row[1], 2, '.', ',')
-					, 'AbsenteeOwnerSharesQnt' => number_format($row[2], 2, '.', ',')
-					, 'AverageAssessedValue' => number_format($row[3], 2, '.', ',')
-					, 'AverageAssessedValueQnt' => number_format($row[4], 2, '.', ',')
-					, 'StreetVisible311Calls' => number_format($row[5], 2, '.', ',')
-					, 'StreetVisible311CallsQnt' => number_format($row[6], 2, '.', ',')
-					, 'StreetVisiblePropertyViolations' => number_format($row[7], 2, '.', ',')
-					, 'StreetVisiblePropertyViolationsQnt' => number_format($row[8], 2, '.', ',')
-					, 'CrimesAgainstPersons' => number_format($row[9], 2, '.', ',')
-					, 'CrimesAgainstPersonsQnt' => number_format($row[10], 2, '.', ',')
-					, 'CrimesAgainstProperty' => number_format($row[11], 2, '.', ',')
-					, 'CrimesAgainstPropertyQnt' => number_format($row[12], 2, '.', ',')
-					, 'SingleFamilyBPAdditions' => number_format($row[13], 2, '.', ',')
-					, 'SingleFamilyBPAdditionsQnt' => number_format($row[14], 2, '.', ',')
-					, 'MarketValue' => number_format($row[15], 0, '.', ',')
-					, 'Sqft' => number_format($row[16], 0, '.', ',')
-				);
-			} else {
-				$area_stats = array(
-					  'PropertyCount' => number_format($row[0], 0, '.', ',')
-					, 'AbsenteeOwnerShares' => number_format($row[1], 2, '.', ',')
-					, 'AbsenteeOwnerSharesQnt' => number_format($row[2], 2, '.', ',')
-					, 'AverageAssessedValue' => number_format($row[3], 2, '.', ',')
-					, 'AverageAssessedValueQnt' => number_format($row[4], 2, '.', ',')
-					, 'StreetVisible311Calls' => number_format($row[5], 2, '.', ',')
-					, 'StreetVisible311CallsQnt' => number_format($row[6], 2, '.', ',')
-					, 'StreetVisiblePropertyViolations' => number_format($row[7], 2, '.', ',')
-					, 'StreetVisiblePropertyViolationsQnt' => number_format($row[8], 2, '.', ',')
-					, 'CrimesAgainstPersons' => number_format($row[9], 2, '.', ',')
-					, 'CrimesAgainstPersonsQnt' => number_format($row[10], 2, '.', ',')
-					, 'CrimesAgainstProperty' => number_format($row[11], 2, '.', ',')
-					, 'CrimesAgainstPropertyQnt' => number_format($row[12], 2, '.', ',')
-					, 'SingleFamilyBPAdditions' => number_format($row[13], 2, '.', ',')
-					, 'SingleFamilyBPAdditionsQnt' => number_format($row[14], 2, '.', ',')
-				);
+				$area_stats['MarketValue'] = number_format($row[15], 0, '.', ',');
+				$area_stats['Sqft'] = number_format($row[16], 0, '.', ',');
 			}
 		}
 		
@@ -374,6 +360,13 @@
 				, AVG(CAST(cprop_qra AS FLOAT)) AS cprop_qra
 				, N.add1f
 				, AVG(CAST(bpa1f_qra AS FLOAT)) AS bpa1f_qra
+				, (SELECT 
+						COUNT(*) 
+					FROM landbankprops LBP 
+					WHERE ST_Intersects(LBP.geom, (SELECT 
+							geom 
+						FROM public.v2vneighborhood _N 
+						WHERE (_N.neighshape ILIKE '%$neighborhood%'))))
 			FROM public.quintilecityblock Q
 			LEFT OUTER JOIN (SELECT 
 					  COALESCE(CAST(_N.absshnum AS FLOAT), 0) AS absshnum
@@ -415,6 +408,7 @@
 			, 'CrimesAgainstPropertyQnt' => number_format($row[11], 2, '.', ',')
 			, 'SingleFamilyBPAdditions' => number_format($row[12], 0, '.', ',')
 			, 'SingleFamilyBPAdditionsQnt' => number_format($row[13], 2, '.', ',')
+			, 'PropertyCount' => number_format($row[14], 0, '.', ',')
 		);
 		
 		pg_close($conn);
@@ -444,6 +438,13 @@
 				, AVG(CAST(cprop_qra AS FLOAT)) AS cprop_qra
 				, N.add1f
 				, AVG(CAST(bpa1f_qra AS FLOAT)) AS bpa1f_qra
+				, (SELECT 
+						COUNT(*) 
+					FROM landbankprops LBP 
+					WHERE ST_Intersects(LBP.geom, (SELECT 
+							geom 
+						FROM public.v2vzipcode _Z 
+						WHERE (_Z.zipcode ILIKE '$zip_code'))))
 			FROM public.quintilecityblock Q
 			LEFT OUTER JOIN (SELECT 
 					  COALESCE(CAST(_Z.absshnum AS FLOAT), 0) AS absshnum
@@ -485,6 +486,7 @@
 			, 'CrimesAgainstPropertyQnt' => number_format($row[11], 2, '.', ',')
 			, 'SingleFamilyBPAdditions' => number_format($row[12], 0, '.', ',')
 			, 'SingleFamilyBPAdditionsQnt' => number_format($row[13], 2, '.', ',')
+			, 'PropertyCount' => number_format($row[14], 0, '.', ',')
 		);
 	
 		pg_close($conn);

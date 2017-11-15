@@ -46,7 +46,7 @@
 	display: none;
 }
 #sidebar_menu li a, .sidebar-nav li a {
-    color: #999;
+    color: #555555;
     display: block;
     float: left;
     text-decoration: none;
@@ -81,7 +81,7 @@
 }
 
 #divAreaStatsSubheading {
-	color: #BBB;
+	color: #757575;
     font-size: 13px;
     left: 20px;
     position: relative;
@@ -91,12 +91,6 @@
 .sidebar-nav li {
   line-height: 32px;
   text-indent: 20px;
-}
-
-.sidebar-nav li a {
-  color: #999999;
-  display: block;
-  text-decoration: none;
 }
 
 .sidebar-nav li a:hover {
@@ -175,6 +169,12 @@
 
 .sidebar-item { 
 	display: none;
+	line-height: 28px;
+	height: 32px;
+}
+
+.sidebar-item.with-quintile {
+	height: 54px;
 }
 
 .sidebar-item > a {
@@ -184,6 +184,11 @@
 .sidebar-item-label {
 	display: inline-block;
 	width: 185px;
+}
+
+.sidebar-item-label-extended {
+	display: inline-block;
+	width: 260px;
 }
 
 .sidebar-item-value {
@@ -205,6 +210,7 @@
 .sidebar-item-bar-value {
 	background-color: rgba(0, 0, 0, 0.2);
 	color: #FFF;
+	display: none;
 	font-weight: normal;
 	height: 18px;
 	left: 0;
@@ -228,7 +234,7 @@
 .q3-box,
 .q4-box,
 .q5-box {
-	border-left: 1px dotted #959595;
+	border-left: 1px dotted #858585;
 	display: inline-block;
 	height: 18px;
 	left: auto;

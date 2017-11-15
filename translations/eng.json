@@ -37,8 +37,8 @@
 	"area statistics": "Area Statistics",
 	"neighborhood of": "Neighborhood of ",
 	"number of lb properties": "Number of LB Properties",
-	"avg market value": "Valor Promedio de Mercado",
-	"avg lot sqft": "Promedio de sqft",
+	"avg market value": "Avg Market Value",
+	"avg lot sqft": "Avg Lot Sqft",
 	"absentee owner shares": "Absentee Owner Shares",
 	"average assessed value": "Average Assessed Value",
 	"visible 311 calls": "Visible 311 Calls",
@@ -46,5 +46,13 @@
 	"crimes against persons": "Crimes Against Persons",
 	"crimes against property": "Crimes Against Property",
 	"single family bp additions": "Single Family BP Additions",
-	"for more information, click to": "For More Information, Click to"
+	"for more information, click to": "For More Information, Click to",
+	
+	"residential appraised value is the average market value of the properties.": "Residential appraised value is the average market value of the properties.",
+	"this is the average number of single family building permit additions for the area.": "This is the average number of single family building permit additions for the area.",
+	"ownership of real estate by entities or individuals who do not actually live there.": "Ownership of real estate by entities or individuals who do not actually live there.",
+	"this is the number of street visible calls to non-emergency municipal services (311).": "This is the number of street visible calls to non-emergency municipal services (311).",
+	"this is the number of street visible property violations that have been reported in the area.": "This is the number of street visible property violations that have been reported in the area.",
+	"this is the number of crimes against persons that have been reported in the area.": "This is the number of crimes against persons that have been reported in the area.",
+	"this is the number of crimes against property that have been reported in the area.": "This is the number of crimes against property that have been reported in the area."
 }

@@ -12,7 +12,7 @@
 					Area Statistics 
 				</span>
 				<span id="main_icon"></span>
-				<div class="sub_icon glyphicon glyphicon-chevron-right"></div>
+				<div class="sub_icon glyphicon glyphicon-chevron-left"></div>
 			</a>
 		</li>
 		<div id="divAreaStatsSubheading"> 
@@ -47,33 +47,15 @@
 				<div id="txtSqft" class="sidebar-item-value"> 0 </div>
 			</a>
 		</li>
-		
-		<li class="sidebar-item">
+		<li class="sidebar-item with-quintile" style="border-top: 1px solid #DDD; margin-top: 12px; padding-top: 12px;">
 			<a> 
 				<div class="sub_icon glyphicon glyphicon-stats"></div>
-				<div class="sidebar-item-label hide-overflow" translate="absentee owner shares">
-					Absentee Owner Shares
-				</div> 
-				<div class="hover-help-icon"> i </div>
-				<div class="hover-help-content"> 
-					Absentee Owner Shares are ownership of a piece of real estate 
-					by entities or individuals who do not actually live there. 
-				</div>
-				<div class="sidebar-item-bar">
-					<div id="txtAbsenteeOwnerShares" class="sidebar-item-bar-value"> 0 </div>
-					<div id="divAbsenteeOwnerSharesValue" class="sidebar-item-inner-bar"></div>
-				</div>
-			</a>
-		</li>
-		<li class="sidebar-item">
-			<a> 
-				<div class="sub_icon glyphicon glyphicon-stats"></div>
-				<div class="sidebar-item-label hide-overflow" translate="average assessed value">
-					Average Assessed Value
+				<div class="sidebar-item-label-extended hide-overflow" translate="average assessed value">
+					Residential Appraised Value
 				</div>
 				<div class="hover-help-icon"> i </div>
-				<div class="hover-help-content"> 
-					Average Assessed Value is the average market value of the properties.
+				<div class="hover-help-content" translate="residential appraised value is the average market value of the properties."> 
+					Residential Appraised Value is the average market value of the properties. 
 				</div>
 				<div class="sidebar-item-bar">
 					<div id="txtAverageAssessedValue" class="sidebar-item-bar-value"> 0 </div>
@@ -81,79 +63,15 @@
 				</div>
 			</a>
 		</li>
-		<li class="sidebar-item">
-			<a> 
-				<div class="sub_icon glyphicon glyphicon-stats"></div>
-				<div class="sidebar-item-label hide-overflow" translate="visible 311 calls"> 
-					Visible 311 Calls
-				</div> 
-				<div class="hover-help-icon"> i </div>
-				<div class="hover-help-content"> 
-					This is the number of street visible calls to non-emergency municipal services (311).
-				</div>
-				<div class="sidebar-item-bar">
-					<div id="txtStreetVisible311Calls" class="sidebar-item-bar-value"> 0 </div>
-					<div id="divStreetVisible311CallsValue" class="sidebar-item-inner-bar"></div>
-				</div>
-			</a>
-		</li>
-		<li class="sidebar-item">
-			<a> 
-				<div class="sub_icon glyphicon glyphicon-stats"></div>
-				<div class="sidebar-item-label hide-overflow" translate="visible property violations">
-					Visible Property Violations
-				</div>
-				<div class="hover-help-icon"> i </div>
-				<div class="hover-help-content"> 
-					This is the number of street visible property violations that have been reported in the area.
-				</div>
-				<div class="sidebar-item-bar">
-					<div id="txtStreetVisiblePropertyViolations" class="sidebar-item-bar-value"> 0 </div>
-					<div id="divStreetVisiblePropertyViolationsValue" class="sidebar-item-inner-bar"></div>
-				</div>
-			</a>
-		</li>
-		<li class="sidebar-item">
-			<a> 
-				<div class="sub_icon glyphicon glyphicon-stats"></div>
-				<div class="sidebar-item-label hide-overflow" translate="crimes against persons">
-					Crimes Against Persons
-				</div> 
-				<div class="hover-help-icon"> i </div>
-				<div class="hover-help-content"> 
-					This is the number of crimes against persons that have been reported in the area.
-				</div>
-				<div class="sidebar-item-bar">
-					<div id="txtCrimesAgainstPersons" class="sidebar-item-bar-value"> 0 </div>
-					<div id="divCrimesAgainstPersonsValue" class="sidebar-item-inner-bar"></div>
-				</div>
-			</a>
-		</li>
-		<li class="sidebar-item">
+		<li class="sidebar-item with-quintile">
 			<a>
 				<div class="sub_icon glyphicon glyphicon-stats"></div>
-				<div class="sidebar-item-label hide-overflow" translate="crimes against property">
-					Crimes Against Property
+				<div class="sidebar-item-label-extended hide-overflow" translate="single family bp additions">
+					Residential Building Permits
 				</div>
 				<div class="hover-help-icon"> i </div>
-				<div class="hover-help-content"> 
-					This is the number of crimes against property that have been reported in the area.
-				</div>
-				<div class="sidebar-item-bar">
-					<div id="txtCrimesAgainstProperty" class="sidebar-item-bar-value"> 0 </div>
-					<div id="divCrimesAgainstPropertyValue" class="sidebar-item-inner-bar"></div>
-				</div>
-			</a>
-		</li>
-		<li class="sidebar-item">
-			<a>
-				<div class="sub_icon glyphicon glyphicon-stats"></div>
-				<div class="sidebar-item-label hide-overflow" translate="single family bp additions">
-					Single Family BP Additions 
-				</div>
-				<div class="hover-help-icon"> i </div>
-				<div class="hover-help-content"> 
-					This is the average number of single family building permit additions for the area.
+				<div class="hover-help-content" translate="this is the average number of single family building permit additions for the area."> 
+					This is the average number of single family building permit additions for the area. 
 				</div>
 				<div class="sidebar-item-bar">
 					<div id="txtSingleFamilyBPAdditions" class="sidebar-item-bar-value"> 0 </div>
@@ -161,16 +79,96 @@
 				</div>
 			</a>
 		</li>
-		<li class="sidebar-item" style="display: list-item;">
+		<li class="sidebar-item with-quintile">
+			<a> 
+				<div class="sub_icon glyphicon glyphicon-stats"></div>
+				<div class="sidebar-item-label-extended hide-overflow" translate="absentee owner shares">
+					Percent Rental Properties
+				</div> 
+				<div class="hover-help-icon"> i </div>
+				<div class="hover-help-content" translate="ownership of real estate by entities or individuals who do not actually live there."> 
+					Ownership of real estate by entities or individuals who do not actually live there. 
+				</div>
+				<div class="sidebar-item-bar">
+					<div id="txtAbsenteeOwnerShares" class="sidebar-item-bar-value"> 0 </div>
+					<div id="divAbsenteeOwnerSharesValue" class="sidebar-item-inner-bar"></div>
+				</div>
+			</a>
+		</li>
+		<li class="sidebar-item with-quintile">
+			<a> 
+				<div class="sub_icon glyphicon glyphicon-stats"></div>
+				<div class="sidebar-item-label-extended hide-overflow" translate="visible 311 calls"> 
+					311 Calls Visible from Street
+				</div> 
+				<div class="hover-help-icon"> i </div>
+				<div class="hover-help-content" translate="this is the number of street visible calls to non-emergency municipal services (311)."> 
+					This is the number of street visible calls to non-emergency municipal services (311). 
+				</div>
+				<div class="sidebar-item-bar">
+					<div id="txtStreetVisible311Calls" class="sidebar-item-bar-value"> 0 </div>
+					<div id="divStreetVisible311CallsValue" class="sidebar-item-inner-bar"></div>
+				</div>
+			</a>
+		</li>
+		<li class="sidebar-item with-quintile">
+			<a> 
+				<div class="sub_icon glyphicon glyphicon-stats"></div>
+				<div class="sidebar-item-label-extended hide-overflow" translate="visible property violations">
+					Property Violations Visible from Street
+				</div>
+				<div class="hover-help-icon"> i </div>
+				<div class="hover-help-content" translate="this is the number of street visible property violations that have been reported in the area."> 
+					This is the number of street visible property violations that have been reported in the area. 
+				</div>
+				<div class="sidebar-item-bar">
+					<div id="txtStreetVisiblePropertyViolations" class="sidebar-item-bar-value"> 0 </div>
+					<div id="divStreetVisiblePropertyViolationsValue" class="sidebar-item-inner-bar"></div>
+				</div>
+			</a>
+		</li>
+		<li class="sidebar-item with-quintile">
+			<a> 
+				<div class="sub_icon glyphicon glyphicon-stats"></div>
+				<div class="sidebar-item-label-extended hide-overflow" translate="crimes against persons">
+					Crimes Against Persons
+				</div> 
+				<div class="hover-help-icon"> i </div>
+				<div class="hover-help-content" translate="this is the number of crimes against persons that have been reported in the area."> 
+					This is the number of crimes against persons that have been reported in the area. 
+				</div>
+				<div class="sidebar-item-bar">
+					<div id="txtCrimesAgainstPersons" class="sidebar-item-bar-value"> 0 </div>
+					<div id="divCrimesAgainstPersonsValue" class="sidebar-item-inner-bar"></div>
+				</div>
+			</a>
+		</li>
+		<li class="sidebar-item with-quintile">
 			<a>
-				<div class="q-city-average"></div>
-				<div> City Average </div>
+				<div class="sub_icon glyphicon glyphicon-stats"></div>
+				<div class="sidebar-item-label-extended hide-overflow" translate="crimes against property">
+					Crimes Against Property
+				</div>
+				<div class="hover-help-icon"> i </div>
+				<div class="hover-help-content" translate="this is the number of crimes against property that have been reported in the area."> 
+					This is the number of crimes against property that have been reported in the area. 
+				</div>
+				<div class="sidebar-item-bar">
+					<div id="txtCrimesAgainstProperty" class="sidebar-item-bar-value"> 0 </div>
+					<div id="divCrimesAgainstPropertyValue" class="sidebar-item-inner-bar"></div>
+				</div>
+			</a>
+		</li>
+		<li id="liQuintileLegend" class="sidebar-item">
+			<a style="text-align: center;">
+				<div class="q-city-average" style="left: 130px; top: 8px;"></div>
+				<div style="position: relative; top: 4px;"> City Average </div>
 			</a>
 		</li>
 		<li class="sidebar-link sidebar-register-or-login" style="padding: 0 24px 0 0; position: relative; text-align: center; top: 24px;">
 			<div style="color: #858585; line-height: 14px;" translate="for more information, click to"> For more information, click to </div>
 			<div data-toggle="modal" data-target="#divUserRegistrationModal" class="link" style="display: inline-block; line-height: 14px;" translate="register"> Register </div> or 
-			<div data-toggle="modal" data-target="#divUserLoginModal" class="link" style="display: inline-block; line-height: 14px;" translate="login"> Login </div>
+			<div data-toggle="modal" data-target="#divUserLoginModal" class="link" style="display: inline-block; line-height: 14px; text-indent: 0;" translate="login"> Login </div>
 		</li>
 	</ul>
 	<ul class="sidebar-nav sidebar-bottom">

@@ -1,6 +1,7 @@
 
 var app = {
 	autocompleteItems: [],
+	loginEmailAddress: null,
 	languageCode: 'eng',
 	languageData: [],
 	loggedIn: false,
@@ -20,7 +21,28 @@ $(document).ready(function () {
 			initSearch('txtLandingSearch');
 		}, 300);
 	});
+	
+	checkLoginStatus();
 });
+
+function checkLoginStatus() {
+	
+	if (! Storage) return;
+	
+	var v2vLoginInfo = localStorage.getItem('V2VLoginInfo');
+	try {
+		v2vLoginInfo = JSON.parse(v2vLoginInfo);
+	} catch (ex) { }
+	
+	if (v2vLoginInfo && v2vLoginInfo.LoggedIn && v2vLoginInfo.EmailAddress) { 
+	
+		app.loggedIn = true;
+		app.loginEmailAddress = v2vLoginInfo.EmailAddress;
+	} else {
+		
+		logoutUser();
+	}
+}
 
 function bindEvents () {
 	
@@ -93,12 +115,15 @@ function initSearch (searchElementId) {
 			service.autocomplete(search, 10).then(function (results) {
 				
 				results = app.autocompleteItems = JSON.parse(results);
-				
+
 				response($.map(results, function (item) {
+					var label = (item.Name + ' (' + ((item.Category == 'nbrhd') ? 'Neighborhood' : 
+						((item.Category == 'zip') ? 'Zip Code' : 'Address'))  + ')');
 					return {
-						value: item.Gid,
-						label: item.Name,
-						category: item.Category
+						category: item.Category,
+						label: label,
+						name: item.Name,
+						value: item.Gid
 					}
 				}));
 				
@@ -109,12 +134,18 @@ function initSearch (searchElementId) {
 			
 			// To prevent displaying value id
 			setTimeout(function () {
-				$('#' + searchElementId).val(ui.item.label);
+				$('#' + searchElementId).val(ui.item.name);
 			}, 25);
 			
 			_search(ui.item);
         }
-	});
+	});/*.data('ui-autocomplete')._renderItem = function( ul, item ) {
+        return $('<li></li>').data('item.autocomplete', item)
+            .append(
+				'<div style="display: inline-block;">' + item.name + '</div>' + 
+				'<div style="display: inline-block;">(' + item.category + ')</div>')
+            .appendTo(ul);
+	};*/
 	
 	$('#' + searchElementId).keyup(function (e) {
 		
@@ -168,12 +199,23 @@ function performLandingSearch(autocompleteItem) {
 	}).fadeIn();
 	
 	setTimeout(function () {
+		
 		initSearch('txtTopSearch');
-	}, 300);
-	
-	setTimeout(function () {
+
 		bindMapModals();
-	}, 250);
+
+		app.refreshSidebar();
+		
+		if (app.loggedIn) {
+	
+			$('.menu-user .menu-username').html(app.loginEmailAddress);
+			$('.menu-user').addClass('visible');
+			$('.sidebar-register-or-login').hide();
+			$('.menu-register-user, .menu-login-user').hide();
+			
+			refreshUserFavorites();
+		}
+	}, 300);
 	
 	$('#divMap').fadeIn();
 	
@@ -205,6 +247,9 @@ function search (autocompleteItem) {
 	}
 	
 	authService.saveSearch(userLocation.label);
+	
+	if (isDefined(userLocation.label)) 
+		userLocation.label = userLocation.label.replace(/\(neighborhood\)|\(zip\scode\)|\(address\)/gi, '').trim();
 	
 	searchMap(
 		searchValue,
@@ -240,7 +285,7 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 	var areaStatsHeaderHTML = '';
 	switch (adjustedLocationCategory) {
 		case 'address':
-			areaStatsHeaderHTML = (app.loggedIn) ? ('Within 0.25 Miles of ' + userLocation.label) : 
+			areaStatsHeaderHTML = (mapInfo.radiusType == 'quarter-mile') ? ('Within 0.25 Miles of ' + userLocation.label) : 
 				('<span translate="neighborhood of"> Neighborhood of </span>&nbsp;<span>' + userLocation.neighborhood + '</span>');
 			break;
 		case 'nbrhd':
@@ -289,19 +334,29 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 		case 'nbrhd':
 			service.getAreaStatisticsByNeighborhood(locationLabel).then(function (results) {
 				
-				refreshQuintiles(JSON.parse(results));
+				results = JSON.parse(results);
+				
+				// Property Count
+				$('#txtPropertyCount').text(formatNumber(results.PropertyCount)).closest('.sidebar-item').fadeIn();
+				
+				refreshQuintiles(results);
 			});
 			break;
 		case 'zip':
 			service.getAreaStatisticsByZipCode(locationLabel).then(function (results) {
 				
-				refreshQuintiles(JSON.parse(results));
+				results = JSON.parse(results);
+				
+				// Property Count
+				$('#txtPropertyCount').text(formatNumber(results.PropertyCount)).closest('.sidebar-item').fadeIn();
+				
+				refreshQuintiles(results);
 			});
 			break;
 		case 'city':
 		
 			// Property Count
-			$('#txtPropertyCount').text(formatNumber(mapLayers.markers.length)).closest('.sidebar-item').fadeIn();
+			$('#txtPropertyCount').text('1,325').closest('.sidebar-item').fadeIn();
 		
 			$('#divSidebarWrapper .load-indicator').fadeOut();
 			break;
@@ -312,23 +367,11 @@ function refreshQuintiles (results) {
 	
 	var cityQuintileAverages = [2.97, 3.03, 3.01, 3.02, 3.01, 3.00, 3.03];
 	
-	// Share of parcels owned by absentee owner number
-	$('#txtAbsenteeOwnerShares').text(formatNumber(results.AbsenteeOwnerShares)).closest('.sidebar-item').fadeIn();
-	$('#divAbsenteeOwnerSharesValue').css({
-		'background-color': getQuintileValue(results.AbsenteeOwnerSharesQnt, true), 
-		'width' : (((results.AbsenteeOwnerSharesQnt / 5) * 100) + '%') 
-	});
-	$('#divAbsenteeOwnerSharesValue').empty().append('<div class="q1-box"></div><div class="q2-box">' +
-		'</div><div class="q3-box"></div><div class="q4-box"></div><div class="q5-box"></div>');
-	$('#divAbsenteeOwnerSharesValue').append('<div class="q-city-average"' + 
-		' title="City Average: ' + cityQuintileAverages[0].toFixed(2) + '"' + 
-		' style="left: ' + (cityQuintileAverages[0] / 5 * 100) + '%;"></div>');
-	
 	// Average Assessed Value
 	var assessedValue = (results.AverageAssessedValue == 0) ? 'n/a' : formatNumber(results.AverageAssessedValue);
 	$('#txtAverageAssessedValue').text(assessedValue).closest('.sidebar-item').fadeIn();
 	$('#divAverageAssessedValue').css({
-		'background-color': getQuintileValue(results.AverageAssessedValueQnt), 
+		'background-color': getQuintileValue(0, results.AverageAssessedValueQnt), 
 		'width' : (((results.AverageAssessedValueQnt / 5) * 100) + '%') 
 	});
 	$('#divAverageAssessedValue').empty().append('<div class="q1-box"></div><div class="q2-box">' +
@@ -337,10 +380,34 @@ function refreshQuintiles (results) {
 		' title="City Average: ' + cityQuintileAverages[1].toFixed(2) + '"' + 
 		' style="left: ' + (cityQuintileAverages[1] / 5 * 100) + '%;"></div>');
 	
+	// Single Family BP additions
+	$('#txtSingleFamilyBPAdditions').text(formatNumber(results.SingleFamilyBPAdditions)).closest('.sidebar-item').fadeIn();
+	$('#divSingleFamilyBPAdditionsValue').css({
+		'background-color': getQuintileValue(1, results.SingleFamilyBPAdditionsQnt), 
+		'width' : (((results.SingleFamilyBPAdditionsQnt / 5) * 100) + '%') 
+	});
+	$('#divSingleFamilyBPAdditionsValue').empty().append('<div class="q1-box"></div><div class="q2-box">' +
+		'</div><div class="q3-box"></div><div class="q4-box"></div><div class="q5-box"></div>');
+	$('#divSingleFamilyBPAdditionsValue').append('<div class="q-city-average"' + 
+		' title="City Average: ' + cityQuintileAverages[6].toFixed(2) + '"' + 
+		' style="left: ' + (cityQuintileAverages[6] / 5 * 100) + '%;"></div>');
+	
+	// Share of parcels owned by absentee owner number
+	$('#txtAbsenteeOwnerShares').text(formatNumber(results.AbsenteeOwnerShares)).closest('.sidebar-item').fadeIn();
+	$('#divAbsenteeOwnerSharesValue').css({
+		'background-color': getQuintileValue(2, results.AbsenteeOwnerSharesQnt, true), 
+		'width' : (((results.AbsenteeOwnerSharesQnt / 5) * 100) + '%') 
+	});
+	$('#divAbsenteeOwnerSharesValue').empty().append('<div class="q1-box"></div><div class="q2-box">' +
+		'</div><div class="q3-box"></div><div class="q4-box"></div><div class="q5-box"></div>');
+	$('#divAbsenteeOwnerSharesValue').append('<div class="q-city-average"' + 
+		' title="City Average: ' + cityQuintileAverages[0].toFixed(2) + '"' + 
+		' style="left: ' + (cityQuintileAverages[0] / 5 * 100) + '%;"></div>');
+	
 	// Number of 311 Calls Visible from Street
 	$('#txtStreetVisible311Calls').text(formatNumber(results.StreetVisible311Calls)).closest('.sidebar-item').fadeIn();
 	$('#divStreetVisible311CallsValue').css({
-		'background-color': getQuintileValue(results.StreetVisible311CallsQnt, true), 
+		'background-color': getQuintileValue(3, results.StreetVisible311CallsQnt, true), 
 		'width' : (((results.StreetVisible311CallsQnt / 5) * 100) + '%') 
 	});
 	$('#divStreetVisible311CallsValue').empty().append('<div class="q1-box"></div><div class="q2-box">' +
@@ -352,7 +419,7 @@ function refreshQuintiles (results) {
 	// Property Violations Visible from Street
 	$('#txtStreetVisiblePropertyViolations').text(formatNumber(results.StreetVisiblePropertyViolations)).closest('.sidebar-item').fadeIn();
 	$('#divStreetVisiblePropertyViolationsValue').css({
-		'background-color': getQuintileValue(results.StreetVisiblePropertyViolationsQnt, true), 
+		'background-color': getQuintileValue(4, results.StreetVisiblePropertyViolationsQnt, true), 
 		'width' : (((results.StreetVisiblePropertyViolationsQnt / 5) * 100) + '%') 
 	});
 	$('#divStreetVisiblePropertyViolationsValue').empty().append('<div class="q1-box"></div><div class="q2-box">' +
@@ -364,7 +431,7 @@ function refreshQuintiles (results) {
 	// Crimes Against Persons Number
 	$('#txtCrimesAgainstPersons').text(formatNumber(results.CrimesAgainstPersons)).closest('.sidebar-item').fadeIn();
 	$('#divCrimesAgainstPersonsValue').css({
-		'background-color': getQuintileValue(results.CrimesAgainstPersonsQnt, true), 
+		'background-color': getQuintileValue(5, results.CrimesAgainstPersonsQnt, true), 
 		'width' : (((results.CrimesAgainstPersonsQnt / 5) * 100) + '%') 
 	});
 	$('#divCrimesAgainstPersonsValue').empty().append('<div class="q1-box"></div><div class="q2-box">' +
@@ -376,7 +443,7 @@ function refreshQuintiles (results) {
 	// Crimes Against Property Number
 	$('#txtCrimesAgainstProperty').text(formatNumber(results.CrimesAgainstProperty)).closest('.sidebar-item').fadeIn();
 	$('#divCrimesAgainstPropertyValue').css({
-		'background-color': getQuintileValue(results.CrimesAgainstPropertyQnt, true), 
+		'background-color': getQuintileValue(6, results.CrimesAgainstPropertyQnt, true), 
 		'width' : (((results.CrimesAgainstPropertyQnt / 5) * 100) + '%') 
 	});
 	$('#divCrimesAgainstPropertyValue').empty().append('<div class="q1-box"></div><div class="q2-box">' +
@@ -385,25 +452,19 @@ function refreshQuintiles (results) {
 		' title="City Average: ' + cityQuintileAverages[5].toFixed(2) + '"' + 
 		' style="left: ' + (cityQuintileAverages[5] / 5 * 100) + '%;"></div>');
 	
-	// Single Family BP additions
-	$('#txtSingleFamilyBPAdditions').text(formatNumber(results.SingleFamilyBPAdditions)).closest('.sidebar-item').fadeIn();
-	$('#divSingleFamilyBPAdditionsValue').css({
-		'background-color': getQuintileValue(results.SingleFamilyBPAdditionsQnt), 
-		'width' : (((results.SingleFamilyBPAdditionsQnt / 5) * 100) + '%') 
-	});
-	$('#divSingleFamilyBPAdditionsValue').empty().append('<div class="q1-box"></div><div class="q2-box">' +
-		'</div><div class="q3-box"></div><div class="q4-box"></div><div class="q5-box"></div>');
-	$('#divSingleFamilyBPAdditionsValue').append('<div class="q-city-average"' + 
-		' title="City Average: ' + cityQuintileAverages[6].toFixed(2) + '"' + 
-		' style="left: ' + (cityQuintileAverages[6] / 5 * 100) + '%;"></div>');
-	
 	$('#divSidebarWrapper .load-indicator').fadeOut();
+	
+	$('#liQuintileLegend').addClass('always-visible');
 }
 
-function getQuintileValue (value, isReverse) {
+function getQuintileValue (index, value, isReverse) {
 	
 	var ret = '';
 	
+	if (index < 2) ret = 'rgba(45, 188, 37, 0.90)';
+	if (index >= 2) ret = 'rgba(255, 155, 0, 0.80)';
+	
+	/*
 	if (! isReverse) {
 		if (value <= 1) {
 			ret = '#EA0B0B';
@@ -429,6 +490,8 @@ function getQuintileValue (value, isReverse) {
 			ret = '#EA0B0B';
 		}
 	}
+	*/
+	
 	return ret;
 }
 
@@ -464,14 +527,14 @@ function toggleLanguage () {
 function translate (selector) {
 	
 	if (! selector) selector = 'body';
-	
+
 	$(selector + '[translate]').add($(selector).find('[translate]')).each(function () {
-		var translation = app.languageData[$(this).attr('translate')]; // || $(this).attr('translate');
+		var translation = app.languageData[$(this).attr('translate')];
 		if (isDefined(translation)) $(this).html(translation);
 	});
 	
 	$(selector + '[translate-placeholder]').add($(selector).find('[translate-placeholder]')).each(function () {
-		var translation = app.languageData[$(this).attr('translate-placeholder')]; // || $(this).attr('translate-placeholder');
+		var translation = app.languageData[$(this).attr('translate-placeholder')];
 		if (isDefined(translation)) $(this).attr('placeholder', translation);
 	});
 }
@@ -597,6 +660,12 @@ function loginUser () {
 		$('.sidebar-register-or-login').hide();
 		
 		app.loggedIn = true;
+		if (Storage) {
+			localStorage.setItem('V2VLoginInfo', JSON.stringify({
+				EmailAddress: loginUserViewModel.LoginEmailAddress,
+				LoggedIn: app.loggedIn
+			}));
+		}
 		
 		refreshUserFavorites();
 		app.refreshSidebar();
@@ -616,6 +685,12 @@ function logoutUser () {
 		$('.menu-user').removeClass('visible');
 		
 		app.loggedIn = false;
+		if (Storage) {
+			localStorage.setItem('V2VLoginInfo', JSON.stringify({
+				EmailAddress: null,
+				LoggedIn: app.loggedIn
+			}));
+		}
 		
 		refreshUserFavorites();
 		app.refreshSidebar();

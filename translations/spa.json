@@ -46,6 +46,13 @@
 	"crimes against persons": "Crímenes Contra Personas",
 	"crimes against property": "Crímenes Contra la Propiedad",
 	"single family bp additions": "Adiciones de BP de una Sola Familia",
-	"for more information, click to": "Para Más Información, Haga Clic para"
+	"for more information, click to": "Para Más Información, Haga Clic para",
 	
+	"residential appraised value is the average market value of the properties.": "El valor de tasación residencial es el valor de mercado promedio de las propiedades.",
+	"this is the average number of single family building permit additions for the area.": "Este es el número promedio de adiciones de permisos de construcción unifamiliares para el área.",
+	"ownership of real estate by entities or individuals who do not actually live there.": "Propiedad de bienes inmuebles por entidades o individuos que en realidad no viven allí.",
+	"this is the number of street visible calls to non-emergency municipal services (311).": "Este es el número de llamadas visibles en la calle a servicios municipales que no son de emergencia (311).",
+	"this is the number of street visible property violations that have been reported in the area.": "Este es el número de violaciones de propiedad visibles en la calle que se han reportado en el área.",
+	"this is the number of crimes against persons that have been reported in the area.": "Este es el número de crímenes contra personas que se han denunciado en el área.",
+	"this is the number of crimes against property that have been reported in the area.": "Este es el número de delitos contra la propiedad que se han denunciado en el área."
 }

@@ -73,18 +73,17 @@ function initMap (mapElementId) {
 	$('#' + mapElementId).fadeIn(200);
 	
 	var baseLayers = {
-		'Esri World Street Map': Esri_WorldStreetMap,
+		//'Esri World Street Map': Esri_WorldStreetMap,
+		'OpenStreetMap_Mapnik': OpenStreetMap_Mapnik,
 		'Esri World Imagery': Esri_WorldImagery,
-		'OpenStreetMap_Mapnik': OpenStreetMap_Mapnik
-		
 		//'OpenStreetMap_DE': OpenStreetMap_DE,
-		//'OpenTopoMap': OpenTopoMap
+		'OpenTopoMap': OpenTopoMap
 	};
 
 	var overlayLayers = { };
 	
 	L.control.layers(baseLayers, overlayLayers).addTo(map);
-	baseLayers['Esri World Street Map'].addTo(map);
+	baseLayers['OpenStreetMap_Mapnik'].addTo(map);
 	
 	// Set click event on map
 	map.on('click', function onMapClick (e) {
@@ -178,8 +177,6 @@ function initMap (mapElementId) {
 				.html('<i class="glyphicon glyphicon-zoom-in" title="Go to previous map view"></i>');
 
 			$(backViewButton).bind('click', function () {
-				
-				//console.log('Clicked back view button w/ map view history: ', mapInfo.viewHistory); // Debug
 				
 				if (mapInfo.viewHistory.length == 0) return;
 				
@@ -336,7 +333,7 @@ function clearMap () {
 function searchMap (locationGid, locationName, locationCategory, locationLat, locationLng) {
 	
 	if (! isDefined(locationCategory)) locationCategory = 'city';
-	
+
 	// For address items, draw a search radius
 	switch (locationCategory.toString().toLowerCase()) {
 		
@@ -385,7 +382,7 @@ function searchByAddress (locationGid, locationLat, locationLng) {
 					userLocation.lat, 
 					userLocation.lng
 				],
-				userLocation.zoom
+				map.getZoom()
 			);    
 		}
 		
@@ -404,8 +401,7 @@ function searchByAddress (locationGid, locationLat, locationLng) {
 			map.fitBounds(mapLayers.searchRadiusLayer.getBounds());
 			
 			setTimeout(function () {
-				var mapZoom = map.getZoom();
-				map.setZoom(mapZoom - 1);
+				map.setZoom(map.getZoom() - 1);
 			}, 100);
 						
 			refreshMarkers(locationGid);
@@ -425,7 +421,6 @@ function searchByAddress (locationGid, locationLat, locationLng) {
 					mapLayers.searchRadiusLayer.addTo(map);
 					
 					setTimeout(function () {
-						
 						map.fitBounds(mapLayers.searchRadiusLayer.getBounds());
 						refreshMarkers(locationGid);
 					}, 100);
@@ -503,7 +498,7 @@ function searchByNeighborhoodOrZip (locationName) {
 				userLocation.lat, 
 				userLocation.lng
 			],
-			userLocation.zoom
+			map.getZoom()
 		);    
 		
 		refreshMarkers();
@@ -521,8 +516,7 @@ function searchByNeighborhoodOrZip (locationName) {
 		map.fitBounds(geojsonBounds);
 		
 		setTimeout(function () {
-			var mapZoom = map.getZoom();
-			map.setZoom(mapZoom - 1);
+			map.setZoom(map.getZoom() - 1);
 		}, 100);
 	});
 }
@@ -674,7 +668,7 @@ function refreshProperties () {
 						'</div>' + 
 						'</div>' +
 						'<div class="map-popup-item">' + 
-						'<div class="map-popup-item-label" translate="sqft"> Sqft </div>' + 
+						'<div class="map-popup-item-label" translate="sqft"> Lot Sqft </div>' + 
 						'<div class="map-popup-item-value">' + (propertyDetails.SqftDisplay || '-') + '</div>' + 
 						'</div>' +
 						
