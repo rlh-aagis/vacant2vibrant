@@ -61,7 +61,11 @@ function bindLandingModals () {
 	
 	}).appendTo('body > .container');
 	$('<div id="divDisclaimerContainer"></div>').load('templates/disclaimer.html', function (response, status, xhr) { 
-	
+		$('.disclaimer-more-button').bind('click', function () {
+			$(this).hide();
+			$('.disclaimer-collapsed .fadeout').remove();
+			$('.disclaimer-collapsed').removeClass('disclaimer-collapsed');
+		});
 	}).appendTo('body > .container');
 }
 
@@ -285,7 +289,7 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 	var areaStatsHeaderHTML = '';
 	switch (adjustedLocationCategory) {
 		case 'address':
-			areaStatsHeaderHTML = (mapInfo.radiusType == 'quarter-mile') ? ('Within 0.25 Miles of ' + userLocation.label) : 
+			areaStatsHeaderHTML = (mapInfo.radiusType == 'quarter-mile') ? ('<span style="margin-right: 4px;" translate="within 0.25 miles of"> Within 0.25 Miles of </span>' + userLocation.label) : 
 				('<span translate="neighborhood of"> Neighborhood of </span>&nbsp;<span>' + userLocation.neighborhood + '</span>');
 			break;
 		case 'nbrhd':
@@ -320,7 +324,8 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 				if (! isDefined(results)) return;
 				
 				// Property Count
-				$('#txtPropertyCount').text(formatNumber(results.PropertyCount)).closest('.sidebar-item').fadeIn();
+				$('#txtPropertyCountSold').text(formatNumber(results.SoldPropertyCount)).closest('.sidebar-item').fadeIn();
+				$('#txtPropertyCountUnsold').text(formatNumber(results.UnsoldPropertyCount)).closest('.sidebar-item').fadeIn();
 				// Market Value
 				if (isDefined(results.MarketValue))
 					$('#txtMarketValue').text('$' + formatNumber(results.MarketValue)).closest('.sidebar-item').fadeIn();
@@ -337,7 +342,14 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 				results = JSON.parse(results);
 				
 				// Property Count
-				$('#txtPropertyCount').text(formatNumber(results.PropertyCount)).closest('.sidebar-item').fadeIn();
+				$('#txtPropertyCountSold').text(formatNumber(results.SoldPropertyCount)).closest('.sidebar-item').fadeIn();
+				$('#txtPropertyCountUnsold').text(formatNumber(results.UnsoldPropertyCount)).closest('.sidebar-item').fadeIn();
+				// Market Value
+				if (isDefined(results.MarketValue))
+					$('#txtMarketValue').text('$' + formatNumber(results.MarketValue)).closest('.sidebar-item').fadeIn();
+				// Sqft
+				if (isDefined(results.MarketValue))
+					$('#txtSqft').text(formatNumber(results.Sqft)).closest('.sidebar-item').fadeIn();
 				
 				refreshQuintiles(results);
 			});
@@ -348,7 +360,14 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 				results = JSON.parse(results);
 				
 				// Property Count
-				$('#txtPropertyCount').text(formatNumber(results.PropertyCount)).closest('.sidebar-item').fadeIn();
+				$('#txtPropertyCountSold').text(formatNumber(results.SoldPropertyCount)).closest('.sidebar-item').fadeIn();
+				$('#txtPropertyCountUnsold').text(formatNumber(results.UnsoldPropertyCount)).closest('.sidebar-item').fadeIn();
+				// Market Value
+				if (isDefined(results.MarketValue))
+					$('#txtMarketValue').text('$' + formatNumber(results.MarketValue)).closest('.sidebar-item').fadeIn();
+				// Sqft
+				if (isDefined(results.MarketValue))
+					$('#txtSqft').text(formatNumber(results.Sqft)).closest('.sidebar-item').fadeIn();
 				
 				refreshQuintiles(results);
 			});
@@ -356,7 +375,8 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 		case 'city':
 		
 			// Property Count
-			$('#txtPropertyCount').text('1,325').closest('.sidebar-item').fadeIn();
+			$('#txtPropertyCountSold').text('696').closest('.sidebar-item').fadeIn();
+			$('#txtPropertyCountUnsold').text('629').closest('.sidebar-item').fadeIn();
 		
 			$('#divSidebarWrapper .load-indicator').fadeOut();
 			break;
@@ -365,7 +385,8 @@ app.refreshSidebar = function (locationLabel, locationCategory) {
 
 function refreshQuintiles (results) {
 	
-	var cityQuintileAverages = [2.97, 3.03, 3.01, 3.02, 3.01, 3.00, 3.03];
+	//var cityQuintileAverages = [2.97, 3.03, 3.01, 3.02, 3.01, 3.00, 3.03];
+	var cityQuintileAverages = [2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5];
 	
 	// Average Assessed Value
 	var assessedValue = (results.AverageAssessedValue == 0) ? 'n/a' : formatNumber(results.AverageAssessedValue);
@@ -453,6 +474,8 @@ function refreshQuintiles (results) {
 		' style="left: ' + (cityQuintileAverages[5] / 5 * 100) + '%;"></div>');
 	
 	$('#divSidebarWrapper .load-indicator').fadeOut();
+	
+	$('.sidebar-heading.with-quintile').toggle(($('.sidebar-item.with-quintile').length > 0));
 	
 	$('#liQuintileLegend').addClass('always-visible');
 }
@@ -724,6 +747,7 @@ function openUserDetails () {
 function toggleMapLegend () {
 	
 	$('.map-legend').toggleClass('visible');
+	
 }
 
 function favoriteSearch (favoriteElement) {

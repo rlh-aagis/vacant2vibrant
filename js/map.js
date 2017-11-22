@@ -35,6 +35,7 @@ var mapInfo = {
 	}]
 };
 
+var layerControl = null;
 var map = null;
 
 function initMap (mapElementId) {
@@ -73,22 +74,35 @@ function initMap (mapElementId) {
 	$('#' + mapElementId).fadeIn(200);
 	
 	var baseLayers = {
-		//'Esri World Street Map': Esri_WorldStreetMap,
-		'OpenStreetMap_Mapnik': OpenStreetMap_Mapnik,
-		'Esri World Imagery': Esri_WorldImagery,
-		//'OpenStreetMap_DE': OpenStreetMap_DE,
-		'OpenTopoMap': OpenTopoMap
+		'Street View 1': OpenStreetMap_Mapnik,
+		'Street View 2': OpenTopoMap,
+		'Aerial View': Esri_WorldImagery
 	};
 
 	var overlayLayers = { };
 	
-	L.control.layers(baseLayers, overlayLayers).addTo(map);
-	baseLayers['OpenStreetMap_Mapnik'].addTo(map);
+	layerControl = L.control.layers(baseLayers, overlayLayers, { collapsed: false }).addTo(map);
+	setTimeout(function () {
+		var minimizeButton = $('<div class="minimize-button">_</div>');
+		minimizeButton.bind('click', function () {
+			if ($('.leaflet-control-layers').hasClass('leaflet-control-layers-expanded')) {
+				layerControl.collapse();
+			} else {
+				layerControl.expand();
+			}
+		});
+		$('.leaflet-control-layers').append(minimizeButton);
+	}, 100);
+	baseLayers['Street View 1'].addTo(map);
 	
 	// Set click event on map
 	map.on('click', function onMapClick (e) {
 		if ($('#divSidebar').hasClass('active'))
 			$('#divSidebar').removeClass('active');
+		
+		$('#divSideBarMenuToggle .sub_icon')
+			.removeClass('glyphicon-chevron-left')
+			.addClass('glyphicon-chevron-right');
 	});
 	
 	// Set popup open event on map
@@ -126,7 +140,7 @@ function initMap (mapElementId) {
 		onAdd: function (map) {
 			var legendContainer = L.DomUtil.create('div');
 			
-			$(legendContainer).addClass('map-legend')
+			$(legendContainer).addClass('map-legend map-legend-expanded')
 				.html(
 					'<div class="map-legend-title" translate="map legend"> Map Legend </div>' +
 					'<div class="map-legend-row">' +
@@ -152,9 +166,27 @@ function initMap (mapElementId) {
 					'<div class="map-legend-row">' +
 						'<img src="content/images/house-outline-sold.svg" />' + 
 						'<span translate="sold"> Sold </span>' +
-					'</div>'
+					'</div>' +
+					'<div class="map-legend-icon"><i class="glyphicon glyphicon-list"></div>'
 				);
 
+				setTimeout(function () {
+					var minimizeButton = $('<div class="minimize-button">_</div>');
+					minimizeButton.bind('click', function (event) {
+						event.preventDefault();
+						event.stopPropagation();
+						$('.map-legend').toggleClass('map-legend-expanded');
+					});
+					$(legendContainer).append(minimizeButton);
+					
+					$(legendContainer).bind('click', function (event)  {
+						event.preventDefault();
+						event.stopPropagation();
+						if (! $(this).hasClass('map-legend-expanded'))
+							$(this).addClass('map-legend-expanded');
+					});
+				}, 100);
+				
 			setTimeout(function () {
 				translate('.map-legend');
 			}, 300);
@@ -691,10 +723,13 @@ function refreshProperties () {
 							'<div class="map-popup-item-value">' +
 								'<a href="http://maps.kcmo.org/apps/parcelviewer/" target="_blank" translate="kansas city parcel viewer">' + 
 									'Kansas City Parcel Viewer' + 
-								'</a>' +
+								'</a>' + 
+								((propertyDetails.SoldAvail.toLowerCase() == 'unsold') ? 
+								('<br/><a href="https://public-kclb.epropertyplus.com/landmgmtpub/remote/public/property/viewSummary?parcelNumber=' + propertyDetails.APN + '" target="_blank" translate="kcmo land bank">' + 
+									'KCMO Land Bank' +
+								'</a>') : '') +
 							'</div>' +
 						'</div>' +
-						
 					'</div>'
 				).openOn(map);
 				

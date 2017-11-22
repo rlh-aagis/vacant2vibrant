@@ -271,7 +271,14 @@
 			
 		$query = "
 			SELECT 
-				  COUNT(*) AS PropertyCount 
+				  (SELECT COUNT(*) FROM landbankprops LBP2
+					WHERE (1 = 1) 
+					AND (LBP2.sold_avail ILIKE 'disp%')
+					$where_condition) AS SoldPropertyCount 
+				, (SELECT COUNT(*) FROM landbankprops LBP2
+					WHERE (1 = 1) 
+					AND (LBP2.sold_avail ILIKE 'unsold%')
+					$where_condition) AS UnsoldPropertyCount 
 				, Qnt.AbsenteeOwnerShares
 				, Qnt.AbsenteeOwnerSharesQnt
 				, Qnt.AverageAssessedValue
@@ -310,27 +317,28 @@
 			
 			// Add basic data for all searches
 			$area_stats = array(
-				  'PropertyCount' => number_format($row[0], 0, '.', ',')
-				, 'AbsenteeOwnerShares' => number_format($row[1], 2, '.', ',')
-				, 'AbsenteeOwnerSharesQnt' => number_format($row[2], 2, '.', ',')
-				, 'AverageAssessedValue' => number_format($row[3], 2, '.', ',')
-				, 'AverageAssessedValueQnt' => number_format($row[4], 2, '.', ',')
-				, 'StreetVisible311Calls' => number_format($row[5], 2, '.', ',')
-				, 'StreetVisible311CallsQnt' => number_format($row[6], 2, '.', ',')
-				, 'StreetVisiblePropertyViolations' => number_format($row[7], 2, '.', ',')
-				, 'StreetVisiblePropertyViolationsQnt' => number_format($row[8], 2, '.', ',')
-				, 'CrimesAgainstPersons' => number_format($row[9], 2, '.', ',')
-				, 'CrimesAgainstPersonsQnt' => number_format($row[10], 2, '.', ',')
-				, 'CrimesAgainstProperty' => number_format($row[11], 2, '.', ',')
-				, 'CrimesAgainstPropertyQnt' => number_format($row[12], 2, '.', ',')
-				, 'SingleFamilyBPAdditions' => number_format($row[13], 2, '.', ',')
-				, 'SingleFamilyBPAdditionsQnt' => number_format($row[14], 2, '.', ',')
+				  'SoldPropertyCount' => number_format($row[0], 0, '.', ',')
+				, 'UnsoldPropertyCount' => number_format($row[1], 0, '.', ',')
+				, 'AbsenteeOwnerShares' => number_format($row[2], 2, '.', ',')
+				, 'AbsenteeOwnerSharesQnt' => number_format($row[3], 2, '.', ',')
+				, 'AverageAssessedValue' => number_format($row[4], 2, '.', ',')
+				, 'AverageAssessedValueQnt' => number_format($row[5], 2, '.', ',')
+				, 'StreetVisible311Calls' => number_format($row[6], 2, '.', ',')
+				, 'StreetVisible311CallsQnt' => number_format($row[7], 2, '.', ',')
+				, 'StreetVisiblePropertyViolations' => number_format($row[8], 2, '.', ',')
+				, 'StreetVisiblePropertyViolationsQnt' => number_format($row[9], 2, '.', ',')
+				, 'CrimesAgainstPersons' => number_format($row[10], 2, '.', ',')
+				, 'CrimesAgainstPersonsQnt' => number_format($row[11], 2, '.', ',')
+				, 'CrimesAgainstProperty' => number_format($row[12], 2, '.', ',')
+				, 'CrimesAgainstPropertyQnt' => number_format($row[13], 2, '.', ',')
+				, 'SingleFamilyBPAdditions' => number_format($row[14], 2, '.', ',')
+				, 'SingleFamilyBPAdditionsQnt' => number_format($row[15], 2, '.', ',')
 			);
 			
 			// Add additonal data only for registered users
 			if (isset($_SESSION['Username'])) {
-				$area_stats['MarketValue'] = number_format($row[15], 0, '.', ',');
-				$area_stats['Sqft'] = number_format($row[16], 0, '.', ',');
+				$area_stats['MarketValue'] = number_format($row[16], 0, '.', ',');
+				$area_stats['Sqft'] = number_format($row[17], 0, '.', ',');
 			}
 		}
 		
@@ -366,7 +374,32 @@
 					WHERE ST_Intersects(LBP.geom, (SELECT 
 							geom 
 						FROM public.v2vneighborhood _N 
-						WHERE (_N.neighshape ILIKE '%$neighborhood%'))))
+						WHERE (_N.neighshape ILIKE '%$neighborhood%')))
+					AND	(LBP.sold_avail ILIKE 'disp%')) AS SoldPropertyCount
+				, (SELECT 
+						COUNT(*) 
+					FROM landbankprops LBP 
+					WHERE ST_Intersects(LBP.geom, (SELECT 
+							geom 
+						FROM public.v2vneighborhood _N 
+						WHERE (_N.neighshape ILIKE '%$neighborhood%')))
+					AND	(LBP.sold_avail ILIKE 'unsold%')) AS UnsoldPropertyCount
+				, (SELECT 
+						AVG(CAST(LBP.mktval AS INT))
+					FROM landbankprops LBP 
+					WHERE ST_Intersects(LBP.geom, (SELECT 
+							geom 
+						FROM public.v2vneighborhood _N 
+						WHERE (_N.neighshape ILIKE '%$neighborhood%')))
+					AND	(LBP.sold_avail ILIKE 'unsold%')) AS MarketValue
+				, (SELECT 
+						AVG(CAST(LBP.sqft AS INT))
+					FROM landbankprops LBP 
+					WHERE ST_Intersects(LBP.geom, (SELECT 
+							geom 
+						FROM public.v2vneighborhood _N 
+						WHERE (_N.neighshape ILIKE '%$neighborhood%')))
+					AND	(LBP.sold_avail ILIKE 'unsold%')) AS Sqft
 			FROM public.quintilecityblock Q
 			LEFT OUTER JOIN (SELECT 
 					  COALESCE(CAST(_N.absshnum AS FLOAT), 0) AS absshnum
@@ -408,8 +441,15 @@
 			, 'CrimesAgainstPropertyQnt' => number_format($row[11], 2, '.', ',')
 			, 'SingleFamilyBPAdditions' => number_format($row[12], 0, '.', ',')
 			, 'SingleFamilyBPAdditionsQnt' => number_format($row[13], 2, '.', ',')
-			, 'PropertyCount' => number_format($row[14], 0, '.', ',')
+			, 'SoldPropertyCount' => number_format($row[14], 0, '.', ',')
+			, 'UnsoldPropertyCount' => number_format($row[15], 0, '.', ',')
 		);
+		
+		// Add additonal data only for registered users
+		if (isset($_SESSION['Username'])) {
+			$area_stats['MarketValue'] = number_format($row[16], 0, '.', ',');
+			$area_stats['Sqft'] = number_format($row[17], 0, '.', ',');
+		}
 		
 		pg_close($conn);
 		
@@ -444,7 +484,32 @@
 					WHERE ST_Intersects(LBP.geom, (SELECT 
 							geom 
 						FROM public.v2vzipcode _Z 
-						WHERE (_Z.zipcode ILIKE '$zip_code'))))
+						WHERE (_Z.zipcode ILIKE '$zip_code')))
+					AND	(LBP.sold_avail ILIKE 'disp%')) AS SoldPropertyCount
+				, (SELECT 
+						COUNT(*) 
+					FROM landbankprops LBP 
+					WHERE ST_Intersects(LBP.geom, (SELECT 
+							geom 
+						FROM public.v2vzipcode _Z 
+						WHERE (_Z.zipcode ILIKE '$zip_code')))
+					AND	(LBP.sold_avail ILIKE 'unsold%')) AS UnsoldPropertyCount
+				, (SELECT 
+						AVG(CAST(LBP.mktval AS INT))
+					FROM landbankprops LBP 
+					WHERE ST_Intersects(LBP.geom, (SELECT 
+							geom 
+						FROM public.v2vzipcode _Z 
+						WHERE (_Z.zipcode ILIKE '$zip_code')))
+					AND	(LBP.sold_avail ILIKE 'unsold%')) AS MarketValue
+				, (SELECT 
+						AVG(CAST(LBP.sqft AS INT))
+					FROM landbankprops LBP 
+					WHERE ST_Intersects(LBP.geom, (SELECT 
+							geom 
+						FROM public.v2vzipcode _Z 
+						WHERE (_Z.zipcode ILIKE '$zip_code')))
+					AND	(LBP.sold_avail ILIKE 'unsold%')) AS Sqft
 			FROM public.quintilecityblock Q
 			LEFT OUTER JOIN (SELECT 
 					  COALESCE(CAST(_Z.absshnum AS FLOAT), 0) AS absshnum
@@ -486,8 +551,15 @@
 			, 'CrimesAgainstPropertyQnt' => number_format($row[11], 2, '.', ',')
 			, 'SingleFamilyBPAdditions' => number_format($row[12], 0, '.', ',')
 			, 'SingleFamilyBPAdditionsQnt' => number_format($row[13], 2, '.', ',')
-			, 'PropertyCount' => number_format($row[14], 0, '.', ',')
+			, 'SoldPropertyCount' => number_format($row[14], 0, '.', ',')
+			, 'UnsoldPropertyCount' => number_format($row[15], 0, '.', ',')
 		);
+		
+		// Add additonal data only for registered users
+		if (isset($_SESSION['Username'])) {
+			$area_stats['MarketValue'] = number_format($row[16], 0, '.', ',');
+			$area_stats['Sqft'] = number_format($row[17], 0, '.', ',');
+		}
 	
 		pg_close($conn);
 		

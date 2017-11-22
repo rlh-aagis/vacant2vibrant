@@ -167,6 +167,17 @@
 	}
 }
 
+.sidebar-heading {
+	font-size: 15px;
+}
+
+.sidebar-heading.with-quintile {
+	border-top: 1px solid #DDD;
+	display: none;
+	margin-top: 12px; 
+	padding-top: 12px;
+}
+
 .sidebar-item { 
 	display: none;
 	line-height: 28px;
@@ -186,6 +197,11 @@
 	width: 185px;
 }
 
+.sidebar-item-label-long {
+	display: inline-block;
+	width: 220px;
+}
+
 .sidebar-item-label-extended {
 	display: inline-block;
 	width: 260px;
@@ -197,6 +213,14 @@
 	margin: 0 0 0 -25px;
 	text-align: right;
 	width: 95px;
+}
+
+.sidebar-item-value-short {
+	display: inline-block;
+	font-weight: bold;
+	margin: 0 0 0 -25px;
+	text-align: right;
+	width: 60px;
 }
 
 .sidebar-item-bar {
