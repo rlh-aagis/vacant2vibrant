@@ -7,7 +7,12 @@
 	"login": "Entrar",
 	"user": "usuario",
 	"register": "Enregistrar",
-	"search": "Buscar",
+	
+	"welcome to the vacant to vibrant land bank website": "Bienvenido al sitio web de Land Bank Vacante a <b> Vibrante </b>",
+	"search by address, neighborhood, or zip code": "Búsqueda por dirección, vecindario o código postal",
+	"kansas city, mo only": "Solo Kansas City, MO",
+	"map search": "Mapa de Búsqueda",
+	"* not associated with the land bank of kansas city, missouri": "* No asociado con el Land Bank de Kansas City, Missouri",
 	
 	"property details": "Detalles de la Propiedad",
 	"address": "Dirección",

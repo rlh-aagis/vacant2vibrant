@@ -15,17 +15,12 @@ $(document).ready(function () {
 	
 	bindLandingModals();
 	
-	$('#divLandingPage').load('templates/landing.html', function( response, status, xhr ) { 
-		
-		setTimeout(function () {
-			initSearch('txtLandingSearch');
-		}, 300);
-	});
+	loadLandingPage();
 	
 	checkLoginStatus();
 });
 
-function checkLoginStatus() {
+function checkLoginStatus () {
 	
 	if (! Storage) return;
 	
@@ -38,10 +33,35 @@ function checkLoginStatus() {
 	
 		app.loggedIn = true;
 		app.loginEmailAddress = v2vLoginInfo.EmailAddress;
+
 	} else {
 		
 		logoutUser();
 	}
+}
+
+function loadLandingPage () {
+	
+	// Load navbar
+	$('#divNavbar').load('templates/navbar.html').fadeIn();
+	
+	// Load landing page
+	$('#divLandingPage').load('templates/landing.html', function( response, status, xhr ) { 
+		
+		setTimeout(function () {
+			initSearch('txtLandingSearch');
+			
+			if (app.loggedIn) {
+				$('.menu-user .menu-username').html(app.loginEmailAddress);
+				$('.menu-user').addClass('visible');
+				$('.sidebar-register-or-login').hide();
+				$('.menu-register-user, .menu-login-user').hide();
+
+				refreshUserFavorites();
+			}
+			
+		}, 300);
+	});
 }
 
 function bindEvents () {
@@ -60,6 +80,7 @@ function bindLandingModals () {
 	$('<div id="divMessageModalContainer"></div>').load('templates/message-modal.html', function (response, status, xhr) { 
 	
 	}).appendTo('body > .container');
+	
 	$('<div id="divDisclaimerContainer"></div>').load('templates/disclaimer.html', function (response, status, xhr) { 
 		$('.disclaimer-more-button').bind('click', function () {
 			$(this).hide();
@@ -67,11 +88,6 @@ function bindLandingModals () {
 			$('.disclaimer-collapsed').removeClass('disclaimer-collapsed');
 		});
 	}).appendTo('body > .container');
-}
-
-function bindMapModals () {
-	
-	if (app.page == 'landing') return;
 	
 	$('<div id="divUserLoginModalContainer"></div>').load('templates/user/user-login.html', function (response, status, xhr) { 
 		$('#divUserLoginModalContainer #txtLoginPassword').keyup(function (e) {
@@ -79,9 +95,10 @@ function bindMapModals () {
 			if (e.keyCode == 13) $('#btnLogin').trigger('click');
 		});
 	}).appendTo('body > .container');
-	$('<div id="divUserProfileModalContainer"></div>').load('templates/user/user-profile.html', function (response, status, xhr) { 
 	
-	}).appendTo('body > .container');
+	// $('<div id="divUserProfileModalContainer"></div>').load('templates/user/user-profile.html', function (response, status, xhr) { 
+	
+	// }).appendTo('body > .container');
 	$('<div id="divUserRegModalContainer"></div>').load('templates/user/user-registration.html', function (response, status, xhr) { 
 	
 	}).appendTo('body > .container');
@@ -97,6 +114,13 @@ function bindMapModals () {
 	$('<div id="divUserDetailsModalContainer"></div>').load('templates/user/user-details.html', function (response, status, xhr) { 
 	
 	}).appendTo('body > .container');
+}
+
+function bindMapModals () {
+	
+	if (app.page == 'landing') return;
+	
+	// Nothing here yet
 }
 
 function initSearch (searchElementId) {
@@ -182,9 +206,6 @@ function performLandingSearch(autocompleteItem) {
 	
 	$('#divLandingPage').fadeOut();
 	
-	// Load navbar
-	$('#divNavbar').load('templates/navbar.html').fadeIn();
-	
 	// Load sidebar
 	$('#divSidebar').load('templates/sidebar.html', function( response, status, xhr ) { 
 		$('#divSideBarMenuToggle').click(function (e) {
@@ -210,15 +231,11 @@ function performLandingSearch(autocompleteItem) {
 
 		app.refreshSidebar();
 		
-		if (app.loggedIn) {
-	
-			$('.menu-user .menu-username').html(app.loginEmailAddress);
-			$('.menu-user').addClass('visible');
-			$('.sidebar-register-or-login').hide();
-			$('.menu-register-user, .menu-login-user').hide();
-			
-			refreshUserFavorites();
-		}
+		$('#navbar').find('.search-menu, .home-menu').removeClass('display-none');
+		
+		if ($(window).width() <= 600)
+			$('.map-legend').removeClass('map-legend-expanded');
+		
 	}, 300);
 	
 	$('#divMap').fadeIn();
@@ -744,28 +761,37 @@ function openUserDetails () {
 	});
 }
 
-function toggleMapLegend () {
-	
-	$('.map-legend').toggleClass('visible');
-	
-}
-
 function favoriteSearch (favoriteElement) {
 	
 	var favoriteItem = $(favoriteElement).data('favorite-data');
 	
 	if (! isDefined(favoriteItem)) return;
 	
-	map.closePopup();
-	
-	$('#txtTopSearch').val(favoriteItem.SearchText);
-	$('#txtTopSearch').autocomplete('search');
-	setTimeout(function () {
-		$('.ui-autocomplete .ui-menu-item').hide();
-	}, 300);
-	setTimeout(function () {
-		$('.top-search-button').trigger('click');
-	}, 500);
+	if (app.page == 'landing') {
+		
+		$('#txtLandingSearch').val(favoriteItem.SearchText);
+		$('#txtLandingSearch').autocomplete('search');
+		
+		setTimeout(function () {
+			$('.ui-autocomplete .ui-menu-item').hide();
+		}, 300);
+		setTimeout(function () {
+			$('#btnLandingSearch').trigger('click');
+		}, 500);
+	} else {
+
+		map.closePopup();
+		
+		$('#txtTopSearch').val(favoriteItem.SearchText);
+		$('#txtTopSearch').autocomplete('search');
+		
+		setTimeout(function () {
+			$('.ui-autocomplete .ui-menu-item').hide();
+		}, 300);
+		setTimeout(function () {
+			$('.top-search-button').trigger('click');
+		}, 500);
+	}
 }
 
 function clearFavorite (favoriteElement) {

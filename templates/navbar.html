@@ -10,24 +10,32 @@
 			<a class="navbar-brand" href="#"> 
 				<img src="content/images/v2v-lb-logo.png" title="Vacant to Vibrant - Land Bank" />
 			</a>
-			<div class="mobile-nav-button" onclick="toggleMapLegend()">
-				<i class="glyphicon glyphicon-list-alt"></i>
-			</div>
 		</div>
 		<div id="navbar" class="navbar-collapse collapse">
 			
 			<ul class="nav navbar-nav">
-				<li class="active"><a href="javascript:void(0);" translate="home" 
-					onclick="location.reload();" style="text-transform: capitalize;"> Home </a></li>
+				<li class="active home-menu display-none">
+					<a href="javascript:void(0);" 
+						onclick="location.reload();" style="text-transform: capitalize;">
+						<!-- <i class="glyphicon glyphicon-home" style="margin-right: 8px;"></i> -->
+						<span translate="home"> Home </span>
+					</a>
+				</li>
 				<li class="menu-register-user">
-					<a href="#" data-toggle="modal" data-target="#divUserRegistrationModal" translate="register"> Register </a>
+					<a href="#" data-toggle="modal" data-target="#divUserRegistrationModal"> 
+						<i class="glyphicon glyphicon-edit" style="margin-right: 8px;"></i>
+						<span translate="register" style="color: #E6E6E6 !important; font-weight: bold;"> Register </span>
+					</a>
 				</li>
 			</ul>
 			
 			<ul class="nav navbar-nav navbar-right">
 
 				<li class="menu-login-user">
-					<a href="#" data-toggle="modal" data-target="#divUserLoginModal" translate="login"> Login </a>
+					<a href="#" data-toggle="modal" data-target="#divUserLoginModal"> 
+						<i class="glyphicon glyphicon-log-in" style="margin-right: 8px;"></i>
+						<span translate="login"> Log In </span>
+					</a>
 				</li>
 				
 				<li class="dropdown menu-user">
@@ -47,7 +55,8 @@
 				
 				<li class="language-menu">
 					<div class="language-data" style="display: none;"></div>
-					<a href="javascript:void(0);" class="language-label" onclick="toggleLanguage()"> 
+					<a href="javascript:void(0);" class="language-label" onclick="toggleLanguage()">
+						<i class="glyphicon glyphicon-globe" style="margin-right: 8px;"></i>
 						<span class="language-code"> ENG </span>
 					</a>
 				</li>
@@ -60,7 +69,7 @@
 					<div class="nav-menu-list-content"></div>
 				</li>
 				
-				<li class="search-menu">
+				<li class="search-menu display-none">
 					<div class="input-group" style="width: 100%;">
 						<input type="text" id="txtTopSearch" class="form-control" 
 							translate-placeholder="search" placeholder="Search by address, neighborhood, or Zip Code" name="q">

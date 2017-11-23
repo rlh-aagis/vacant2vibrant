@@ -229,13 +229,13 @@ function initMap (mapElementId) {
 	};
 	L.control.backView({ position: 'topright' }).addTo(map);
 
-	// Add map settings button control to map
+	// Add search settings button control to map
 	L.Control.MapSettings = L.Control.extend({
 		onAdd: function (map) {
 			var mapSettingsButton = L.DomUtil.create('div');
 			
 			$(mapSettingsButton).addClass('map-button map-settings-button').html(
-				'<i class="glyphicon glyphicon-cog" title="Map Settings" style="left: 3px; top: 2px;"></i>' +
+				'<i class="glyphicon glyphicon-cog" title="Search Settings" style="left: 3px; top: 2px;"></i>' +
 				'<div class="map-settings-content">' +
 					'<div style="margin: 0 0 8px 0;" translate="map search type preferred"> Map Search Type Preferred </div>' +
 					'<div class="toggle-value-label"> 0.25 Mile </div>' +

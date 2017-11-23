@@ -29,6 +29,10 @@ body {
 	display: inline-block !important;
 }
 
+.display-none {
+	display: none !important;
+}
+
 .always-visible {
 	display: list-item !important;
 }
@@ -90,7 +94,7 @@ input[type="radio"] + label {
 	margin: 0;
     padding: 1px 10px 1px 8px;
     position: absolute;
-    right: 12px;
+    right: 22px;
 	text-align: center;
 	text-indent: 0;
     top: 32px;
@@ -175,22 +179,28 @@ input[type="radio"] + label {
 	background-color: #DDD;
 }
 
-#divLandingPage { }
-
-.landing-title {
-	color: rgba(255, 255, 255, 0.8);
-    font-size: 28px;
-    margin-left: 50%;
-    text-align: right;
-    width: 50%;
-    line-height: 34px;
+#divLandingPage > .container > .row {
+    left: 50%;
+    position: absolute;
+	top: 50%;
+	transform: translate(-50%, -50%);
+    width: 80%;
 }
 
-@media screen and (max-width: 400px) {
-	.landing-title {
-		margin-left: 10% !important;
-		width: 90% !important;
-	}
+.landing-search-box {
+	background-color: rgba(255, 255, 255, 0.91);
+	border-radius: 2px; 
+	min-height: 400px; 
+	padding: 32px 32px 8px 32px;
+}
+
+.landing-title {
+	color: #808080;
+    font-size: 28px;
+	line-height: 34px;
+	margin: 0 0 0 auto;
+    text-align: right;
+    width: 240px;
 }
 
 .landing-divider {
@@ -376,16 +386,6 @@ input[type="radio"] + label {
 	width: 180px;
 }
 
-@media screen and (max-width: 400px)  {  
-	.map-legend {
-		display: none;
-	}
-	
-	.map-legend.visible {
-		display: block;
-	}
-}
-
 .map-legend .map-legend-title {
 	display: none;
 	font-weight: bold;
@@ -553,7 +553,7 @@ nav.navbar {
 }
 
 .navbar-brand > img {
-	opacity: 0.78;
+	opacity: 0.96;
 }
 
 @media screen and (max-width: 600px)  {
@@ -573,7 +573,6 @@ nav.navbar li {
 
 nav.navbar li.active {
 	border-bottom: 5px solid rgba(255, 255, 255, 0.65);
-	margin-top: -5px;
 }
 
 nav.navbar li.active > a {
@@ -594,8 +593,21 @@ nav.navbar .dropdown-menu li > a {
 	color: #656565 !important;
 }
 
+@media screen and (max-width: 600px)  {
+	nav.navbar .dropdown-menu li > a {
+		color: #EEE !important;
+	}
+}
+
+@media screen and (max-width: 600px)  {
+	.navbar-default .navbar-toggle .icon-bar {
+		background-color: #DDD;
+	}
+}
+
 nav.navbar li.active  > a { 
 	color: #FFF !important;
+	padding: 13px 15px 12px 15px !important;
 }
 
 .top-search-button {
@@ -621,34 +633,6 @@ nav.navbar li.active  > a {
 
 .delete-button:hover {
 	background-color: rgba(255, 255, 255, 0.2);
-}
-
-.mobile-nav-button {
-    color: rgba(255, 255, 255, 0.9);
-	cursor: pointer;
-	display: none;
-    font-size: 24px;
-	font-weight: normal;
-    height: 50px;
-	padding: 8px 0 0 0;
-	text-align: center;
-	width: 40px;
-	
-	-webkit-transition: all 0.3s ease;
-    -moz-transition: all 0.3s ease;
-    -o-transition: all 0.3s ease;
-    -ms-transition: all 0.3s ease;
-    transition: all 0.3s ease;
-}
-
-.mobile-nav-button:hover {
-	background-color: rgba(0, 0, 0, 0.3) !important;
-}
-
-@media screen and (max-width: 400px)  { 
-	.mobile-nav-button {
-		display: inline-block;
-	}
 }
 
 .favorite-search-button {
@@ -800,6 +784,12 @@ nav.navbar li.active  > a {
     -o-transition: all 0.3s ease;
     -ms-transition: all 0.3s ease;
     transition: all 0.3s ease;
+}
+
+@media screen and (max-width: 600px)  {
+	.nav-menu-list-content {
+		position: static !important;
+	}
 }
 
 .nav-menu-list-content .nav-menu-list-item {

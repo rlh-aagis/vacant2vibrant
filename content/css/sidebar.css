@@ -31,20 +31,47 @@
 .sidebar-nav {
     display: block;
     float: left;
-    width: 350px;
-    list-style: none;
+	height: calc(100% - 84px);
+	list-style: none;
+	overflow-y: auto;
+    overflow-x: hidden;
     margin: 0;
     padding: 0;
+	width: 350px;
 }
+
+.sidebar-nav::-webkit-scrollbar {
+	height: 12px;
+	width: 12px;
+	z-index: 6;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+	background: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+	background-color: #909090;
+	cursor: pointer;
+}
+
 #divSidebar.active {
     padding-left: 350px;
 }
+
 #divSidebar.active #divSidebarWrapper {
     left: 350px;
 }
+
 #divSidebar:not(.active) #sidebar {
 	display: none;
 }
+
+#sidebar_menu {
+	height: 84px !important;
+	overflow-y: hidden !important;
+}
+
 #sidebar_menu li a, .sidebar-nav li a {
     color: #555555;
     display: block;
@@ -121,8 +148,9 @@
 }
 
 .sidebar-bottom {
-    position: absolute;
     bottom: 0;
+	height: 0;
+	position: absolute;
 }
 
 #main_icon
@@ -228,7 +256,7 @@
     height: 20px;
     margin: 0 10%;
     position: relative;
-	width: 80%;
+	width: 76%;
 }
 
 .sidebar-item-bar-value {
