@@ -188,8 +188,9 @@ input[type="radio"] + label {
 }
 
 .landing-search-box {
-	background-color: rgba(255, 255, 255, 0.91);
-	border-radius: 2px; 
+	background-color: rgba(255, 255, 255, 0.95);
+	border-radius: 3px; 
+	box-shadow: 0 1px 5px rgba(0, 0, 0, 0.35);
 	min-height: 400px; 
 	padding: 32px 32px 8px 32px;
 }

@@ -98,6 +98,12 @@
 	right: 4px;
 	top: 32px;
 }
+	
+@media screen and (max-width: 600px)  {
+	#divSideBarMenuToggle > .sub_icon {
+		right: -2px;
+	}
+}
 
 #divSideBarMenuToggle:hover > .sub_icon {
 	color: #656565 !important;
@@ -177,13 +183,13 @@
   display: inline-block;
 }
 
-@media (max-width:767px) {
+@media screen and (max-width: 600px) {
 	#divSidebar {
 		padding-left: 70px;
 		transition: all .4s ease 0s;
 	}
 	#divSidebarWrapper {
-		left: 70px;
+		left: 60px;
 	}
 	#divSidebar.active {
 		padding-left: 350px;
