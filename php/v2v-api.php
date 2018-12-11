@@ -55,7 +55,7 @@
 			LIMIT 10
 		";
 		
-		$conn = get_postgresql_db_connection('postgres');
+		$conn = get_postgresql_db_connection('v2v');
 		
 		$result = pg_query($conn, $query) 
 			or die ('Error: ' + pg_last_error($conn) + '\n');
@@ -88,7 +88,7 @@
 			LIMIT 1
 		";
 		
-		$conn = get_postgresql_db_connection('postgres');
+		$conn = get_postgresql_db_connection('v2v');
 		
 		$result = pg_query($conn, $query) 
 			or die ('Error: ' + pg_last_error($conn) + '\n');
@@ -122,7 +122,7 @@
 			AND (active = 1)
 		";
 		
-		$conn = get_postgresql_db_connection('postgres');
+		$conn = get_postgresql_db_connection('v2v');
 		
 		$result = pg_query($conn, $query) 
 			or die ('Error: ' + pg_last_error($conn) + '\n');
@@ -154,7 +154,7 @@
 			LIMIT 1
 		";
 		
-		$conn = get_postgresql_db_connection('postgres');
+		$conn = get_postgresql_db_connection('v2v');
 		
 		$result = pg_query($conn, $query) 
 			or die ('Error: ' + pg_last_error($conn) + '\n');
@@ -184,7 +184,7 @@
 			LIMIT 1 
 		";
 		
-		$conn = get_postgresql_db_connection('postgres');
+		$conn = get_postgresql_db_connection('v2v');
 		
 		$result = pg_query($conn, $query) 
 			or die ('Error: ' + pg_last_error($conn) + '\n');
@@ -307,7 +307,7 @@
 				, Qnt.SingleFamilyBPAdditions, Qnt.SingleFamilyBPAdditionsQnt
 		";
 		
-		$conn = get_postgresql_db_connection('postgres');
+		$conn = get_postgresql_db_connection('v2v');
 
 		$result = pg_query($conn, $query) 
 			or die ('Error: ' + pg_last_error($conn) + '\n');
@@ -419,7 +419,7 @@
 			LIMIT 1 
 		";
 		
-		$conn = get_postgresql_db_connection('postgres');
+		$conn = get_postgresql_db_connection('v2v');
 		
 		$result = pg_query($conn, $query) 
 			or die ('Error: ' + pg_last_error($conn) + '\n');
@@ -529,7 +529,7 @@
 			LIMIT 1 
 		";
 		
-		$conn = get_postgresql_db_connection('postgres');
+		$conn = get_postgresql_db_connection('v2v');
 		
 		$result = pg_query($conn, $query) 
 			or die ('Error: ' + pg_last_error($conn) + '\n');
@@ -581,7 +581,7 @@
 			FROM public.landbankprops
 		";
 		
-		$conn = get_postgresql_db_connection('postgres');
+		$conn = get_postgresql_db_connection('v2v');
 		
 		$result = pg_query($conn, $query) 
 			or die ('Error: ' + pg_last_error($conn) + '\n');
@@ -614,26 +614,28 @@
 	
 		$query = "
 			SELECT
-				  gid
-				, address
-				, apn
-				, neigh
-				, zip
-				, yearacq
-				, yearsold
-				, propclass
-				, sold_avail
-				, condition
-				, mktval
-				, sqft
-				, lat
-				, lon
-			FROM public.landbankprops
-			WHERE gid = $propertyId;
+				  LBP.gid
+				, LBP.address
+				, LBP.apn
+				, LBP.neigh
+				, LBP.zip
+				, LBP.yearacq
+				, LBP.yearsold
+				, LBP.propclass
+				, LBP.sold_avail
+				, LBP.condition
+				, LBP.mktval
+				, LBP.sqft
+				, LBP.lat
+				, LBP.lon
+				, KIVA.\"city id\" AS kivapin
+			FROM public.landbankprops LBP
+			LEFT OUTER JOIN lb_kiva_parcel KIVA ON KIVA.\"parcel no.\" = LBP.apn 
+			WHERE LBP.gid = $propertyId;
 		";
 			
-		$conn = get_postgresql_db_connection('postgres');
-		
+		$conn = get_postgresql_db_connection('v2v');
+
 		$result = pg_query($conn, $query) 
 			or die ('Error: ' + pg_last_error($conn) + '\n');
 			
@@ -658,6 +660,7 @@
 			, 'SqftDisplay' => number_format($row[11], 0, '.', ',')
 			, 'Lat' => $row[12]
 			, 'Lon' => $row[13]
+			, 'KivaPIN' => $row[14]
 		);	
 		
 		pg_close($conn);
@@ -714,7 +717,7 @@
 			WHERE gid = $propertyId;
 		";
 			
-		$conn = get_postgresql_db_connection('postgres');
+		$conn = get_postgresql_db_connection('v2v');
 		
 		$result = pg_query($conn, $query) 
 			or die ('Error: ' + pg_last_error($conn) + '\n');
@@ -768,7 +771,7 @@
 		echo json_encode($propertyDetails);	
 	}
 	
-	function get_postgresql_db_connection ($db_name='postgres') {
+	function get_postgresql_db_connection ($db_name='v2v') {
 		
 		global $data_conn;
 		

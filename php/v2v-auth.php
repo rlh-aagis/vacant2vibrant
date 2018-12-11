@@ -350,19 +350,26 @@
 		echo json_encode(true);
 	}
 	
-	// set_search - Saves a user's search
+	// set_search - Saves a user's search by user id or ip
 	function set_search () {
 		
-		if (! isset($_SESSION['Username'])) return;
+		$ip = (isset($_SERVER['HTTP_X_FORWARDED_FOR']) ? ($_SERVER['HTTP_X_FORWARDED_FOR'] . ", ") : "") . $_SERVER['REMOTE_ADDR'];
 		
-		$search_text = (isset($search_text)) ? $search_text : (isset($_REQUEST['SearchText']) ? 
-			pg_escape_string($_REQUEST['SearchText']) : null);
+		//$user_identifier = isset($_SESSION['Username']) ? 
+		//	$_SESSION['Username'] : ('[' . $_SERVER['REMOTE_ADDR'] . ']');
+		
+		$search_text = 'ok'; //(isset($search_text)) ? $search_text : (isset($_REQUEST['SearchText']) ? 
+			//pg_escape_string($_REQUEST['SearchText']) : null);
 		
 		$query = "
 			INSERT INTO public.user_searches (user_id, search_text, created_date) 
-			VALUES (
-				(SELECT id FROM users WHERE email ILIKE '" . $_SESSION['Username'] . "'),
-				'$search_text',
+			VALUES ('TEST'" . //"'[$ip]'," .
+				/*
+				(isset($_SESSION['Username']) ? 
+					"(SELECT id FROM users WHERE email ILIKE '$user_identifier')," :
+					("'" . $user_identifier . "',")) .
+				*/
+				"'$search_text',
 				now()
 			)
 		";
@@ -374,7 +381,7 @@
 		
 		pg_close($conn);
 		
-		echo json_encode(true);
+		echo json_encode('Inserted user identifier: ' . $user_identifier); // true
 	}
 	
 	// delete_user_favorite - Deletes a specified user favorite by id

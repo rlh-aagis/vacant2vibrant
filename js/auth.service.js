@@ -1,7 +1,7 @@
 
 var authService = {
 	//authUrl: 'http://localhost/php/v2v-auth.php', // DEV
-	authUrl: 'http://aagis.net/v2v/php/v2v-auth.php', // PROD
+	authUrl: 'http://18.218.68.98/v2v/php/v2v-auth.php', // PROD
 	activateUser: null,
 	createUser: null,
 	confirmResetPassword: null,
@@ -188,7 +188,7 @@ authService.saveSearch = function (searchText) {
 	if (! searchText) return;
 	
 	// Format post data
-	favoriteData = {
+	saveSearchData = {
 		Action: 'SaveSearch',
 		SearchText: searchText
 	};
@@ -196,7 +196,7 @@ authService.saveSearch = function (searchText) {
 	var deferred = $.ajax({
 		url: authService.authUrl,
 		type: 'POST',
-		data: favoriteData,
+		data: saveSearchData,
 		success: function (results) { },
 		error: function (e) {
 			console.log(e.message);

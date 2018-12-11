@@ -267,7 +267,7 @@ function search (autocompleteItem) {
 		userLocation.label = 'Kansas City';
 	}
 	
-	authService.saveSearch(userLocation.label);
+	authService.saveSearch(userLocation.label).then(function (results) { });
 	
 	if (isDefined(userLocation.label)) 
 		userLocation.label = userLocation.label.replace(/\(neighborhood\)|\(zip\scode\)|\(address\)/gi, '').trim();
@@ -586,7 +586,7 @@ function registerUser () {
 		CreatePassword: $('#txtCreatePassword').val(),
 		CreateRepeatPassword: $('#txtCreateConfirmPassword').val(),
 		CreateEmailAddress: $('#txtCreateEmailAddress').val(),
-		CreatePurchasedBefore: $('[name="CreatePurchasedBefore"]').val(),
+		CreatePurchasedBefore: $('#selCreatePurchasedBefore').val(),
 		CreateGender: $('#selCreateGender').val(),
 		CreateAge: $('#txtCreateAge').val(),
 		CreateZip: $('#txtCreateZip').val()
@@ -696,6 +696,7 @@ function loginUser () {
 		$('.menu-register-user, .menu-login-user').hide();
 		$('.menu-user .menu-username').html(loginUserViewModel.LoginEmailAddress);
 		$('.menu-user').addClass('visible');
+		$('.navbar-nav.navbar-left').addClass('logged-in');
 		
 		$('.sidebar-register-or-login').hide();
 		
@@ -723,6 +724,7 @@ function logoutUser () {
 
 		$('.menu-register-user, .menu-login-user').show();
 		$('.menu-user').removeClass('visible');
+		$('.navbar-nav.navbar-left').removeClass('logged-in');
 		
 		app.loggedIn = false;
 		if (Storage) {

@@ -642,6 +642,9 @@ function refreshProperties () {
 			userLocation.label = propertyDetails.Address;
 			userLocation.neighborhood = propertyDetails.Neighborhood;
 			
+			// Set city parcel viewer link
+			var cityParcelViewerLink = 'http://maps.kcmo.org/apps/parcelviewer/' + 
+				(isDefined(propertyDetails.KivaPIN) ? ('?kiva=' + propertyDetails.KivaPIN) : '');
 			// Set county parcel link
 			var countyParcelLabel = 'View Parcel Information';
 			var countyParcelLink = 'https://ascendweb.jacksongov.org';
@@ -661,7 +664,7 @@ function refreshProperties () {
 					'<div class="map-popup-title" translate="property details"> Property Details </div>' +
 					'<div class="map-popup-image">' +
 						'<a href="' + parcelImageLink + '" target="_blank">' +
-							'<img src="' + parcelImageLink + '" />' +
+							'<img src="' + parcelImageLink + '" onerror="this.src=\'content/images/image-not-available.png\'" />' +
 						'</a>' +
 					'</div>' +
 					'<div class="map-popup-content">' +
@@ -718,17 +721,14 @@ function refreshProperties () {
 						'<div class="map-popup-item-value">' + (propertyDetails.YearsOld || '-') + '</div>' + 
 						'</div>' +
 						
-						'<div class="map-popup-item">' +
-							//'<div class="map-popup-item-label"> Link to County Data </div>' + 
-							'<div class="map-popup-item-value">' +
-								'<a href="http://maps.kcmo.org/apps/parcelviewer/" target="_blank" translate="kansas city parcel viewer">' + 
-									'Kansas City Parcel Viewer' + 
-								'</a>' + 
-								((propertyDetails.SoldAvail.toLowerCase() == 'unsold') ? 
-								('<br/><a href="https://public-kclb.epropertyplus.com/landmgmtpub/remote/public/property/viewSummary?parcelNumber=' + propertyDetails.APN + '" target="_blank" translate="kcmo land bank">' + 
-									'KCMO Land Bank' +
-								'</a>') : '') +
-							'</div>' +
+						'<div class="map-popup-item ">' +
+							'<a href="' + cityParcelViewerLink + '" target="_blank" translate="kansas city parcel viewer">' + 
+								'Kansas City Parcel Viewer' + 
+							'</a>' + 
+							((propertyDetails.SoldAvail.toLowerCase() == 'unsold') ? 
+							('<br/><a href="https://public-kclb.epropertyplus.com/landmgmtpub/remote/public/property/viewSummary?parcelNumber=' + propertyDetails.APN + '" target="_blank" translate="kcmo land bank">' + 
+								'KCMO Land Bank' +
+							'</a>') : '') +
 						'</div>' +
 					'</div>'
 				).openOn(map);

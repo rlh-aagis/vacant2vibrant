@@ -4,7 +4,7 @@
 }
 
 #divSidebar {
-	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.33);
+	box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
 	display: none;
     height: calc(100% - 55px);
 	left: 0;
@@ -101,7 +101,7 @@
 	
 @media screen and (max-width: 600px)  {
 	#divSideBarMenuToggle > .sub_icon {
-		right: -2px;
+		right: -6px;
 	}
 }
 
@@ -185,11 +185,11 @@
 
 @media screen and (max-width: 600px) {
 	#divSidebar {
-		padding-left: 70px;
+		padding-left: 50px;
 		transition: all .4s ease 0s;
 	}
 	#divSidebarWrapper {
-		left: 60px;
+		left: 50px;
 	}
 	#divSidebar.active {
 		padding-left: 350px;
